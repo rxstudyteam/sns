@@ -1,0 +1,4 @@
+include ':app'
+include ':app_dummy'
+include ':base'
+include ':common'
