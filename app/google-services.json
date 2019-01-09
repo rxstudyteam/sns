@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "869837540388",
+    "firebase_url": "https://rxteam-sns.firebaseio.com",
+    "project_id": "rxteam-sns",
+    "storage_bucket": "rxteam-sns.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:869837540388:android:3c923a35d7c78764",
+        "android_client_info": {
+          "package_name": "com.teamrx.rxtargram"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "869837540388-2vk094hjkhakhdblsvgvcigj6k27c32n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.teamrx.rxtargram",
+            "certificate_hash": "9077573e1d516a1b297a79c7c20ec2b763c1c29a"
+          }
+        },
+        {
+          "client_id": "869837540388-mdqqoflp3eh1i6c8siekjiefni2qtjog.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbSYPsKD5001jbXv0rKzy9CEIxn7n1ygU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "869837540388-mdqqoflp3eh1i6c8siekjiefni2qtjog.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
