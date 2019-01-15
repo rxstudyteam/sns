@@ -15,6 +15,10 @@ android {
         dataBinding {
             enabled = true
         }
+        compileOptions {
+            sourceCompatibility JavaVersion.VERSION_1_8
+            targetCompatibility JavaVersion.VERSION_1_8
+        }
     }
     buildTypes {
         release {
@@ -41,4 +45,11 @@ dependencies {
     implementation project(':app_dummy')
 
     implementation 'com.google.firebase:firebase-core:16.0.6'
+
+    implementation 'com.github.bumptech.glide:glide:4.8.0'
+    implementation 'jp.wasabeef:glide-transformations:3.3.0'
+
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.16'// rxjava
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'// rxandroid
+    implementation 'com.jakewharton.rxbinding2:rxbinding:2.1.1'// rxandroid
 }
