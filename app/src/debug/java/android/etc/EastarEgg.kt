@@ -14,6 +14,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.google.firebase.iid.FirebaseInstanceId
+import com.teamrx.rxtargram.profile.Profile
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -93,6 +94,12 @@ class EastarEgg(var activity: Activity) {
             .setOnCancelListener { Log.toast(activity, "canceled") }
             .load()
     }
+
+
+    fun PROFILE_WRITR() {
+        activity.startActivity(Intent(activity, Profile::class.java))
+    }
+
 
 
     private fun showToast(uri: Uri) {
