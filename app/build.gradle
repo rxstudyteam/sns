@@ -41,4 +41,5 @@ dependencies {
     implementation project(':app_dummy')
 
     implementation 'com.google.firebase:firebase-core:16.0.6'
+    implementation 'com.google.firebase:firebase-firestore:17.1.5'
 }
