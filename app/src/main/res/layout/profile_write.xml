@@ -19,7 +19,7 @@
         android:layout_height="match_parent">
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/photo"
+            android:id="@+id/profile_url"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginStart="16dp"
@@ -36,19 +36,27 @@
             android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
-            app:layout_constraintStart_toStartOf="@+id/photo"
-            app:layout_constraintTop_toBottomOf="@+id/photo"
+            app:layout_constraintStart_toStartOf="@+id/profile_url"
+            app:layout_constraintTop_toBottomOf="@+id/profile_url"
             tools:text="상담사" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintStart_toStartOf="@+id/name"
+            app:layout_constraintTop_toBottomOf="@+id/name"
+            tools:text="email@gmail.com" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/post_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            app:layout_constraintStart_toStartOf="@+id/name"
-            app:layout_constraintTop_toBottomOf="@+id/name"
+            app:layout_constraintStart_toStartOf="@+id/email"
+            app:layout_constraintTop_toBottomOf="@+id/email"
             tools:text="게시물 100" />
 
         <androidx.appcompat.widget.AppCompatTextView

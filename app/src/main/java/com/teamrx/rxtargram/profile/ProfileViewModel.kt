@@ -13,7 +13,6 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
 
     //가입
     fun join(email: String, name: String, profile_url: String? = null) {
-
         FirebaseFirestore.getInstance().collection(user_collection)
                 .add(ProfileModel(email, name, profile_url))
                 .addOnSuccessListener { documentReference ->
@@ -63,7 +62,6 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
 //                val value = dataSnapshot.getValue(String::class.java)
 //                Log.e(value)
 //            }
-//
 //            override fun onCancelled(error: DatabaseError) {
 //                // Failed to read value
 //                Log.e(error)
