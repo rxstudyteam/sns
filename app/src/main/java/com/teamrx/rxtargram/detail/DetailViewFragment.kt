@@ -8,14 +8,17 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.BaseViewModel
 import com.teamrx.rxtargram.inject.Injection
 import com.teamrx.rxtargram.model.Post
+import kotlinx.android.synthetic.main.fragment_detail_view.*
 
 class DetailViewFragment : Fragment() {
 
     private lateinit var detailViewModel: DetailViewModel
+    private lateinit var adapter: PostRecyclerViewAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
             = inflater.inflate(R.layout.fragment_detail_view, container, false)
@@ -24,6 +27,9 @@ class DetailViewFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         // 컴포넌트 리스너
+        context?.let { adapter = PostRecyclerViewAdapter(it) }
+        recyclerView.layoutManager = LinearLayoutManager(activity)
+        recyclerView.adapter = adapter
     }
 
     override fun onResume() {
@@ -36,14 +42,8 @@ class DetailViewFragment : Fragment() {
         })
     }
 
-    override fun onStop() {
-        super.onStop()
-
-        // 비활성화 될 때 close
-    }
-
     private fun updateUI(posts: List<Post>) {
-
+        adapter.addPosts(posts)
     }
 
     inline fun <reified T : BaseViewModel> getViewModel(): T {
