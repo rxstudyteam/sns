@@ -22,7 +22,7 @@ import io.reactivex.schedulers.Schedulers
 import smart.util.GalleryLoader
 
 @Suppress("FunctionName")
-class EastarEgg(var activity: Activity) {
+class EastarEgg(val activity: Activity) {
     fun APPLICATION_DETAILS_SETTINGS() {
         try {
             activity.startActivity(
@@ -96,7 +96,7 @@ class EastarEgg(var activity: Activity) {
     }
 
 
-    fun PROFILE_WRITR() {
+    fun PROFILE_WRITER() {
         activity.startActivity(Intent(activity, Profile::class.java))
     }
 
@@ -117,5 +117,5 @@ class EastarEgg(var activity: Activity) {
             }
     }
 
-    var disposable: Array<Disposable> = emptyArray()
+    val disposable: Array<Disposable> = emptyArray()
 }

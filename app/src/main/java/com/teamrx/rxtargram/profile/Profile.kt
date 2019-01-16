@@ -14,6 +14,6 @@ class Profile : AppActivity() {
         super.onCreate(savedInstanceState)
         bb = DataBindingUtil.setContentView(this, R.layout.profile_write)
         bb.vm = ViewModelProviders.of(mActivity).get(ProfileViewModel::class.java)
-//        bb.model = bb.vm.getProfle()
+        bb.vm!!.getProfle()
     }
 }

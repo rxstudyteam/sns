@@ -1,51 +1,74 @@
 package com.teamrx.rxtargram.profile
 
 import android.app.Application
+import android.log.Log
 import androidx.lifecycle.AndroidViewModel
+import com.google.firebase.firestore.FirebaseFirestore
+import smart.base.PP
 
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
-
-    fun setProfle() {
-        val userId: String = ""
-        val email: String = ""
-        val name: String = ""
-        val profile_url: String? = ""
-        val profile = ProfileModel(userId, email, name, profile_url)
-//        FirebaseFirestore.getInstance().collection(Const.USER).document().set(profile)
-//            .addOnCompleteListener { task ->
-//                if (task.isSuccessful)
-//            }
-        getTotalX(arrayOf(2,4 ),arrayOf(16,32,96 ))
+    companion object {
+        const val user_collection = "user"
     }
 
-    fun getTotalX(a: Array<Int>, b: Array<Int>): Int {
-        var result = ArrayList<Int>()
-        var min = a.min()
-        var max1 = a.max()
-        var max = b.max()
+    //가입
+    fun join(email: String, name: String, profile_url: String? = null) {
 
-        for (i in max1!! downTo max!! step min!!) {
-            var isGood = true
-            for (j in 0..b.size) {
-                if (b[j] % i !== 0) {
-                    isGood = false;
-                    break;
+        FirebaseFirestore.getInstance().collection(user_collection)
+                .add(ProfileModel(email, name, profile_url))
+                .addOnSuccessListener { documentReference ->
+                    PP.user_id.set(documentReference.id)
+                    Log.e(PP.user_id.get())
                 }
-            }
+                .addOnFailureListener { e -> e.printStackTrace() }
+    }
 
-            if (isGood) {
-                for (j in 0..a.size) {
-                    if (i % a[j] !== 0) {
-                        isGood = false;
-                        break;
+    fun getProfile() {
+        FirebaseFirestore.getInstance()
+                .collection(user_collection).document(PP.user_id.get())
+                .get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        var document = task.result!!
+                        Log.d(document.id, document.data)
+                    } else {
+                        Log.w(task.exception)
                     }
                 }
-            }
+                .addOnFailureListener { e -> e.printStackTrace() }
 
-            if (isGood) {
-                result.add(i)
-            }
-        }
-        return result.size
     }
+
+    fun getProfle() {
+        //목록
+        FirebaseFirestore.getInstance()
+                .collection(user_collection)
+                .get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        for (document in task.result!!) {
+                            Log.d(document.id, document.data)
+                        }
+                    } else {
+                        Log.w(task.exception)
+                    }
+                }
+                .addOnFailureListener { e -> e.printStackTrace() }
+
+//        val database = FirebaseDatabase.getInstance()
+//        val ref = database.getReference().g
+//        ref.addValueEventListener(object : ValueEventListener {
+//            override fun onDataChange(dataSnapshot: DataSnapshot) {
+//                // This method is called once with the initial value and again whenever data at this location is updated.
+//                val value = dataSnapshot.getValue(String::class.java)
+//                Log.e(value)
+//            }
+//
+//            override fun onCancelled(error: DatabaseError) {
+//                // Failed to read value
+//                Log.e(error)
+//            }
+//        })
+    }
+
 }

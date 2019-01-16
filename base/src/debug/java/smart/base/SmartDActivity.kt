@@ -18,7 +18,7 @@ abstract class SmartDActivity : CActivity() {
     override fun onStart() {
         super.onStart()
         egg(this)
-        eggJ(this)
+//        eggJ(this)
     }
 
     private fun egg(activity: Activity) {
@@ -42,6 +42,8 @@ abstract class SmartDActivity : CActivity() {
                 if (method.declaringClass != eastarEgg)
                     continue
                 if (method.returnType != Void.TYPE)
+                    continue
+                if (method.name.contains("access$"))//exclude lambda
                     continue
                 if (method.name.contains("lambda"))//exclude lambda
                     continue
