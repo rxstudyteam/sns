@@ -6,7 +6,7 @@ import com.teamrx.rxtargram.repository.RemoteAppDataSource
 import com.teamrx.rxtargram.viewmodel.ViewModelFactory
 
 object Injection {
-    fun provideAppDataSource(): AppDataSource {
+    private fun provideAppDataSource(): AppDataSource {
         return AppRepository.getInstance(RemoteAppDataSource)
     }
 

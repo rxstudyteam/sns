@@ -46,7 +46,7 @@ class DetailViewFragment : Fragment() {
         adapter.addPosts(posts)
     }
 
-    inline fun <reified T : BaseViewModel> getViewModel(): T {
+    private inline fun <reified T : BaseViewModel> getViewModel(): T {
         val viewModelFactory = Injection.provideViewModelFactory()
         return ViewModelProviders.of(this, viewModelFactory).get(T::class.java)
     }
