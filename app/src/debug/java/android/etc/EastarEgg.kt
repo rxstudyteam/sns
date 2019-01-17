@@ -97,18 +97,16 @@ class EastarEgg(var activity: Activity) {
 
     private fun showToast(uri: Uri) {
         Log.toast(activity, uri.toString())
-        disposable + Observable.fromFuture(Glide.with(activity).asBitmap().load(uri).submit())
+        Observable.fromFuture(Glide.with(activity).asBitmap().load(uri).submit())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { bitmap ->
                 Toast(activity).apply {
-                    var iv = ImageView(activity)
+                    val iv = ImageView(activity)
                     iv.setImageBitmap(bitmap)
                     view = iv
                     show()
                 }
             }
     }
-
-    var disposable: Array<Disposable> = emptyArray()
 }
