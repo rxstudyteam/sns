@@ -16,11 +16,11 @@ import com.bumptech.glide.Glide
 import com.google.firebase.iid.FirebaseInstanceId
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import smart.util.GalleryLoader
 
 @Suppress("FunctionName")
+@SuppressLint("CheckResult")
 class EastarEgg(var activity: Activity) {
     fun APPLICATION_DETAILS_SETTINGS() {
         try {
