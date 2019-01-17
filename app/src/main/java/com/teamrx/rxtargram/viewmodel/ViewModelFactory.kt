@@ -8,9 +8,9 @@ import java.lang.IllegalArgumentException
 
 @Suppress("UNCHECKED_CAST")
 class ViewModelFactory(private val dataSource: AppDataSource): ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return when {
-            modelClass.isAssignableFrom(DetailViewModel::class.java) -> DetailViewModel(dataSource) as T
+    override fun <T : ViewModel?> create(viewModelClass: Class<T>): T {
+        return when(viewModelClass) {
+            DetailViewModel::class.java -> DetailViewModel(dataSource) as T
 
             else -> throw IllegalArgumentException("unknown viewmodel class")
         }
