@@ -15,17 +15,16 @@ import java.util.*
 
 
 /**
-<pre>
-&lt;uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="18"/>
-
-GalleryLoader.builder(activity)
-    .setCrop(true, 100, 100)
-    .setSource(GalleryLoader.Source.CAMERA)
-    .setOnGalleryLoadedListener(this::showToast)
-    .setOnCancelListener { Log.toast(activity, "canceled") }
-    .load()
-
-</pre>
+ *```kotlin
+ *<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="18"/>
+ *
+ *GalleryLoader.builder(activity)
+ *  .setCrop(true, 100, 100)
+ *  .setSource(GalleryLoader.Source.CAMERA)
+ *  .setOnGalleryLoadedListener(this::showToast)
+ *  .setOnCancelListener { Log.toast(activity, "canceled") }
+ *  .load()
+ *```
  */
 class GalleryLoader : AppCompatActivity() {
 
