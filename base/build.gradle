@@ -46,6 +46,6 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.8.0'
     implementation 'jp.wasabeef:glide-transformations:3.3.0'
 
-//    implementation files('libs/common.jar')
-    api project(':common')
+    releaseApi files('libs/common.jar')
+    debugApi project(':common')
 }
