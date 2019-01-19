@@ -43,9 +43,7 @@ abstract class SmartDActivity : CActivity() {
                     continue
                 if (method.returnType != Void.TYPE)
                     continue
-                if (method.name.contains("access$"))//exclude lambda
-                    continue
-                if (method.name.contains("lambda"))//exclude lambda
+                if (method.name.contains("$"))
                     continue
                 funcs += method.name
             }

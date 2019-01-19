@@ -2,6 +2,7 @@
 
 package android.etc
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -17,11 +18,11 @@ import com.google.firebase.iid.FirebaseInstanceId
 import com.teamrx.rxtargram.profile.Profile
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import smart.util.GalleryLoader
 
 @Suppress("FunctionName")
+@SuppressLint("CheckResult")
 class EastarEgg(val activity: Activity) {
     fun APPLICATION_DETAILS_SETTINGS() {
         try {
@@ -67,7 +68,6 @@ class EastarEgg(val activity: Activity) {
             .load()
     }
 
-
     fun GALLERY_LOADER_BY_CAMERA_CROP() {
         GalleryLoader.builder(activity)
             .setCrop(true, 100, 100)
@@ -95,27 +95,22 @@ class EastarEgg(val activity: Activity) {
             .load()
     }
 
-
     fun PROFILE_WRITER() {
         activity.startActivity(Intent(activity, Profile::class.java))
     }
 
-
-
     private fun showToast(uri: Uri) {
         Log.toast(activity, uri.toString())
-        disposable + Observable.fromFuture(Glide.with(activity).asBitmap().load(uri).submit())
+        Observable.fromFuture(Glide.with(activity).asBitmap().load(uri).submit())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { bitmap ->
                 Toast(activity).apply {
-                    var iv = ImageView(activity)
+                    val iv = ImageView(activity)
                     iv.setImageBitmap(bitmap)
                     view = iv
                     show()
                 }
             }
     }
-
-    val disposable: Array<Disposable> = emptyArray()
 }

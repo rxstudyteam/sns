@@ -1,8 +1,11 @@
 package com.teamrx.rxtargram
 
+import android.log.Log
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import java.util.*
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -14,38 +17,18 @@ class ExampleUnitTest {
     fun addition_isCorrect() {
         assertEquals(4, 2 + 2)
     }
-//    fun getTotalX(a: Array<Int>, b: Array<Int>): Int {
+
     @Test
-    fun getTotalX() {
-        var a = arrayOf(3, 4)
-        var b = arrayOf(24, 48)
-        var result = ArrayList<Int>()
-        var max1 = a.max()
-        var max = b.min()
-        for (i in max1!!..max!! ) {
-            var isGood = true
-            for (j in 0 until b.size) {
-                if (b[j] % i != 0) {
-                    isGood = false
-                    continue
-
+    fun t2() {
+        runBlocking {
+            val jobs = List(10) {
+                launch {
+                    delay(1000L)
+                    Log.e("aaa")
                 }
             }
-            if (isGood) {
-                for (j in 0 until a.size) {
-                    if (i % a[j] != 0) {
-                        isGood = false
-                        break
-                    }
-                }
-            }
-            if (isGood) {
-                result.add(i)
-            }
+            Log.e("End runBlock ")
         }
-        System.out.println( result.toString())
-        assert(result.size == 3)
-//        return result.size
+        Log.e("End function")
     }
-
 }

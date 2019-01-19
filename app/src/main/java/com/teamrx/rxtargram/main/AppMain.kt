@@ -1,9 +1,11 @@
 package com.teamrx.rxtargram.main
 
 import android.os.Bundle
+import androidx.fragment.app.transaction
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.AppActivity
+import com.teamrx.rxtargram.detail.DetailViewFragment
 import kotlinx.android.synthetic.main.app_main.*
 
 class AppMain : AppActivity() {
@@ -12,6 +14,7 @@ class AppMain : AppActivity() {
         BottomNavigationView.OnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.navigation_home -> {
+                    supportFragmentManager.transaction { replace(R.id.main_content, DetailViewFragment.getInstance()) }
                     return@OnNavigationItemSelectedListener true
                 }
                 R.id.navigation_dashboard -> {
@@ -29,5 +32,6 @@ class AppMain : AppActivity() {
         setContentView(R.layout.app_main)
 
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+        navigation.selectedItemId = R.id.navigation_home
     }
 }

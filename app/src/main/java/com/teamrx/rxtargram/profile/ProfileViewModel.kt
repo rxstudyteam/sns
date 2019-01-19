@@ -1,58 +1,69 @@
 package com.teamrx.rxtargram.profile
 
-import android.app.Application
 import android.log.Log
-import androidx.lifecycle.AndroidViewModel
-import com.google.firebase.firestore.FirebaseFirestore
+import androidx.databinding.Observable
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import com.teamrx.rxtargram.model.MProfile
+import com.teamrx.rxtargram.repository.AppDataSource
 import smart.base.PP
 
-class ProfileViewModel(application: Application) : AndroidViewModel(application) {
-    companion object {
-        const val user_collection = "user"
+
+class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
+
+//    //가입
+//    fun join(email: String, name: String, profile_url: String? = null) {
+//        dataSource.join(MProfile(email, name, profile_url))
+//    }
+
+    private lateinit var profile: MutableLiveData<MProfile>
+    fun getProfile(): LiveData<MProfile> {
+        Log.e()
+        if (!::profile.isInitialized) {
+            Log.e()
+            profile = MutableLiveData()
+            val userId = PP.user_id.get("")!!
+            dataSource.getProfile(userId) {
+                Log.w(it)
+            }
+        }
+        Log.e()
+        return profile
     }
 
-    //가입
-    fun join(email: String, name: String, profile_url: String? = null) {
-        FirebaseFirestore.getInstance().collection(user_collection)
-                .add(ProfileModel(email, name, profile_url))
-                .addOnSuccessListener { documentReference ->
-                    PP.user_id.set(documentReference.id)
-                    Log.e(PP.user_id.get())
-                }
-                .addOnFailureListener { e -> e.printStackTrace() }
-    }
+//    val user_id: MutableLiveData<String> = MutableLiveData()
+//    val email: MutableLiveData<String> = MutableLiveData()
+//    val name: MutableLiveData<String> = MutableLiveData()
+    val profile_url: MutableLiveData<String> = MutableLiveData()
 
-    fun getProfile() {
-        FirebaseFirestore.getInstance()
-                .collection(user_collection).document(PP.user_id.get())
-                .get()
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        var document = task.result!!
-                        Log.d(document.id, document.data)
-                    } else {
-                        Log.w(task.exception)
-                    }
-                }
-                .addOnFailureListener { e -> e.printStackTrace() }
+//    fun getProfile(): LiveData<MProfile> {
+//        Log.e()
+//        if (!::profile.isInitialized) {
+//            Log.e()
+//            profile = MutableLiveData()
+//            val userId = PP.user_id.get("")!!
+//            dataSource.getProfile(userId) {
+//                Log.w(it)
+////                user_id.postValue(userId)
+////                email.postValue(it?.email)
+////                name.postValue(it?.name)
+////                profile_url.postValue(it?.profile_url)
+//            }
+//        }
+//        Log.e()
+//        return profile
+//    }
 
-    }
-
-    fun getProfle() {
-        //목록
-        FirebaseFirestore.getInstance()
-                .collection(user_collection)
-                .get()
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        for (document in task.result!!) {
-                            Log.d(document.id, document.data)
-                        }
-                    } else {
-                        Log.w(task.exception)
-                    }
-                }
-                .addOnFailureListener { e -> e.printStackTrace() }
+//    private lateinit var profiles: MutableLiveData<Pair<String, MProfile?>>
+//    fun getProfiles(): MutableLiveData<Pair<String, MProfile?>> {
+//
+//        if (!::profiles.isInitialized) {
+//            profiles = MutableLiveData()
+//            dataSource.getProfiles()
+//        }
+//        return profiles
+//    }
 
 //        val database = FirebaseDatabase.getInstance()
 //        val ref = database.getReference().g
@@ -67,6 +78,5 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
 //                Log.e(error)
 //            }
 //        })
-    }
 
 }
