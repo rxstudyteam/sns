@@ -4,9 +4,8 @@ import android.log.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.firestore.FirebaseFirestore
-import com.teamrx.rxtargram.model.MProfile
 import com.teamrx.rxtargram.model.Post
-import kotlinx.coroutines.delay
+import com.teamrx.rxtargram.model.ProfileModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import smart.base.PP
@@ -16,41 +15,18 @@ object RemoteAppDataSource : AppDataSource {
     const val USER_COLLECTION = "user"
     const val POST_COLLECTION = "post"
 
-    object USER {
-        override fun toString() = "user"
+    object USER_DOCUMENT {
         val EMAIL = "email"
         val NAME = "name"
         val PROFILE_URL = "profile_url"
     }
 
-    object POST {
-        override fun toString() = "post"
+    object POST_DOCUMENT {
         val CREATED_AT = "created_at"
     }
 
-    fun test2_1() {
-        runBlocking {
-            val jobs = List(10) {
-                launch {
-                    delay(1000L)
-                    Log.e("aaa")
-                }
-            }
-            Log.e("End runBlock ")
-        }
-        Log.e("End function")
-    }
-
-    override fun getProfile(user_id: String, callback: (MProfile?) -> Unit) {
+    override fun getProfile(user_id: String, callback: (ProfileModel) -> Unit) {
         var user_id = "KxUypfZKf2cKmJs4jOeU"
-        Log.e()
-        if (user_id.isBlank()) {
-            callback(null)
-            return
-        }
-
-        Log.e()
-
         FirebaseFirestore.getInstance()
             .collection(USER_COLLECTION).document(user_id)
             .get()
@@ -59,24 +35,50 @@ object RemoteAppDataSource : AppDataSource {
                     val document = task.result!!
                     if (document.exists()) {
                         Log.w(document.id, document.data)
-                        callback(MProfile(document[USER.EMAIL] as String, document[USER.NAME] as String, document[USER.PROFILE_URL] as String?))
-                    } else {
-                        callback(null)
+                        callback(ProfileModel(document[USER_DOCUMENT.EMAIL] as String, document[USER_DOCUMENT.NAME] as String, document[USER_DOCUMENT.PROFILE_URL] as String?))
                     }
-                } else {
-                    Log.w(task.exception)
-                    callback(null)
                 }
-            }
-            .addOnFailureListener { e ->
-                e.printStackTrace()
-                callback(null)
             }
     }
 
-    override fun join(profile: MProfile) {
+    override fun getProfile2(user_id: String): ProfileModel? {
+        var user_id = "KxUypfZKf2cKmJs4jOeU"
+        var profileModel: ProfileModel? = null
+        Log.e()
+        runBlocking {
+            Log.e()
+            Log.e()
+            FirebaseFirestore.getInstance()
+                .collection(USER_COLLECTION).document(user_id)
+                .get()
+                .addOnCompleteListener { task ->
+                    var job = launch {
+                        Log.e()
+                        if (task.isSuccessful) {
+                            Log.e()
+                            val document = task.result!!
+                            if (document.exists()) {
+                                Log.e()
+                                Log.w(document.id, document.data)
+                                profileModel = ProfileModel(document[USER_DOCUMENT.NAME] as String, document[USER_DOCUMENT.EMAIL] as String, document[USER_DOCUMENT.PROFILE_URL] as String?)
+                            }
+                            Log.e(profileModel)
+                        }
+
+                        Log.e(profileModel)
+                    }
+//                    job.join()
+                    Log.e(profileModel)
+                }
+            Log.e(profileModel)
+        }
+        Log.e(profileModel)
+        return profileModel
+    }
+
+    override fun join(profileModel: ProfileModel) {
         FirebaseFirestore.getInstance().collection(USER_COLLECTION)
-            .add(profile)
+            .add(profileModel)
             .addOnSuccessListener { documentReference ->
                 PP.user_id.set(documentReference.id)
                 Log.e(PP.user_id.get(), "회원가입이 완료됨")
@@ -140,7 +142,7 @@ object RemoteAppDataSource : AppDataSource {
         val postLiveData = MutableLiveData<List<Post>>()
 
         val firestore = FirebaseFirestore.getInstance()
-        firestore.collection(POST_COLLECTION).orderBy(POST.CREATED_AT)
+        firestore.collection(POST_COLLECTION).orderBy(POST_DOCUMENT.CREATED_AT)
             .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                 if (querySnapshot == null) return@addSnapshotListener
 

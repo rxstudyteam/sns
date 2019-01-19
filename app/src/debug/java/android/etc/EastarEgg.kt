@@ -19,23 +19,17 @@ import com.teamrx.rxtargram.profile.Profile
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import smart.base.AllActivity
 import smart.util.GalleryLoader
 
 @Suppress("FunctionName")
 @SuppressLint("CheckResult")
 class EastarEgg(val activity: Activity) {
-    fun APPLICATION_DETAILS_SETTINGS() {
-        try {
-            activity.startActivity(
-                Intent(
-                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                    Uri.parse("package:" + activity.packageName)
-                ).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
+    fun APPLICATION_DETAILS_SETTINGS() = activity.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + activity.packageName)).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    fun ALL_ACTIVITY() = activity.startActivity(Intent(activity, AllActivity::class.java))
 
     fun PUSH_TOKEN() {
         FirebaseInstanceId.getInstance().instanceId.addOnSuccessListener(activity) { instanceIdResult ->
@@ -97,6 +91,19 @@ class EastarEgg(val activity: Activity) {
 
     fun PROFILE_WRITER() {
         activity.startActivity(Intent(activity, Profile::class.java))
+    }
+
+    fun AAAAAAAAAAAA() {
+        runBlocking {
+            val jobs = List(10) {
+                launch {
+                    delay(1000L)
+                    Log.e("aaa")
+                }
+            }
+            Log.e("End runBlock ")
+        }
+        Log.e("End function")
     }
 
     private fun showToast(uri: Uri) {

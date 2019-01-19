@@ -1,8 +1,7 @@
 package com.teamrx.rxtargram.repository
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import com.teamrx.rxtargram.model.MProfile
+import com.teamrx.rxtargram.model.ProfileModel
 import com.teamrx.rxtargram.model.Post
 
 interface AppDataSource {
@@ -15,8 +14,10 @@ interface AppDataSource {
 //    fun setProfile(user_id: String, profile: MProfile?)
 
     //프로필가져오기
-    fun getProfile(user_id: String, callback: (MProfile?) -> Unit)
+    fun getProfile(user_id: String, callback: (ProfileModel) -> Unit)
 
     //가입
-    fun join(profile: MProfile)
+    fun join(profileModel: ProfileModel)
+
+    fun getProfile2(user_id: String): ProfileModel?
 }

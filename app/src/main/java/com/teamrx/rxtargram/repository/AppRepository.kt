@@ -1,19 +1,18 @@
 package com.teamrx.rxtargram.repository
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import com.teamrx.rxtargram.model.MProfile
 import com.teamrx.rxtargram.model.Post
+import com.teamrx.rxtargram.model.ProfileModel
 
 class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppDataSource {
 
-    override fun join(profile: MProfile) {
-        remoteAppDataSource.join(profile)
+    override fun join(profileModel: ProfileModel) {
+        remoteAppDataSource.join(profileModel)
     }
 
-    override fun getProfile(user_id: String, callback: (MProfile?) -> Unit) {
-        remoteAppDataSource.getProfile(user_id, callback)
-    }
+    override fun getProfile(user_id: String, callback: (ProfileModel) -> Unit) = remoteAppDataSource.getProfile(user_id, callback)
+
+    override fun getProfile2(user_id: String) = remoteAppDataSource.getProfile2(user_id)
 
 //    override fun getProfiles(): List<MProfile> {
 //        remoteAppDataSource.getProfiles()

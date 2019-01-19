@@ -1,7 +1,6 @@
 package com.teamrx.rxtargram
 
 import android.log.Log
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -19,16 +18,14 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun t2() {
+    fun coroutineScope() {
+        Log.MODE = Log.eMODE.SYSTEMOUT
         runBlocking {
-            val jobs = List(10) {
-                launch {
-                    delay(1000L)
-                    Log.e("aaa")
-                }
+            val job = launch {
+                Log.e("01_job")
             }
-            Log.e("End runBlock ")
+            Log.e("00_start")
         }
-        Log.e("End function")
+        Log.e("99_end")
     }
 }

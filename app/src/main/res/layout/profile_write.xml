@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:bind="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="profile.Profile">
+    tools:context="profileModel.Profile">
 
     <data>
+
+        <import type="com.teamrx.rxtargram.model.ProfileModel" />
+
         <variable
-            name="vmProfile"
+            name="profileViewModel"
             type="com.teamrx.rxtargram.profile.ProfileViewModel" />
     </data>
 
@@ -22,19 +24,21 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
+            android:background="#5f00"
             android:scaleType="centerCrop"
             app:layout_constraintDimensionRatio="H,1:1"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@drawable/test_00" />
-        <!--bind:imageUrl="@{vm.profile.profile_url}"-->
 
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:hint="name"
+            android:text="@{profileViewModel.profile.name.toString()}"
             app:layout_constraintEnd_toEndOf="@+id/profile_url"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@+id/profile_url"
@@ -46,56 +50,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:hint="email"
+            android:text="@{profileViewModel.profile.email.toString()}"
             app:layout_constraintEnd_toEndOf="@+id/name"
             app:layout_constraintStart_toStartOf="@+id/name"
             app:layout_constraintTop_toBottomOf="@+id/name"
             tools:text="email@gmail.com" />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/profile_url_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:layout_constraintStart_toStartOf="@+id/email"
-            app:layout_constraintTop_toBottomOf="@+id/email"
-            tools:text="https://profile_url_text" />
-            <!--android:text="@{vmProfile.profile.profile_url}"-->
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/profile_url_text2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="46dp"
-            app:layout_constraintStart_toStartOf="@+id/email"
-            app:layout_constraintTop_toBottomOf="@+id/email"
-            android:text="@{vmProfile.profile_url}"
-            tools:text="https://profile_url_text" />
-
-        <!--<androidx.appcompat.widget.AppCompatTextView-->
-            <!--android:id="@+id/post_count"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_marginTop="16dp"-->
-            <!--app:layout_constraintStart_toStartOf="@+id/email"-->
-            <!--app:layout_constraintTop_toBottomOf="@+id/email"-->
-            <!--tools:text="게시물 100" />-->
-
-        <!--<androidx.appcompat.widget.AppCompatTextView-->
-            <!--android:id="@+id/followers"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_marginStart="8dp"-->
-            <!--app:layout_constraintBaseline_toBaselineOf="@+id/post_count"-->
-            <!--app:layout_constraintStart_toEndOf="@+id/post_count"-->
-            <!--tools:text="Followers 100" />-->
-
-        <!--<androidx.appcompat.widget.AppCompatTextView-->
-            <!--android:id="@+id/following"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_marginStart="8dp"-->
-            <!--app:layout_constraintBaseline_toBaselineOf="@+id/followers"-->
-            <!--app:layout_constraintStart_toEndOf="@+id/followers"-->
-            <!--tools:text="Following 100" />-->
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

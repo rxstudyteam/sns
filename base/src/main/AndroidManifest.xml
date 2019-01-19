@@ -9,7 +9,8 @@
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
             android:enabled="true"
-            android:grantUriPermissions="true">
+            android:grantUriPermissions="true"
+            android:exported="false">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
@@ -18,5 +19,7 @@
         <activity
             android:name="smart.util.GalleryLoader"
             android:theme="@style/GalleryLoaderTheme" />
+
+        <activity android:name="smart.base.AllActivity" />
     </application>
 </manifest>
