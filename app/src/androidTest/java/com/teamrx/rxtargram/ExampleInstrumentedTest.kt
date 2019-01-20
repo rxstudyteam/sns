@@ -1,7 +1,9 @@
 package com.teamrx.rxtargram
 
+import android.log.Log
 import androidx.test.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
+import com.teamrx.rxtargram.repository.RemoteAppDataSource
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,4 +23,10 @@ class ExampleInstrumentedTest {
         val appContext = InstrumentationRegistry.getTargetContext()
         assertEquals("com.teamrx.rxtargram", appContext.packageName)
     }
+    @Test
+    fun getProfile2() {
+        Log.MODE = Log.eMODE.SYSTEMOUT
+        RemoteAppDataSource.getProfile2("")
+    }
+
 }

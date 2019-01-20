@@ -3,9 +3,13 @@ package com.teamrx.rxtargram.repository
 import android.log.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.model.ProfileModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import smart.base.PP
@@ -35,46 +39,159 @@ object RemoteAppDataSource : AppDataSource {
                     val document = task.result!!
                     if (document.exists()) {
                         Log.w(document.id, document.data)
-                        callback(ProfileModel(document[USER_DOCUMENT.EMAIL] as String, document[USER_DOCUMENT.NAME] as String, document[USER_DOCUMENT.PROFILE_URL] as String?))
+                        callback(
+                            ProfileModel(
+                                document[USER_DOCUMENT.EMAIL] as String,
+                                document[USER_DOCUMENT.NAME] as String,
+                                document[USER_DOCUMENT.PROFILE_URL] as String?
+                            )
+                        )
                     }
                 }
             }
     }
 
+//    override fun getProfile2(user_id: String): ProfileModel? {
+//        var user_id = "KxUypfZKf2cKmJs4jOeU"
+//        var profileModel: ProfileModel? = null
+//        Log.e()
+//        runBlocking {
+//            Log.e()
+//            FirebaseFirestore.getInstance()
+//                .collection(USER_COLLECTION).document(user_id)
+//                .get()
+//                .addOnCompleteListener { task ->
+//                    var job = launch {
+//                        Log.e()
+//                        if (task.isSuccessful) {
+//                            Log.e()
+//                            val document = task.result!!
+//                            if (document.exists()) {
+//                                Log.e()
+//                                Log.w(document.id, document.data)
+//                                profileModel = ProfileModel(document[USER_DOCUMENT.NAME] as String, document[USER_DOCUMENT.EMAIL] as String, document[USER_DOCUMENT.PROFILE_URL] as String?)
+//                            }
+//                            Log.e(profileModel)
+//                        }
+//
+//                        Log.e(profileModel)
+//                    }
+////                    job.join()
+//                    Log.e(profileModel)
+//                }
+//            Log.e(profileModel)
+//        }
+//        Log.e(profileModel)
+//        return profileModel
+//    }
+
+//    suspend fun refreshTitle() {
+//        withContext(Dispatchers.IO) {
+//            try {
+//                val result = network.fetchNewWelcome().await()
+//                titleDao.insertTitle(Title(result))
+//            } catch (error: FakeNetworkException) {
+//                throw TitleRefreshError(error)
+//            }
+//        }
+//    }
+
+//    suspend fun <T> FakeNetworkCall<T>.await(): T {
+//        return suspendCoroutine { continuation ->
+//            addOnResultListener { result ->
+//                when (result) {
+//                    is FakeNetworkSuccess<T> -> continuation.resume(result.data)
+//                    is FakeNetworkError -> continuation.resumeWithException(result.error)
+//                }
+//            }
+//        }
+//    }
+
+//    @Suppress("UNCHECKED_CAST")
+//    suspend fun <T> Task<T>.await(): T {
+//        return suspendCoroutine { continuation ->
+//            addOnCompleteListener { continuation.resume(result as T) }
+//            addOnFailureListener { continuation.resumeWithException(it) }
+//        }
+//    }
+
+    var user_id = "KxUypfZKf2cKmJs4jOeU"
     override fun getProfile2(user_id: String): ProfileModel? {
-        var user_id = "KxUypfZKf2cKmJs4jOeU"
+//        Executors.newSingleThreadExecutor().execute {
+        Log.e()
         var profileModel: ProfileModel? = null
         Log.e()
-        runBlocking {
-            Log.e()
-            Log.e()
-            FirebaseFirestore.getInstance()
-                .collection(USER_COLLECTION).document(user_id)
-                .get()
-                .addOnCompleteListener { task ->
-                    var job = launch {
-                        Log.e()
-                        if (task.isSuccessful) {
-                            Log.e()
-                            val document = task.result!!
-                            if (document.exists()) {
-                                Log.e()
-                                Log.w(document.id, document.data)
-                                profileModel = ProfileModel(document[USER_DOCUMENT.NAME] as String, document[USER_DOCUMENT.EMAIL] as String, document[USER_DOCUMENT.PROFILE_URL] as String?)
-                            }
-                            Log.e(profileModel)
-                        }
-
-                        Log.e(profileModel)
+        val task = FirebaseFirestore.getInstance()
+            .collection(USER_COLLECTION).document(RemoteAppDataSource.user_id)
+            .get()
+            .addOnCompleteListener { task ->
+                Log.w("addOnCompleteListener", task.isComplete, task.isSuccessful)
+                if (task.isSuccessful) {
+                    val document = task.result!!
+                    if (document.exists()) {
+                        Log.w(document.id, document.data)
+                        profileModel = document.toObject(ProfileModel::class.java)
+                        Log.w(profileModel)
                     }
-//                    job.join()
-                    Log.e(profileModel)
                 }
-            Log.e(profileModel)
-        }
+            }
+            .continueWithTask { task: Task<DocumentSnapshot> ->
+                Log.e(task.result!!)
+
+                task
+            }
+        Log.e(task)
+        Tasks.await(task)
         Log.e(profileModel)
-        return profileModel
+//        return profileModel
+//        }
+        return null
     }
+
+//    override fun getProfile2(user_id: String): ProfileModel? {
+//
+//        runBlocking (Dispatchers.Default){
+//            Log.e()
+//            var profileModel: ProfileModel? = null
+//            Log.e()
+//            val task = FirebaseFirestore.getInstance()
+//                .collection(USER_COLLECTION).document(RemoteAppDataSource.user_id)
+//                .get()
+//                .addOnCompleteListener { task ->
+//                    Log.w("addOnCompleteListener", task.isComplete, task.isSuccessful)
+//                    if (task.isSuccessful) {
+//                        val document = task.result!!
+//                        if (document.exists()) {
+//                            Log.w(document.id, document.data)
+//                            profileModel = document.toObject(ProfileModel::class.java)
+//                            Log.w(profileModel)
+//                        }
+//                    }
+//                }
+//                .continueWithTask { task: Task<DocumentSnapshot> ->
+//                    Log.e(task.result!!)
+//
+//                    task
+//                }
+//
+//
+//            launch {
+//                Log.e(task)
+//                Tasks.await(task)
+//                Log.e("aaa")
+//            }
+//            Log.e(profileModel)
+//
+//            Log.e("End runBlock ")
+//        }
+//        Log.e("End function")
+//
+////        Executors.newSingleThreadExecutor().execute {
+//
+////        return profileModel
+////        }
+//        return null
+//    }
 
     override fun join(profileModel: ProfileModel) {
         FirebaseFirestore.getInstance().collection(USER_COLLECTION)

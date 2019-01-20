@@ -16,6 +16,7 @@ import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.google.firebase.iid.FirebaseInstanceId
 import com.teamrx.rxtargram.profile.Profile
+import com.teamrx.rxtargram.repository.RemoteAppDataSource
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -95,7 +96,7 @@ class EastarEgg(val activity: Activity) {
 
     fun AAAAAAAAAAAA() {
         runBlocking {
-            val jobs = List(10) {
+            val jobs = List(1) {
                 launch {
                     delay(1000L)
                     Log.e("aaa")
@@ -104,6 +105,15 @@ class EastarEgg(val activity: Activity) {
             Log.e("End runBlock ")
         }
         Log.e("End function")
+
+        runBlocking {
+            delay(12000L)
+        }
+
+        Log.e("End function")
+    }
+    fun AAAAAAAAABB() {
+        RemoteAppDataSource.getProfile2("")
     }
 
     private fun showToast(uri: Uri) {

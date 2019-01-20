@@ -1,6 +1,7 @@
 package com.teamrx.rxtargram
 
 import android.log.Log
+import com.teamrx.rxtargram.repository.RemoteAppDataSource
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -28,4 +29,5 @@ class ExampleUnitTest {
         }
         Log.e("99_end")
     }
+
 }
