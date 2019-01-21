@@ -27,7 +27,7 @@ object RemoteAppDataSource : AppDataSource {
     }
 
     override fun getProfile(user_id: String): ProfileModel? {
-//        var user_id = "KxUypfZKf2cKmJs4jOeU"
+
         val future = Executors.newSingleThreadExecutor().submit<ProfileModel> {
             val task = FirebaseFirestore.getInstance()
                     .collection(USER_COLLECTION).document(user_id)
