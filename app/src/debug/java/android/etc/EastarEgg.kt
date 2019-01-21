@@ -20,9 +20,6 @@ import com.teamrx.rxtargram.repository.RemoteAppDataSource
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import smart.base.AllActivity
 import smart.util.GalleryLoader
 
@@ -48,46 +45,46 @@ class EastarEgg(val activity: Activity) {
     fun GALLERY_LOADER_BY_CAMERA() {
         GalleryLoader.builder(activity)
 //                .setCrop(true, 100, 100)
-            .setSource(GalleryLoader.Source.CAMERA)
-            .setOnGalleryLoadedListener(this::showToast)
-            .setOnCancelListener { Log.toast(activity, "canceled") }
-            .load()
+                .setSource(GalleryLoader.Source.CAMERA)
+                .setOnGalleryLoadedListener(this::showToast)
+                .setOnCancelListener { Log.toast(activity, "canceled") }
+                .load()
     }
 
     fun GALLERY_LOADER_BY_GALLERY() {
         GalleryLoader.builder(activity)
 //                .setCrop(true, 100, 100)
-            .setSource(GalleryLoader.Source.GALLERY)
-            .setOnGalleryLoadedListener(this::showToast)
-            .setOnCancelListener { Log.toast(activity, "canceled") }
-            .load()
+                .setSource(GalleryLoader.Source.GALLERY)
+                .setOnGalleryLoadedListener(this::showToast)
+                .setOnCancelListener { Log.toast(activity, "canceled") }
+                .load()
     }
 
     fun GALLERY_LOADER_BY_CAMERA_CROP() {
         GalleryLoader.builder(activity)
-            .setCrop(true, 100, 100)
-            .setSource(GalleryLoader.Source.CAMERA)
-            .setOnGalleryLoadedListener(this::showToast)
-            .setOnCancelListener { Log.toast(activity, "canceled") }
-            .load()
+                .setCrop(true, 100, 100)
+                .setSource(GalleryLoader.Source.CAMERA)
+                .setOnGalleryLoadedListener(this::showToast)
+                .setOnCancelListener { Log.toast(activity, "canceled") }
+                .load()
     }
 
     fun GALLERY_LOADER_BY_GALLERY_CROP() {
         GalleryLoader.builder(activity)
-            .setCrop(true, 100, 100)
-            .setSource(GalleryLoader.Source.GALLERY)
-            .setOnGalleryLoadedListener(this::showToast)
-            .setOnCancelListener { Log.toast(activity, "canceled") }
-            .load()
+                .setCrop(true, 100, 100)
+                .setSource(GalleryLoader.Source.GALLERY)
+                .setOnGalleryLoadedListener(this::showToast)
+                .setOnCancelListener { Log.toast(activity, "canceled") }
+                .load()
     }
 
     fun GALLERY_LOADER_BY_SELECT_CROP() {
         GalleryLoader.builder(activity)
-            .setCrop(true, 100, 100)
+                .setCrop(true, 100, 100)
 //                .setSource(GalleryLoader.eSource.GALLERY)
-            .setOnGalleryLoadedListener(this::showToast)
-            .setOnCancelListener { Log.toast(activity, "canceled") }
-            .load()
+                .setOnGalleryLoadedListener(this::showToast)
+                .setOnCancelListener { Log.toast(activity, "canceled") }
+                .load()
     }
 
     fun PROFILE_WRITER() {
@@ -95,39 +92,21 @@ class EastarEgg(val activity: Activity) {
     }
 
     fun AAAAAAAAAAAA() {
-        runBlocking {
-            val jobs = List(1) {
-                launch {
-                    delay(1000L)
-                    Log.e("aaa")
-                }
-            }
-            Log.e("End runBlock ")
-        }
-        Log.e("End function")
-
-        runBlocking {
-            delay(12000L)
-        }
-
-        Log.e("End function")
-    }
-    fun AAAAAAAAABB() {
-        RemoteAppDataSource.getProfile2("")
+        RemoteAppDataSource.getProfile("")
     }
 
     private fun showToast(uri: Uri) {
         Log.toast(activity, uri.toString())
         Observable.fromFuture(Glide.with(activity).asBitmap().load(uri).submit())
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { bitmap ->
-                Toast(activity).apply {
-                    val iv = ImageView(activity)
-                    iv.setImageBitmap(bitmap)
-                    view = iv
-                    show()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { bitmap ->
+                    Toast(activity).apply {
+                        val iv = ImageView(activity)
+                        iv.setImageBitmap(bitmap)
+                        view = iv
+                        show()
+                    }
                 }
-            }
     }
 }

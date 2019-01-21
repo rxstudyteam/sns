@@ -3,16 +3,13 @@ package com.teamrx.rxtargram.repository
 import android.log.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.model.ProfileModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import smart.base.PP
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 object RemoteAppDataSource : AppDataSource {
 
@@ -29,228 +26,32 @@ object RemoteAppDataSource : AppDataSource {
         val CREATED_AT = "created_at"
     }
 
-    override fun getProfile(user_id: String, callback: (ProfileModel) -> Unit) {
-        var user_id = "KxUypfZKf2cKmJs4jOeU"
-        FirebaseFirestore.getInstance()
-            .collection(USER_COLLECTION).document(user_id)
-            .get()
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val document = task.result!!
-                    if (document.exists()) {
-                        Log.w(document.id, document.data)
-                        callback(
-                            ProfileModel(
-                                document[USER_DOCUMENT.EMAIL] as String,
-                                document[USER_DOCUMENT.NAME] as String,
-                                document[USER_DOCUMENT.PROFILE_URL] as String?
-                            )
-                        )
-                    }
-                }
-            }
-    }
-
-//    override fun getProfile2(user_id: String): ProfileModel? {
+    override fun getProfile(user_id: String): ProfileModel? {
 //        var user_id = "KxUypfZKf2cKmJs4jOeU"
-//        var profileModel: ProfileModel? = null
-//        Log.e()
-//        runBlocking {
-//            Log.e()
-//            FirebaseFirestore.getInstance()
-//                .collection(USER_COLLECTION).document(user_id)
-//                .get()
-//                .addOnCompleteListener { task ->
-//                    var job = launch {
-//                        Log.e()
-//                        if (task.isSuccessful) {
-//                            Log.e()
-//                            val document = task.result!!
-//                            if (document.exists()) {
-//                                Log.e()
-//                                Log.w(document.id, document.data)
-//                                profileModel = ProfileModel(document[USER_DOCUMENT.NAME] as String, document[USER_DOCUMENT.EMAIL] as String, document[USER_DOCUMENT.PROFILE_URL] as String?)
-//                            }
-//                            Log.e(profileModel)
-//                        }
-//
-//                        Log.e(profileModel)
-//                    }
-////                    job.join()
-//                    Log.e(profileModel)
-//                }
-//            Log.e(profileModel)
-//        }
-//        Log.e(profileModel)
-//        return profileModel
-//    }
+        val future = Executors.newSingleThreadExecutor().submit<ProfileModel> {
+            val task = FirebaseFirestore.getInstance()
+                    .collection(USER_COLLECTION).document(user_id)
+                    .get()
+            val document = Tasks.await(task, 5, TimeUnit.SECONDS)
 
-//    suspend fun refreshTitle() {
-//        withContext(Dispatchers.IO) {
-//            try {
-//                val result = network.fetchNewWelcome().await()
-//                titleDao.insertTitle(Title(result))
-//            } catch (error: FakeNetworkException) {
-//                throw TitleRefreshError(error)
-//            }
-//        }
-//    }
+            if (document.exists())
+                document.toObject(ProfileModel::class.java)
+            else
+                null
 
-//    suspend fun <T> FakeNetworkCall<T>.await(): T {
-//        return suspendCoroutine { continuation ->
-//            addOnResultListener { result ->
-//                when (result) {
-//                    is FakeNetworkSuccess<T> -> continuation.resume(result.data)
-//                    is FakeNetworkError -> continuation.resumeWithException(result.error)
-//                }
-//            }
-//        }
-//    }
-
-//    @Suppress("UNCHECKED_CAST")
-//    suspend fun <T> Task<T>.await(): T {
-//        return suspendCoroutine { continuation ->
-//            addOnCompleteListener { continuation.resume(result as T) }
-//            addOnFailureListener { continuation.resumeWithException(it) }
-//        }
-//    }
-
-    var user_id = "KxUypfZKf2cKmJs4jOeU"
-    override fun getProfile2(user_id: String): ProfileModel? {
-//        Executors.newSingleThreadExecutor().execute {
-        Log.e()
-        var profileModel: ProfileModel? = null
-        Log.e()
-        val task = FirebaseFirestore.getInstance()
-            .collection(USER_COLLECTION).document(RemoteAppDataSource.user_id)
-            .get()
-            .addOnCompleteListener { task ->
-                Log.w("addOnCompleteListener", task.isComplete, task.isSuccessful)
-                if (task.isSuccessful) {
-                    val document = task.result!!
-                    if (document.exists()) {
-                        Log.w(document.id, document.data)
-                        profileModel = document.toObject(ProfileModel::class.java)
-                        Log.w(profileModel)
-                    }
-                }
-            }
-            .continueWithTask { task: Task<DocumentSnapshot> ->
-                Log.e(task.result!!)
-
-                task
-            }
-        Log.e(task)
-        Tasks.await(task)
-        Log.e(profileModel)
-//        return profileModel
-//        }
-        return null
+        }
+        return future.get(5, TimeUnit.SECONDS)
     }
-
-//    override fun getProfile2(user_id: String): ProfileModel? {
-//
-//        runBlocking (Dispatchers.Default){
-//            Log.e()
-//            var profileModel: ProfileModel? = null
-//            Log.e()
-//            val task = FirebaseFirestore.getInstance()
-//                .collection(USER_COLLECTION).document(RemoteAppDataSource.user_id)
-//                .get()
-//                .addOnCompleteListener { task ->
-//                    Log.w("addOnCompleteListener", task.isComplete, task.isSuccessful)
-//                    if (task.isSuccessful) {
-//                        val document = task.result!!
-//                        if (document.exists()) {
-//                            Log.w(document.id, document.data)
-//                            profileModel = document.toObject(ProfileModel::class.java)
-//                            Log.w(profileModel)
-//                        }
-//                    }
-//                }
-//                .continueWithTask { task: Task<DocumentSnapshot> ->
-//                    Log.e(task.result!!)
-//
-//                    task
-//                }
-//
-//
-//            launch {
-//                Log.e(task)
-//                Tasks.await(task)
-//                Log.e("aaa")
-//            }
-//            Log.e(profileModel)
-//
-//            Log.e("End runBlock ")
-//        }
-//        Log.e("End function")
-//
-////        Executors.newSingleThreadExecutor().execute {
-//
-////        return profileModel
-////        }
-//        return null
-//    }
 
     override fun join(profileModel: ProfileModel) {
         FirebaseFirestore.getInstance().collection(USER_COLLECTION)
-            .add(profileModel)
-            .addOnSuccessListener { documentReference ->
-                PP.user_id.set(documentReference.id)
-                Log.e(PP.user_id.get(), "회원가입이 완료됨")
-            }
-            .addOnFailureListener { e -> e.printStackTrace() }
+                .add(profileModel)
+                .addOnSuccessListener { documentReference ->
+                    PP.user_id.set(documentReference.id)
+                    Log.e(PP.user_id.get(), "회원가입이 완료됨")
+                }
+                .addOnFailureListener { e -> e.printStackTrace() }
     }
-
-//    override fun setProfile(profile: MutableLiveData<MProfile?>) {
-//        FirebaseFirestore.getInstance().collection(USER_COLLECTION).document(PP.user_id.get())
-//                .get()
-//                .addOnCompleteListener { task ->
-//                    if (task.isSuccessful) {
-//                        var document = task.result!!
-//                        Log.d(document.id, document.data)
-//                        profile.value = MProfile(document[USER.EMAIL] as String, document[USER.NAME] as String, document[USER.PROFILE_URL] as String?)
-//                    } else {
-//                        Log.w(task.exception)
-//                    }
-//                }
-//                .addOnFailureListener { e -> e.printStackTrace() }
-//    }
-//
-//    fun getProfles(callback: (List<Pair<String, MProfile>>) -> Unit) {
-//        //목록
-//        FirebaseFirestore.getInstance().collection(USER_COLLECTION)
-//                .get()
-//                .addOnCompleteListener { task ->
-//                    if (task.isSuccessful) {
-//                        val list: List<Pair<String, MProfile>> = ArrayList()
-//                        for (document in task.result!!) {
-//                            Log.d(document.id, document.data, MProfile(document[USER.EMAIL] as String, document[USER.NAME] as String, document[USER.PROFILE_URL] as String?))
-//                            list + document.id to MProfile(document[USER.EMAIL] as String, document[USER.NAME] as String, document[USER.PROFILE_URL] as String?)
-//                        }
-//                        callback(list)
-//                    } else {
-//                        Log.w(task.exception)
-//                    }
-//                }
-//                .addOnFailureListener { e -> e.printStackTrace() }
-//    }
-
-//        val database = FirebaseDatabase.getInstance()
-//        val ref = database.getReference().g
-//        ref.addValueEventListener(object : ValueEventListener {
-//            override fun onDataChange(dataSnapshot: DataSnapshot) {
-//                // This method is called once with the initial value and again whenever data at this location is updated.
-//                val value = dataSnapshot.getValue(String::class.java)
-//                Log.e(value)
-//            }
-//            override fun onCancelled(error: DatabaseError) {
-//                // Failed to read value
-//                Log.e(error)
-//            }
-//        })
-//    }
 
     // https://github.com/kunny/RxFirebase
     // Firebase + Rxjava를 이용해 Obserbable을 리턴하고 ViewModel에서 Livedata로 데이터를 관리하고 싶었으나
@@ -260,26 +61,25 @@ object RemoteAppDataSource : AppDataSource {
 
         val firestore = FirebaseFirestore.getInstance()
         firestore.collection(POST_COLLECTION).orderBy(POST_DOCUMENT.CREATED_AT)
-            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                if (querySnapshot == null) return@addSnapshotListener
+                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                    if (querySnapshot == null) return@addSnapshotListener
 
-                val posts = mutableListOf<Post>()
-                for (snapshot in querySnapshot.documents) {
-                    try {
-                        val item = snapshot.toObject(Post::class.java)
-                        // 팔로우한 유저만 구분.
-                        if (item != null)
-                            posts.add(item)
-                    } catch (e: Exception) {
-                        firebaseFirestoreException?.printStackTrace()
-                        e.printStackTrace()
+                    val posts = mutableListOf<Post>()
+                    for (snapshot in querySnapshot.documents) {
+                        try {
+                            val item = snapshot.toObject(Post::class.java)
+                            // 팔로우한 유저만 구분.
+                            if (item != null)
+                                posts.add(item)
+                        } catch (e: Exception) {
+                            firebaseFirestoreException?.printStackTrace()
+                            e.printStackTrace()
+                        }
                     }
-                }
 
-                postLiveData.postValue(posts)
-            }
+                    postLiveData.postValue(posts)
+                }
 
         return postLiveData
     }
-
 }

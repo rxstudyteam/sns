@@ -14,10 +14,10 @@ interface AppDataSource {
 //    fun setProfile(user_id: String, profile: MProfile?)
 
     //프로필가져오기
-    fun getProfile(user_id: String, callback: (ProfileModel) -> Unit)
+    fun getProfile(user_id: String): ProfileModel?
 
     //가입
     fun join(profileModel: ProfileModel)
 
-    fun getProfile2(user_id: String): ProfileModel?
+
 }

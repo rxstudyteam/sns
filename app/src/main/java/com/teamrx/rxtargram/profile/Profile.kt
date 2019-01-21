@@ -1,6 +1,5 @@
 package com.teamrx.rxtargram.profile
 
-import android.log.Log
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.LiveData
@@ -33,19 +32,7 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
         if (!::profileModel.isInitialized) {
             profileModel = MutableLiveData()
             val userId = PP.user_id.get("")!!
-            dataSource.getProfile(userId) {
-                Log.w(it)
-                profileModel.value = ProfileModel(it.name, it.email, it.profile_url)
-            }
-        }
-        return profileModel
-    }
-
-    fun getProfile2(): LiveData<ProfileModel> {
-        if (!::profileModel.isInitialized) {
-            profileModel = MutableLiveData()
-            val userId = PP.user_id.get("")!!
-            profileModel.value = dataSource.getProfile2(userId)
+            profileModel.value = dataSource.getProfile(userId)
         }
         return profileModel
     }
