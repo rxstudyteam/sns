@@ -26,22 +26,31 @@ object RemoteAppDataSource : AppDataSource {
         val CREATED_AT = "created_at"
     }
 
-    override fun getProfile(user_id: String): ProfileModel? {
+    //    override fun getProfile(user_id: String): ProfileModel? {
+//        val future = Executors.newSingleThreadExecutor().submit<ProfileModel> {
+//            val task = FirebaseFirestore.getInstance()
+//                    .collection(USER_COLLECTION).document(user_id)
+//                    .get()
+//            val document = Tasks.await(task, 5, TimeUnit.SECONDS)
+//
+//            if (document.exists())
+//                document.toObject(ProfileModel::class.java)
+//            else
+//                null
+//        }
+//        return future.get(5, TimeUnit.SECONDS)
+//    }
+    override fun getProfile(user_id: String): ProfileModel? = Executors.newSingleThreadExecutor().submit<ProfileModel> {
+        val task = FirebaseFirestore.getInstance()
+                .collection(USER_COLLECTION).document(user_id)
+                .get()
+        val document = Tasks.await(task, 5, TimeUnit.SECONDS)
 
-        val future = Executors.newSingleThreadExecutor().submit<ProfileModel> {
-            val task = FirebaseFirestore.getInstance()
-                    .collection(USER_COLLECTION).document(user_id)
-                    .get()
-            val document = Tasks.await(task, 5, TimeUnit.SECONDS)
-
-            if (document.exists())
-                document.toObject(ProfileModel::class.java)
-            else
-                null
-
-        }
-        return future.get(5, TimeUnit.SECONDS)
-    }
+        if (document.exists())
+            document.toObject(ProfileModel::class.java)
+        else
+            null
+    }.get(5, TimeUnit.SECONDS)
 
     override fun join(profileModel: ProfileModel) {
         FirebaseFirestore.getInstance().collection(USER_COLLECTION)
