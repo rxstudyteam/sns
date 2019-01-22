@@ -11,21 +11,22 @@ import com.teamrx.rxtargram.util.GlideApp
 import kotlinx.android.synthetic.main.detail_item.view.*
 import java.util.*
 
-class PostRecyclerViewAdapter(private val mContext: Context): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class PostRecyclerViewAdapter(private val mContext: Context) : RecyclerView.Adapter<PostRecyclerViewAdapter.ViewHolder>() {
 
     private val posts = ArrayList<Post>()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
-        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.detail_item, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
+            ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.detail_item, parent, false))
 
     override fun getItemCount(): Int = posts.size
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val item = (holder as ViewHolder).itemView
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val item = holder.itemView
+        holder.post = posts[position]
 
         GlideApp.with(mContext)
-            .load("http://cdnweb01.wikitree.co.kr/webdata/editor/201411/28/img_20141128161209_521102e2.jpg")
-            .into(item.ivContentImage)
+                .load("http://cdnweb01.wikitree.co.kr/webdata/editor/201411/28/img_20141128161209_521102e2.jpg")
+                .into(item.ivContentImage)
 
         item.tvUserId.text = posts[position].user_id
         item.tvTitle.text = posts[position].title
@@ -38,5 +39,14 @@ class PostRecyclerViewAdapter(private val mContext: Context): RecyclerView.Adapt
         notifyDataSetChanged()
     }
 
-    inner class ViewHolder(view: View): RecyclerView.ViewHolder(view)
+    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+
+        var post: Post? = null
+
+        init {
+            itemView.option.setOnClickListener {
+                println("ViewHolder is clicked!")
+            }
+        }
+    }
 }
