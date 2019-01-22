@@ -48,5 +48,11 @@ public class ExampleInstrumentedTestJ {
             }
         });
     }
+
+//    @BindingAdapter(value = {"imageUrl"})
+//    public static void setImage(ImageView imageView, String url) {
+//        Log.e(url);
+//    }
+
 }
 

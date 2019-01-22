@@ -4,12 +4,14 @@ import android.log.Log
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ImageView
 import android.widget.Toast
-import androidx.databinding.DataBindingUtil
+import androidx.databinding.BindingAdapter
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProviders
+import com.bumptech.glide.Glide
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.AppActivity
 import com.teamrx.rxtargram.databinding.ProfileWriteBinding
@@ -24,14 +26,18 @@ class Profile : AppActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        bb = DataBindingUtil.setContentView(this, R.layout.profile_write)
         vm = ViewModelProviders.of(mActivity, Injection.provideViewModelFactory()).get(ProfileViewModel::class.java)
-        bb.profileViewModel = vm
-        bb.setLifecycleOwner(this)
 
-        supportActionBar?.title = vm.getTitle()
-        supportActionBar?.setDisplayShowHomeEnabled(true)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        bb = ProfileWriteBinding.inflate(layoutInflater).apply {
+            profileViewModel = vm
+            setLifecycleOwner(mActivity)
+        }
+
+        supportActionBar?.apply {
+            title = vm.getTitle()
+            setDisplayShowHomeEnabled(true)
+            setDisplayHomeAsUpEnabled(true)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -56,17 +62,33 @@ class Profile : AppActivity() {
     }
 }
 
+@BindingAdapter("bind:load")
+fun ImageView.load(imageUrl: String?) {
+    Log.e(imageUrl)
+    Glide.with(this)
+            .load(imageUrl)
+            .into(this)
+}
+
 class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
-    lateinit var profileModel: MutableLiveData<ProfileModel>
+//    lateinit var profileModel: MutableLiveData<ProfileModel>
+
+    private val profileModel = MediatorLiveData<ProfileModel>().apply {
+        addSource(this) { value ->
+            setValue(value)
+        }
+    }.also {
+        it.observeForever { /* empty */ }
+    }
 
     fun getProfile(): LiveData<ProfileModel> {
         Log.e(1)
-        if (!::profileModel.isInitialized) {
-            Log.e(2)
-            profileModel = MutableLiveData()
-            val userId = PP.user_id.get("")!!
-            profileModel.value = dataSource.getProfile(userId)
-        }
+//        if (!::profileModel.isInitialized) {
+//            Log.e(2)
+//            profileModel = MutableLiveData()
+        val userId = PP.user_id.get("")!!
+        profileModel.value = dataSource.getProfile(userId)
+//        }
         return profileModel
     }
 
@@ -80,7 +102,7 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
         return if (userId.isNullOrEmpty()) {
             Log.w("join")
             try {
-                dataSource.setProfile(profileModel.value!!)
+                dataSource.join(profileModel.value!!)
             } catch (e: Exception) {
                 false
             }
