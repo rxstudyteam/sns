@@ -11,12 +11,13 @@ import com.teamrx.rxtargram.util.GlideApp
 import kotlinx.android.synthetic.main.detail_item.view.*
 import java.util.*
 
-class PostRecyclerViewAdapter(private val mContext: Context) : RecyclerView.Adapter<PostRecyclerViewAdapter.ViewHolder>() {
+class PostRecyclerViewAdapter(private val mContext: Context, private val optionClickListener: OptionClickListener) :
+    RecyclerView.Adapter<PostRecyclerViewAdapter.ViewHolder>() {
 
     private val posts = ArrayList<Post>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-            ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.detail_item, parent, false))
+        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.detail_item, parent, false))
 
     override fun getItemCount(): Int = posts.size
 
@@ -25,8 +26,8 @@ class PostRecyclerViewAdapter(private val mContext: Context) : RecyclerView.Adap
         holder.post = posts[position]
 
         GlideApp.with(mContext)
-                .load("http://cdnweb01.wikitree.co.kr/webdata/editor/201411/28/img_20141128161209_521102e2.jpg")
-                .into(item.ivContentImage)
+            .load("http://cdnweb01.wikitree.co.kr/webdata/editor/201411/28/img_20141128161209_521102e2.jpg")
+            .into(item.ivContentImage)
 
         item.tvUserId.text = posts[position].user_id
         item.tvTitle.text = posts[position].title
@@ -45,7 +46,7 @@ class PostRecyclerViewAdapter(private val mContext: Context) : RecyclerView.Adap
 
         init {
             itemView.option.setOnClickListener {
-                println("ViewHolder is clicked!")
+                optionClickListener.onOptionClick(post)
             }
         }
     }

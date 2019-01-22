@@ -1,10 +1,13 @@
 package com.teamrx.rxtargram.detail
 
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -13,21 +16,22 @@ import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.BaseViewModel
 import com.teamrx.rxtargram.inject.Injection
 import com.teamrx.rxtargram.model.Post
+import com.teamrx.rxtargram.util.getStringArray
 import kotlinx.android.synthetic.main.fragment_detail_view.*
 
-class DetailViewFragment : Fragment() {
+class DetailViewFragment : Fragment(), OptionClickListener {
 
     private lateinit var detailViewModel: DetailViewModel
     private lateinit var adapter: PostRecyclerViewAdapter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
-            = inflater.inflate(R.layout.fragment_detail_view, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        inflater.inflate(R.layout.fragment_detail_view, container, false)
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
         // 컴포넌트 리스너
-        context?.let { adapter = PostRecyclerViewAdapter(it) }
+        context?.let { adapter = PostRecyclerViewAdapter(it, this) }
         recyclerView.layoutManager = LinearLayoutManager(activity)
         recyclerView.adapter = adapter
     }
@@ -58,4 +62,21 @@ class DetailViewFragment : Fragment() {
         }
     }
 
+    override fun onOptionClick(post: Post?) {
+        val alertBuilder = AlertDialog.Builder(context)
+        val adapter = ArrayAdapter<String>(context, android.R.layout.select_dialog_item)
+        adapter.addAll(getStringArray(R.array.post_option).toMutableList())
+
+        alertBuilder.setAdapter(adapter) { _, id ->
+
+            val strName = adapter.getItem(id)
+
+            when (strName) {
+                getString(R.string.crystal) -> println("수정!!")
+            }
+
+            Toast.makeText(context, "selected $strName", Toast.LENGTH_SHORT).show()
+        }
+        alertBuilder.show()
+    }
 }
