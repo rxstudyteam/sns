@@ -15,9 +15,10 @@ interface AppDataSource {
 
     //프로필가져오기
     fun getProfile(user_id: String): ProfileModel?
-
+    //내프로필변경
+    fun setProfile(value: ProfileModel) : Boolean
     //가입
-    fun join(profileModel: ProfileModel)
+    fun join(profileModel: ProfileModel): Boolean
 
 
 }

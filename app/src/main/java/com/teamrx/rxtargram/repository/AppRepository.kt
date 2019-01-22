@@ -5,6 +5,8 @@ import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.model.ProfileModel
 
 class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppDataSource {
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
+    override fun setProfile(profileModel: ProfileModel) = remoteAppDataSource.setProfile(profileModel)
 
     override fun join(profileModel: ProfileModel) = remoteAppDataSource.join(profileModel)
 

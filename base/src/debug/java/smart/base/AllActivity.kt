@@ -21,9 +21,7 @@ class AllActivity : BActivity() {
         setContentView(sc)
 
         val activities = getActivities()
-        Log.e(activities)
         for (activity in activities) {
-            Log.w(activity)
             val btn = Button(this)
             btn.text = activity.substring(activity.lastIndexOf('.') + 1)
             btn.setOnClickListener { startActivity(Intent().setClassName(this, activity)) }

@@ -27,8 +27,8 @@
             android:background="#5f00"
             android:scaleType="centerCrop"
             app:layout_constraintDimensionRatio="H,1:1"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@drawable/test_00" />
 
@@ -38,6 +38,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:hint="name"
+            android:inputType="textPersonName|textFilter|textNoSuggestions"
+            android:maxLines="1"
             android:text="@{profileViewModel.profile.name.toString()}"
             app:layout_constraintEnd_toEndOf="@+id/profile_url"
             app:layout_constraintHorizontal_bias="0.0"
@@ -51,6 +53,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:hint="email"
+            android:inputType="textEmailAddress|textFilter|textNoSuggestions"
+            android:maxLines="1"
             android:text="@{profileViewModel.profile.email.toString()}"
             app:layout_constraintEnd_toEndOf="@+id/name"
             app:layout_constraintStart_toStartOf="@+id/name"

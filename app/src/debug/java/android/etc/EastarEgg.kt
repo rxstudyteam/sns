@@ -97,18 +97,16 @@ class EastarEgg(val activity: Activity) {
         activity.startActivity(Intent(activity, Profile::class.java))
     }
 
-    fun AAAAAAAAAAAA() {
-//        RemoteAppDataSource.getProfile("KxUypfZKf2cKmJs4jOeU")
-//        RemoteAppDataSource.getProfile("")
-//        CoroutineScope(activity.lifecycle)<ProfileModel?> { getProfile2(). }
+    fun CoroutineFirestore() {
         Log.w(1)
         var result: ProfileModel? = null
         Log.w(2)
-        CoroutineScope(Dispatchers.Main).launch {
+        var job = CoroutineScope(Dispatchers.Main).launch {
             Log.e(3)
             result = getProfile2()
             Log.w(4, result)
         }
+
         Log.e(5, result)
         Log.w(6)
     }
