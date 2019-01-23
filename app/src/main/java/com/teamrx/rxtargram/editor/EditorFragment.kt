@@ -23,6 +23,10 @@ class EditorFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+
+        // 이미지 첨부는 어떻게 해야하는 것일까?
+
         viewModel = ViewModelProviders.of(this).get(EditorViewModel::class.java)
         editor_write_post_button.setOnClickListener {
             viewModel.createPost("2nE", null, "첫 번째 api test", "내용은 별거 없지 뭐")
