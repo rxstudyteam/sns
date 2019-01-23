@@ -24,5 +24,6 @@
         <activity
             android:name=".profile.Profile"
             android:exported="true" />
+        <activity android:name=".detail.CrystalActivity" />
     </application>
 </manifest>

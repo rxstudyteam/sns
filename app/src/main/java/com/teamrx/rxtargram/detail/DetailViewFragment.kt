@@ -1,7 +1,7 @@
 package com.teamrx.rxtargram.detail
 
-
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -25,7 +25,7 @@ class DetailViewFragment : Fragment(), OptionClickListener {
     private lateinit var adapter: PostRecyclerViewAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_detail_view, container, false)
+            inflater.inflate(R.layout.fragment_detail_view, container, false)
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -72,11 +72,18 @@ class DetailViewFragment : Fragment(), OptionClickListener {
             val strName = adapter.getItem(id)
 
             when (strName) {
-                getString(R.string.crystal) -> println("수정!!")
+                getString(R.string.crystal) -> startCrystalActivity(post)
             }
 
             Toast.makeText(context, "selected $strName", Toast.LENGTH_SHORT).show()
         }
         alertBuilder.show()
+    }
+
+    private fun startCrystalActivity(post: Post?) {
+        val intent = Intent(activity?.applicationContext, CrystalActivity::class.java)
+        intent.putExtra("post", post)
+
+        activity?.startActivity(intent)
     }
 }
