@@ -91,4 +91,8 @@ object RemoteAppDataSource : AppDataSource {
 
         return postLiveData
     }
+
+    override fun modifyPost(post: Post) {
+        val firestore = FirebaseFirestore.getInstance()
+    }
 }

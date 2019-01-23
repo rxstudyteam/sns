@@ -2,6 +2,7 @@ package com.teamrx.rxtargram.detail
 
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
 import androidx.lifecycle.ViewModelProviders
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.AppActivity
@@ -9,13 +10,13 @@ import com.teamrx.rxtargram.base.BaseViewModel
 import com.teamrx.rxtargram.inject.Injection
 import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.util.GlideApp
-import kotlinx.android.synthetic.main.activity_crystal.*
+import kotlinx.android.synthetic.main.activity_modify.*
 
 /**
  *
  * Created by Rell on 2019. 1. 23..
  */
-class CrystalActivity : AppActivity() {
+class ModifyActivity : AppActivity() {
     private lateinit var detailViewModel: DetailViewModel
 
     private lateinit var post: Post
@@ -23,25 +24,36 @@ class CrystalActivity : AppActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_crystal)
+        setContentView(R.layout.activity_modify)
 
         post = intent.getParcelableExtra("post")
         updateUI()
 
-        println("CrystalActivity > $post")
+        println("ModifyActivity > $post")
+
+        detailViewModel = getViewModel()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
 
-        menuInflater.inflate(R.menu.menu_crystal, menu)
+        menuInflater.inflate(R.menu.menu_modify, menu)
 
         return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
 
-        detailViewModel = getViewModel()
+        val id = item?.itemId
+
+        when (id) {
+            R.id.done -> done()
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
+
+    fun done() {
+        detailViewModel.modifyPost(post)
     }
 
     private inline fun <reified T : BaseViewModel> getViewModel(): T {

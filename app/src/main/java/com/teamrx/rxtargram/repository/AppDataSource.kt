@@ -1,8 +1,8 @@
 package com.teamrx.rxtargram.repository
 
 import androidx.lifecycle.LiveData
-import com.teamrx.rxtargram.model.ProfileModel
 import com.teamrx.rxtargram.model.Post
+import com.teamrx.rxtargram.model.ProfileModel
 
 interface AppDataSource {
     // 글 목록 가져오기
@@ -19,5 +19,7 @@ interface AppDataSource {
     //가입
     fun join(profileModel: ProfileModel)
 
+    // 글 수정
+    fun modifyPost(post:Post)
 
 }

@@ -72,7 +72,7 @@ class DetailViewFragment : Fragment(), OptionClickListener {
             val strName = adapter.getItem(id)
 
             when (strName) {
-                getString(R.string.crystal) -> startCrystalActivity(post)
+                getString(R.string.modify) -> startModifyActivity(post)
             }
 
             Toast.makeText(context, "selected $strName", Toast.LENGTH_SHORT).show()
@@ -80,8 +80,8 @@ class DetailViewFragment : Fragment(), OptionClickListener {
         alertBuilder.show()
     }
 
-    private fun startCrystalActivity(post: Post?) {
-        val intent = Intent(activity?.applicationContext, CrystalActivity::class.java)
+    private fun startModifyActivity(post: Post?) {
+        val intent = Intent(activity?.applicationContext, ModifyActivity::class.java)
         intent.putExtra("post", post)
 
         activity?.startActivity(intent)

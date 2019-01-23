@@ -5,6 +5,7 @@ import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.model.ProfileModel
 
 class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppDataSource {
+    override fun modifyPost(post: Post) = remoteAppDataSource.modifyPost(post)
 
     override fun join(profileModel: ProfileModel) = remoteAppDataSource.join(profileModel)
 
