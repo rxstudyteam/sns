@@ -7,8 +7,9 @@ import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.databinding.BindingAdapter
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProviders
 import com.bumptech.glide.Glide
@@ -28,7 +29,7 @@ class Profile : AppActivity() {
         super.onCreate(savedInstanceState)
         vm = ViewModelProviders.of(mActivity, Injection.provideViewModelFactory()).get(ProfileViewModel::class.java)
 
-        bb = ProfileWriteBinding.inflate(layoutInflater).apply {
+        bb = DataBindingUtil.setContentView<ProfileWriteBinding>(mActivity, R.layout.profile_write) .apply {
             profileViewModel = vm
             setLifecycleOwner(mActivity)
         }
@@ -56,7 +57,7 @@ class Profile : AppActivity() {
     }
 
     private fun saveProfile() {
-        if (bb.profileViewModel!!.saveProfile()) {
+        if (bb.profileViewModel!!.saveProfile(bb.name.text.toString(), bb.email.text.toString(), bb.profileUrl.tag as String?)) {
             Toast.makeText(this, "변경됨", Toast.LENGTH_SHORT).show()
         }
     }
@@ -71,33 +72,28 @@ fun ImageView.load(imageUrl: String?) {
 }
 
 class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
-//    lateinit var profileModel: MutableLiveData<ProfileModel>
+    lateinit var profileModel: MutableLiveData<ProfileModel>
 
-    private val profileModel = MediatorLiveData<ProfileModel>().apply {
-        addSource(this) { value ->
-            setValue(value)
-        }
-    }.also {
-        it.observeForever { /* empty */ }
-    }
+//    private val profileModel = MediatorLiveData<ProfileModel>().apply {
+//        addSource(this) { value ->
+//            setValue(value)
+//        }
+//    }.also {
+//        it.observeForever { /* empty */ }
+//    }
 
     fun getProfile(): LiveData<ProfileModel> {
         Log.e(1)
-//        if (!::profileModel.isInitialized) {
-//            Log.e(2)
-//            profileModel = MutableLiveData()
-        val userId = PP.user_id.get("")!!
-        profileModel.value = dataSource.getProfile(userId)
-//        }
+        if (!::profileModel.isInitialized) {
+            Log.e(2)
+            profileModel = MutableLiveData()
+            val userId = PP.user_id.get("")!!
+            profileModel.value = dataSource.getProfile(userId)
+        }
         return profileModel
     }
 
-    fun saveProfile(): Boolean {
-        if (profileModel.value == null) {
-            Log.w("profileModel.value")
-            return false
-        }
-
+    fun saveProfile(name: String, email: String, imageUrl: String?): Boolean {
         val userId = PP.user_id.get()
         return if (userId.isNullOrEmpty()) {
             Log.w("join")
