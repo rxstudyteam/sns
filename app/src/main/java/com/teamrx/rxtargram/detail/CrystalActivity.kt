@@ -1,6 +1,7 @@
 package com.teamrx.rxtargram.detail
 
 import android.os.Bundle
+import android.view.Menu
 import androidx.lifecycle.ViewModelProviders
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.AppActivity
@@ -30,13 +31,17 @@ class CrystalActivity : AppActivity() {
         println("CrystalActivity > $post")
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+
+        menuInflater.inflate(R.menu.menu_crystal, menu)
+
+        return super.onCreateOptionsMenu(menu)
+    }
+
     override fun onStart() {
         super.onStart()
 
         detailViewModel = getViewModel()
-//        detailViewModel.getPosts().observe(this, Observer { posts ->
-//            updateUI(posts)
-//        })
     }
 
     private inline fun <reified T : BaseViewModel> getViewModel(): T {
