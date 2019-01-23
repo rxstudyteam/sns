@@ -3,7 +3,9 @@ package com.teamrx.rxtargram.repository
 import android.log.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.model.ProfileModel
@@ -11,35 +13,22 @@ import smart.base.PP
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+@Suppress("ClassName")
 object RemoteAppDataSource : AppDataSource {
 
     const val USER_COLLECTION = "user"
     const val POST_COLLECTION = "post"
 
     object USER_DOCUMENT {
-        val EMAIL = "email"
-        val NAME = "name"
-        val PROFILE_URL = "profile_url"
+        const val EMAIL = "email"
+        const val NAME = "name"
+        const val PROFILE_URL = "profile_url"
     }
 
     object POST_DOCUMENT {
-        val CREATED_AT = "created_at"
+        const val CREATED_AT = "created_at"
     }
 
-    //    override fun getProfile(user_id: String): ProfileModel? {
-//        val future = Executors.newSingleThreadExecutor().submit<ProfileModel> {
-//            val task = FirebaseFirestore.getInstance()
-//                    .collection(USER_COLLECTION).document(user_id)
-//                    .get()
-//            val document = Tasks.await(task, 5, TimeUnit.SECONDS)
-//
-//            if (document.exists())
-//                document.toObject(ProfileModel::class.java)
-//            else
-//                null
-//        }
-//        return future.get(5, TimeUnit.SECONDS)
-//    }
     override fun getProfile(user_id: String): ProfileModel? = try {
         Executors.newSingleThreadExecutor().submit<ProfileModel> {
             val db = FirebaseFirestore.getInstance()
@@ -55,18 +44,18 @@ object RemoteAppDataSource : AppDataSource {
         null
     }
 
-    override fun setProfile(value: ProfileModel): Boolean {
+    override fun setProfile(name: String?, email: String?, profile_url: String?): Boolean {
         val userId = PP.user_id.get()
         if (userId.isNullOrEmpty())
             throw IllegalArgumentException("PP.user_id.get() is empty")
 
         val db = FirebaseFirestore.getInstance()
-        val task = db.collection(USER_COLLECTION).document(userId)
-                .update(USER_DOCUMENT.NAME, value.name,
-                        USER_DOCUMENT.EMAIL, value.email,
-                        USER_DOCUMENT.PROFILE_URL, value.profile_url
-                )
-
+        val ref = db.collection(USER_COLLECTION).document(userId)
+        val map = hashMapOf<String, Any>()
+        name?.let { map[USER_DOCUMENT.NAME] = name }
+        email?.let { map[USER_DOCUMENT.EMAIL] = email }
+        profile_url?.let { map[USER_DOCUMENT.PROFILE_URL] = profile_url }
+        val task = ref.update(map as Map<String, Any>)
         task.addOnCompleteListener {
             Log.d("addOnCompleteListener")
         }.addOnSuccessListener {
@@ -74,23 +63,49 @@ object RemoteAppDataSource : AppDataSource {
         }.addOnFailureListener {
             Log.d("addOnFailureListener")
         }
-
-        Executors.newSingleThreadExecutor().submit {
-            Tasks.await(task, 5, TimeUnit.SECONDS)
-        }.get(5, TimeUnit.SECONDS)
+        task.await()
         return true
     }
 
-    override fun join(profileModel: ProfileModel): Boolean {
-        FirebaseFirestore.getInstance().collection(USER_COLLECTION)
-                .add(profileModel)
-                .addOnSuccessListener { documentReference ->
-                    PP.user_id.set(documentReference.id)
-                    Log.e(PP.user_id.get(), "회원가입이 완료됨")
-                }
-                .addOnFailureListener { e -> e.printStackTrace() }
+    override fun join(name: String, email: String, profile_url: String?): Boolean {
+        val db = FirebaseFirestore.getInstance()
+        val ref = db.collection(USER_COLLECTION)
+        val task = ref.add(mapOf(USER_DOCUMENT.NAME to name
+                , USER_DOCUMENT.EMAIL to email
+                , USER_DOCUMENT.PROFILE_URL to profile_url))
+        task.addOnCompleteListener {
+            Log.d("addOnCompleteListener")
+        }.addOnSuccessListener {
+            Log.d("addOnSuccessListener")
+        }.addOnFailureListener {
+            Log.d("addOnFailureListener")
+        }
+        val result: DocumentReference? = task.await()
+        result?.id?.let { PP.user_id.set(it) }
+
+        Log.e(PP.user_id.get(), "회원가입이 완료됨")
         return true
     }
+
+    fun <T : Any?> Task<T>.await(sec: Long = 5): T? =
+            try {
+                Executors.newSingleThreadExecutor().submit<T> {
+                    Tasks.await(this, sec, TimeUnit.SECONDS)
+                }.get(sec, TimeUnit.SECONDS)
+            } catch (e: Exception) {
+                null
+            }
+
+//    override fun join(name: String, email: String, imageUrl: String?): Boolean {
+//        FirebaseFirestore.getInstance().collection(USER_COLLECTION)
+//                .add(profileModel)
+//                .addOnSuccessListener { documentReference ->
+//                    PP.user_id.set(documentReference.id)
+//                    Log.e(PP.user_id.get(), "회원가입이 완료됨")
+//                }
+//                .addOnFailureListener { e -> e.printStackTrace() }
+//        return true
+//    }
 
     // https://github.com/kunny/RxFirebase
 // Firebase + Rxjava를 이용해 Obserbable을 리턴하고 ViewModel에서 Livedata로 데이터를 관리하고 싶었으나

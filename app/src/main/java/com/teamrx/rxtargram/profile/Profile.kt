@@ -29,7 +29,7 @@ class Profile : AppActivity() {
         super.onCreate(savedInstanceState)
         vm = ViewModelProviders.of(mActivity, Injection.provideViewModelFactory()).get(ProfileViewModel::class.java)
 
-        bb = DataBindingUtil.setContentView<ProfileWriteBinding>(mActivity, R.layout.profile_write) .apply {
+        bb = DataBindingUtil.setContentView<ProfileWriteBinding>(mActivity, R.layout.profile_write).apply {
             profileViewModel = vm
             setLifecycleOwner(mActivity)
         }
@@ -93,19 +93,19 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
         return profileModel
     }
 
-    fun saveProfile(name: String, email: String, imageUrl: String?): Boolean {
+    fun saveProfile(name: String?, email: String?, imageUrl: String?): Boolean {
         val userId = PP.user_id.get()
         return if (userId.isNullOrEmpty()) {
             Log.w("join")
             try {
-                dataSource.join(profileModel.value!!)
+                dataSource.join(name!!, email!!, imageUrl)
             } catch (e: Exception) {
                 false
             }
         } else {
             Log.w("update")
             try {
-                dataSource.setProfile(profileModel.value!!)
+                dataSource.setProfile(name, email, imageUrl)
             } catch (e: Exception) {
                 false
             }
