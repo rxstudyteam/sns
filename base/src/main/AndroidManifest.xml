@@ -20,6 +20,5 @@
             android:name="smart.util.GalleryLoader"
             android:theme="@style/GalleryLoaderTheme" />
 
-        <activity android:name="smart.base.AllActivity" />
     </application>
 </manifest>
