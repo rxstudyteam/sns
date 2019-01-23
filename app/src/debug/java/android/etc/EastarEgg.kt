@@ -23,7 +23,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.*
-import smart.base.AllActivity
+import android.debug.AllActivity
 import smart.util.GalleryLoader
 import java.util.*
 import kotlin.coroutines.resume

@@ -1,7 +1,8 @@
 @file:Suppress("SpellCheckingInspection")
 
-package smart.base
+package android.debug
 
+import android.base.CActivity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.log.Log
@@ -10,7 +11,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
 
-class AllActivity : BActivity() {
+class AllActivity : CActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

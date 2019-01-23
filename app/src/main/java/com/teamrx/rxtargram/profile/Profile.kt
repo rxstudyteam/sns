@@ -33,11 +33,24 @@ class Profile : AppActivity() {
             setLifecycleOwner(mActivity)
         }
 
+//        bb = ProfileWriteBinding.inflate(layoutInflater).apply {
+//            profileViewModel = vm
+//        }.also {
+//            it.setLifecycleOwner(mActivity)
+//        }
+
         supportActionBar?.apply {
             title = vm.getTitle()
             setDisplayShowHomeEnabled(true)
             setDisplayHomeAsUpEnabled(true)
         }
+
+//        supportActionBar?.apply {
+//            title = vm.getTitle()
+//        }?.also {
+//            it.setDisplayShowHomeEnabled(true)
+//            it.setDisplayHomeAsUpEnabled(true)
+//        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -66,18 +79,21 @@ class Profile : AppActivity() {
 fun ImageView.load(imageUrl: String?) {
     Log.e(imageUrl)
     Glide.with(this)
-            .load(imageUrl)
-            .into(this)
+        .load(imageUrl)
+        .into(this)
 }
 
 class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
 //    lateinit var profileModel: MutableLiveData<ProfileModel>
 
     private val profileModel = MediatorLiveData<ProfileModel>().apply {
+        Log.e()
         addSource(this) { value ->
+            Log.e()
             setValue(value)
         }
     }.also {
+        Log.e()
         it.observeForever { /* empty */ }
     }
 
