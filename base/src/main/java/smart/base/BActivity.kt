@@ -2,5 +2,5 @@ package smart.base
 
 import android.base.CActivity
 
-open class BActivity : CActivity() {
+open class BActivity : SmartDActivity() {
 }

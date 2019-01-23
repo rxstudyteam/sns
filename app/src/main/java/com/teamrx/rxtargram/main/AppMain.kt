@@ -6,6 +6,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.AppActivity
 import com.teamrx.rxtargram.editor.EditorActivity
+import com.teamrx.rxtargram.detail.DetailViewFragment
 import kotlinx.android.synthetic.main.app_main.*
 
 class AppMain : AppActivity() {
@@ -14,6 +15,9 @@ class AppMain : AppActivity() {
         BottomNavigationView.OnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.navigation_home -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.main_content, DetailViewFragment.getInstance())
+                        .commit()
                     return@OnNavigationItemSelectedListener true
                 }
                 R.id.navigation_dashboard -> {
@@ -34,5 +38,6 @@ class AppMain : AppActivity() {
         main_go_editor_button.setOnClickListener {
             startActivity(Intent(this@AppMain, EditorActivity::class.java))
         }
+        navigation.selectedItemId = R.id.navigation_home
     }
 }

@@ -6,6 +6,10 @@
 
     <dist:module dist:instant="true"/>
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <dist:module dist:instant="true" />
+
     <application
             android:name=".base.AppApplication"
             android:allowBackup="true"
