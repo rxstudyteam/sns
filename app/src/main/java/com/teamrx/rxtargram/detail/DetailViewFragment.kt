@@ -31,15 +31,19 @@ class DetailViewFragment : Fragment(), OptionClickListener {
         super.onActivityCreated(savedInstanceState)
 
         // 컴포넌트 리스너
-        context?.let { adapter = PostRecyclerViewAdapter(it, this) }
+        setupRecyclerView()
+
+        // 활성화 되었을 때 데이터를 다시 로드 하기 위해 뷰모델 observe
+        setupViewModel()
+    }
+
+    private fun setupRecyclerView() {
+        adapter = PostRecyclerViewAdapter(requireContext(), this)
         recyclerView.layoutManager = LinearLayoutManager(activity)
         recyclerView.adapter = adapter
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        // 활성화 되었을 때 데이터를 다시 로드 하기 위해 뷰모델 observe
+    private fun setupViewModel() {
         detailViewModel = getViewModel()
         detailViewModel.getPosts().observe(this, Observer { posts ->
             updateUI(posts)
@@ -49,6 +53,9 @@ class DetailViewFragment : Fragment(), OptionClickListener {
     private fun updateUI(posts: List<Post>) {
         adapter.addPosts(posts)
     }
+
+//    fun <T : ViewModel> AppCompatActivity.obtainViewModel(viewModelClass: Class<T>) =
+//            ViewModelProviders.of(this, ViewModelFactory.getInstance(application)).get(viewModelClass)
 
     private inline fun <reified T : BaseViewModel> getViewModel(): T {
         val viewModelFactory = Injection.provideViewModelFactory()
