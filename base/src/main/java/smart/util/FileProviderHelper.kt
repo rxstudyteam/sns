@@ -37,22 +37,19 @@ object FileProviderHelper {
     }
 
     private fun toFile(context: Context, uri: Uri?): File? {
-        uri?.run {
-            if (scheme == "content" && authority == context.packageName + PROVIDER && !path.isNullOrBlank()) {
-                for (pair in arrayOf(GTEMP_FOLDER, GLOADER_FOLDER)) {
-                    val (name, folder) = pair
-                    if (name in path!!) {
-                        val pathname = path!!.replaceFirst(name, folder)
-                        Log.e(path)
-                        Log.e("=>")
-                        Log.e(pathname)
-                        val file = File(getRootFolder(context), pathname)
-                        Log.e(uri)
-                        Log.e("=>")
-                        Log.e(file)
-                        return file
-                    }
-                }
+        uri ?: return null
+        if (uri.scheme == "content") return null
+        if (uri.authority == context.packageName + PROVIDER) return null
+        if (!uri.path.isNullOrBlank()) return null
+
+        for (pair in arrayOf(GTEMP_FOLDER, GLOADER_FOLDER)) {
+            val (name, folder) = pair
+            if (name in uri.path!!) {
+                val pathname = uri.path!!.replaceFirst(name, folder)
+                val file = File(getRootFolder(context), pathname)
+                Log.e(uri)
+                Log.w("=>", file)
+                return file
             }
         }
         return null
@@ -78,8 +75,7 @@ object FileProviderHelper {
         val authority = context.packageName + PROVIDER
         val uri = FileProvider.getUriForFile(context, authority, file)
         Log.e(file)
-        Log.e("=>")
-        Log.e(uri)
+        Log.w("=>", uri)
         return uri
     }
 
@@ -95,8 +91,7 @@ object FileProviderHelper {
         val file = getTempFile(context, prefix, suffix)
         val uri = FileProvider.getUriForFile(context, authority, file)
         Log.e(file)
-        Log.e("=>")
-        Log.e(uri)
+        Log.w("=>", uri)
         return uri
     }
 

@@ -8,18 +8,13 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.databinding.BindingAdapter
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProviders
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.AppActivity
 import com.teamrx.rxtargram.databinding.ProfileWriteBinding
 import com.teamrx.rxtargram.inject.Injection
-import com.teamrx.rxtargram.model.ProfileModel
-import com.teamrx.rxtargram.repository.AppDataSource
-import smart.base.PP
 
 class Profile : AppActivity() {
     private lateinit var bb: ProfileWriteBinding
@@ -29,9 +24,11 @@ class Profile : AppActivity() {
         super.onCreate(savedInstanceState)
         vm = ViewModelProviders.of(mActivity, Injection.provideViewModelFactory()).get(ProfileViewModel::class.java)
 
-        bb = DataBindingUtil.setContentView<ProfileWriteBinding>(mActivity, R.layout.profile_write).apply {
+        val binding = DataBindingUtil.setContentView<ProfileWriteBinding>(mActivity, R.layout.profile_write)
+        bb = binding.apply {
             profileViewModel = vm
-            setLifecycleOwner(mActivity)
+            profileImageViewModel = ViewModelProviders.of(mActivity).get(ProfileImageViewModel::class.java)
+            lifecycleOwner = mActivity
         }
 
         supportActionBar?.apply {
@@ -67,52 +64,12 @@ class Profile : AppActivity() {
 fun ImageView.load(imageUrl: String?) {
     Log.e(imageUrl)
     Glide.with(this)
-            .load(imageUrl)
-            .into(this)
-}
-
-class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
-    lateinit var profileModel: MutableLiveData<ProfileModel>
-
-//    private val profileModel = MediatorLiveData<ProfileModel>().apply {
-//        addSource(this) { value ->
-//            setValue(value)
-//        }
-//    }.also {
-//        it.observeForever { /* empty */ }
-//    }
-
-    fun getProfile(): LiveData<ProfileModel> {
-        Log.e(1)
-        if (!::profileModel.isInitialized) {
-            Log.e(2)
-            profileModel = MutableLiveData()
-            val userId = PP.user_id.get("")!!
-            profileModel.value = dataSource.getProfile(userId)
-        }
-        return profileModel
-    }
-
-    fun saveProfile(name: String?, email: String?, imageUrl: String?): Boolean {
-        val userId = PP.user_id.get()
-        return if (userId.isNullOrEmpty()) {
-            Log.w("join")
-            try {
-                dataSource.join(name!!, email!!, imageUrl)
-            } catch (e: Exception) {
-                false
-            }
-        } else {
-            Log.w("update")
-            try {
-                dataSource.setProfile(name, email, imageUrl)
-            } catch (e: Exception) {
-                false
-            }
-        }
-
-    }
-
-    fun getTitle() = if (PP.user_id.get().isNullOrBlank()) "회원가입" else "프로필"
-
+        .setDefaultRequestOptions(RequestOptions().apply {
+            //            placeholder(R.drawable.ic_face_black_24dp)
+            error(R.drawable.test_00)
+        })
+//        .load(imageUrl)
+        .load(R.drawable.test_01)
+        .apply(RequestOptions.circleCropTransform())
+        .into(this)
 }

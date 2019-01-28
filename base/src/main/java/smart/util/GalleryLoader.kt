@@ -13,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.teamrx.base.R
 import java.util.*
 
-
 /**
  *```kotlin
  *<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="18"/>
@@ -27,7 +26,6 @@ import java.util.*
  *```
  */
 class GalleryLoader : AppCompatActivity() {
-
 
     companion object {
         const val REQ_CAMERA = 4901
@@ -53,7 +51,6 @@ class GalleryLoader : AppCompatActivity() {
     enum class Source {
         CAMERA, GALLERY, UNKNOWN
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -154,7 +151,14 @@ class GalleryLoader : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        Log.e(requestCode, resultCode, data)
+//        Log.e(requestCode, resultCode, data)
+        val result = if (resultCode == Activity.RESULT_OK) "RESULT_OK" else "RESULT_CANCELED"
+        when (requestCode) {
+            REQ_GALLERY -> Log.e(result, "REQ_GALLERY", data?.data)
+            REQ_CROP -> Log.e(result, "REQ_CROP", mTragetUri)
+            REQ_CAMERA -> Log.e(result, "REQ_CAMERA", mTragetUri)
+        }
+
 
         if (resultCode != Activity.RESULT_OK) {
             fire(null)
@@ -228,7 +232,7 @@ class GalleryLoader : AppCompatActivity() {
                 else mOnCancelListener?.invoke()
             })
             val intent = Intent(context, GalleryLoader::class.java).apply {
-                putExtra(GalleryLoader.EXTRA.CROP, isCrop)
+                putExtra(GalleryLoader.EXTRA.CROP, isCrop && !android.os.Build.MODEL.contains("Android SDK"))
                 putExtra(GalleryLoader.EXTRA.SOURCE, mSource)
             }
             context.startActivity(intent)
