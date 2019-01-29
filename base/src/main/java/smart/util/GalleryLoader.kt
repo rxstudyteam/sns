@@ -38,13 +38,15 @@ class GalleryLoader : AppCompatActivity() {
         }
     }
 
-    private var w = 480
-    private var h = 800
+//    private var w = 480
+//    private var h = 800
 
     interface EXTRA {
         companion object {
             const val CROP = "CROP"
             const val SOURCE = "SOURCE"
+            const val CROP_WIDTH = "CROP_WIDTH"
+            const val CROP_HEIGHT = "CROP_HEIGHT"
         }
     }
 
@@ -108,7 +110,7 @@ class GalleryLoader : AppCompatActivity() {
 
     private var mTragetUri: Uri? = null
     @Suppress("MemberVisibilityCanBePrivate")
-    fun startCrop(sourceUri: Uri) {
+    fun startCrop(sourceUri: Uri, w: Int, h: Int) {
         val targetUri = FileProviderHelper.getTempUri(this@GalleryLoader, "crop", ".jpg")
         val intent = Intent("com.android.camera.action.CROP").apply {
             setDataAndType(sourceUri, "image/*")
@@ -168,9 +170,11 @@ class GalleryLoader : AppCompatActivity() {
         val crop = intent?.getBooleanExtra(EXTRA.CROP, false) ?: false
         if (crop) {
             intent?.putExtra(EXTRA.CROP, false)
+            val w = intent?.getIntExtra(EXTRA.CROP_WIDTH, (100 * resources.displayMetrics.density).toInt())!!
+            val h = intent?.getIntExtra(EXTRA.CROP_HEIGHT, (100 * resources.displayMetrics.density).toInt())!!
             when (requestCode) {
-                REQ_GALLERY -> startCrop(FileProviderHelper.copyForCrop(this, data?.data))
-                REQ_CAMERA -> mTragetUri?.also { sourceUri -> startCrop(sourceUri) }
+                REQ_GALLERY -> startCrop(FileProviderHelper.copyForCrop(this, data?.data), w, h)
+                REQ_CAMERA -> mTragetUri?.also { sourceUri -> startCrop(sourceUri, w, h) }
             }
             return
         }
@@ -233,6 +237,8 @@ class GalleryLoader : AppCompatActivity() {
             })
             val intent = Intent(context, GalleryLoader::class.java).apply {
                 putExtra(GalleryLoader.EXTRA.CROP, isCrop && !android.os.Build.MODEL.contains("Android SDK"))
+                putExtra(GalleryLoader.EXTRA.CROP_WIDTH, width)
+                putExtra(GalleryLoader.EXTRA.CROP_HEIGHT, height)
                 putExtra(GalleryLoader.EXTRA.SOURCE, mSource)
             }
             context.startActivity(intent)

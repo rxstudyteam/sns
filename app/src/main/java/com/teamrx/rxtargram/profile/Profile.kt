@@ -28,7 +28,7 @@ class Profile : AppActivity() {
         bb = binding.apply {
             profileViewModel = vm
             profileImageViewModel = ViewModelProviders.of(mActivity).get(ProfileImageViewModel::class.java)
-            lifecycleOwner = mActivity
+            setLifecycleOwner(mActivity)
         }
 
         supportActionBar?.apply {
