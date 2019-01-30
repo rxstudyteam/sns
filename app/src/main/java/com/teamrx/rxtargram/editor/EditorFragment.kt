@@ -29,8 +29,7 @@ class EditorFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
 
-        val adapter =
-            ArrayAdapter.createFromResource(requireContext(), R.array.user_names, android.R.layout.simple_spinner_item)
+        val adapter = ArrayAdapter.createFromResource(requireContext(), R.array.user_names, android.R.layout.simple_spinner_item)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         user_spinner.setAdapter(adapter)
         user_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
