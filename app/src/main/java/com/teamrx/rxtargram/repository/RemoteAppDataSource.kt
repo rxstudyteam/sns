@@ -1,21 +1,16 @@
 package com.teamrx.rxtargram.repository
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.google.firebase.firestore.FirebaseFirestore
+import com.teamrx.rxtargram.model.CommentDTO
 import com.teamrx.rxtargram.model.Post
 
 object RemoteAppDataSource: AppDataSource {
 
-    private val postLiveData: MutableLiveData<List<Post>> by lazy { MutableLiveData<List<Post>>() }
+    private val fireStore: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
 
-    // https://github.com/kunny/RxFirebase
-    // Firebase + Rxjava를 이용해 Obserbable을 리턴하고 ViewModel에서 Livedata로 데이터를 관리하고 싶었으나
-    // 위 라이브러리의 기능이 얼만큼 있는지 확인이 안되어 Repo에서 LiveData로 관리하도록 구현함
-    override fun getPosts(): LiveData<List<Post>> {
+    override fun getPosts(callback: (List<Post>) -> Unit) {
 
-        val firestore = FirebaseFirestore.getInstance()
-        firestore.collection("post").orderBy("created_at")
+        fireStore.collection("post").orderBy("created_at")
             .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                 if(querySnapshot == null) return@addSnapshotListener
 
@@ -23,19 +18,44 @@ object RemoteAppDataSource: AppDataSource {
                 for(snapshot in querySnapshot.documents) {
                     try {
                         val item = snapshot.toObject(Post::class.java)
+
+                        // FIXME check
+                        item?.post_id = snapshot.id
+
                         // 팔로우한 유저만 구분.
-                        if (item != null)
+                        if (item != null) {
                             posts.add(item)
+                        }
                     } catch (e: Exception) {
                         firebaseFirestoreException?.printStackTrace()
                         e.printStackTrace()
                     }
                 }
 
-                postLiveData.postValue(posts)
+                callback(posts)
             }
+    }
 
+    override fun getComments(post_id: String, callback: (List<CommentDTO>) -> Unit) {
 
-        return postLiveData
+        fireStore.collection("post").whereEqualTo("parent_post_no", post_id).get()
+            .addOnCompleteListener { task ->
+                if(task.isSuccessful) {
+                    task.result?.let { querySnapshot ->
+                        val commentDTOs = mutableListOf<CommentDTO>()
+
+                        for(dc in querySnapshot.documents) {
+                            val item = dc.toObject(CommentDTO::class.java)
+
+                            if(item?.parent_post_no == post_id) {
+                                commentDTOs.add(item)
+                            }
+                        }
+
+                        callback(commentDTOs)
+                    }
+
+                }
+            }
     }
 }

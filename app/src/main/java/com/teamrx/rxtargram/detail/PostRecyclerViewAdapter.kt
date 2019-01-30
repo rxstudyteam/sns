@@ -11,7 +11,7 @@ import com.teamrx.rxtargram.util.GlideApp
 import kotlinx.android.synthetic.main.detail_item.view.*
 import java.util.*
 
-class PostRecyclerViewAdapter(private val mContext: Context): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class PostRecyclerViewAdapter(private val mContext: Context, private val optionClickListener: OptionClickListener): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val posts = ArrayList<Post>()
 
@@ -31,8 +31,10 @@ class PostRecyclerViewAdapter(private val mContext: Context): RecyclerView.Adapt
         item.tvTitle.text = posts[position].title
         item.tvContent.text = posts[position].content
         item.tvCreatedAt.text = posts[position].created_at?.toDate().toString()
+        item.tvComments.text = "댓글 모두 보기"
 
         item.tvComments.setOnClickListener {
+            posts[position].post_id?.let { optionClickListener.onCommentClick(it) }
 
         }
     }
