@@ -8,11 +8,13 @@ data class Post(var content: String? = null,
                 var created_at: Timestamp? = null,
                 var parent_post_no: String? = null,
                 var title: String? = null,
-                val user_id: String? = null) : Parcelable {
+                val user_id: String? = null,
+                var snapshotId: String? = null) : Parcelable {
 
     constructor(parcel: Parcel) : this(
             parcel.readString(),
             parcel.readParcelable(Timestamp::class.java.classLoader),
+            parcel.readString(),
             parcel.readString(),
             parcel.readString(),
             parcel.readString())
@@ -23,6 +25,7 @@ data class Post(var content: String? = null,
         parcel?.writeString(parent_post_no)
         parcel?.writeString(title)
         parcel?.writeString(user_id)
+        parcel?.writeString(snapshotId)
     }
 
     override fun describeContents(): Int = 0

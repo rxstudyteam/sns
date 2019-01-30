@@ -76,7 +76,10 @@ object RemoteAppDataSource : AppDataSource {
                     val posts = mutableListOf<Post>()
                     for (snapshot in querySnapshot.documents) {
                         try {
+                            println("snapshot.id : ${snapshot.id}")
+
                             val item = snapshot.toObject(Post::class.java)
+                            item?.snapshotId = snapshot.id
                             // 팔로우한 유저만 구분.
                             if (item != null)
                                 posts.add(item)
@@ -94,5 +97,6 @@ object RemoteAppDataSource : AppDataSource {
 
     override fun modifyPost(post: Post) {
         val firestore = FirebaseFirestore.getInstance()
+        firestore.collection(POST_COLLECTION).document()
     }
 }
