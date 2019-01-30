@@ -13,14 +13,20 @@ class EditorViewModel : ViewModel() {
 
     private val fireStore: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
 
-    fun createPost(userId: String, content: String?, parent_post_no: String?, title: String?) {
-        val post = PostDTO(userId, parent_post_no, title, content, Timestamp.now().toDate())
-        fireStore.collection(PostConst.POST_COLLECTION).document().set(post)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Log.i(TAG, "success")
-                    // 생성된 document name 은 어떻게 가져오지?
+    var userId: String? = null
+
+    fun createPost(content: String?, parent_post_no: String?, title: String?) {
+        userId?.let {
+            val post = PostDTO(it, parent_post_no, title, content, Timestamp.now().toDate())
+            fireStore.collection(PostConst.POST_COLLECTION).document().set(post)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Log.i(TAG, "success")
+                        // 생성된 document name 은 어떻게 가져오지?
+                    }
                 }
-            }
+        }
     }
+
+
 }

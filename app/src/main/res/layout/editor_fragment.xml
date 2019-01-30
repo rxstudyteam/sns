@@ -8,6 +8,27 @@
         android:layout_height="match_parent"
         tools:context=".editor.EditorFragment">
 
+    <Spinner android:id="@+id/user_spinner"
+             app:layout_constraintTop_toTopOf="@id/editor_write_post_button"
+             app:layout_constraintBottom_toBottomOf="@id/editor_write_post_button"
+             app:layout_constraintStart_toStartOf="parent"
+             app:layout_constraintEnd_toStartOf="@id/editor_write_post_button"
+             android:layout_width="150dp"
+             android:layout_height="wrap_content"/>
+    <Button
+            android:id="@+id/editor_write_post_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="저장"
+
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toEndOf="@+id/user_spinner"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginBottom="8dp"
+    />
 
     <EditText
             android:id="@+id/title_edit_text"
@@ -46,13 +67,5 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
 
-    <Button
-            android:id="@+id/editor_write_post_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="저장" app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="8dp" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
-            android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent" android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/message"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
