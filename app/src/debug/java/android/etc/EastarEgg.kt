@@ -20,7 +20,6 @@ import io.reactivex.schedulers.Schedulers
 import smart.util.GalleryLoader
 
 @Suppress("FunctionName")
-@SuppressLint("CheckResult")
 class EastarEgg(var activity: Activity) {
     fun APPLICATION_DETAILS_SETTINGS() {
         try {

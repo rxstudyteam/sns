@@ -31,11 +31,17 @@ class PostRecyclerViewAdapter(private val mContext: Context): RecyclerView.Adapt
         item.tvTitle.text = posts[position].title
         item.tvContent.text = posts[position].content
         item.tvCreatedAt.text = posts[position].created_at?.toDate().toString()
+
+        item.tvComments.setOnClickListener {
+
+        }
     }
 
     fun addPosts(posts: List<Post>) {
         this.posts.addAll(posts)
         notifyDataSetChanged()
+
+        println("${this.posts.size}      ${posts.size}")
     }
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view)

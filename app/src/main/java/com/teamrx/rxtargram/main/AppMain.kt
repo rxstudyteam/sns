@@ -14,11 +14,14 @@ class AppMain : AppActivity() {
             when (item.itemId) {
                 R.id.navigation_home -> {
                     supportFragmentManager.beginTransaction()
-                        .replace(R.id.main_content, DetailViewFragment.getInstance())
+                        .replace(R.id.main_content, DetailViewFragment.newInstance())
                         .commit()
                     return@OnNavigationItemSelectedListener true
                 }
                 R.id.navigation_dashboard -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.main_content, BlankFragment())
+                        .commit()
                     return@OnNavigationItemSelectedListener true
                 }
                 R.id.navigation_notifications -> {

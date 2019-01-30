@@ -19,6 +19,7 @@ class DetailViewFragment : Fragment() {
 
     private lateinit var detailViewModel: DetailViewModel
     private lateinit var adapter: PostRecyclerViewAdapter
+    private lateinit var observer: Observer<List<Post>>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
             = inflater.inflate(R.layout.fragment_detail_view, container, false)
@@ -26,20 +27,19 @@ class DetailViewFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        // 컴포넌트 리스너
-        context?.let { adapter = PostRecyclerViewAdapter(it) }
+        adapter = PostRecyclerViewAdapter(requireContext())
         recyclerView.layoutManager = LinearLayoutManager(activity)
         recyclerView.adapter = adapter
-    }
 
-    override fun onResume() {
-        super.onResume()
+        if(!::observer.isInitialized) {
+            observer = Observer { posts ->
+                println("detail viewmodel observe..")
+                updateUI(posts)
+            }
+        }
 
-        // 활성화 되었을 때 데이터를 다시 로드 하기 위해 뷰모델 observe
         detailViewModel = getViewModel()
-        detailViewModel.getPosts().observe(this, Observer { posts ->
-            updateUI(posts)
-        })
+        detailViewModel.getPosts().observe(requireActivity(), observer)
     }
 
     private fun updateUI(posts: List<Post>) {
@@ -52,10 +52,7 @@ class DetailViewFragment : Fragment() {
     }
 
     companion object {
-        private var INSTANCE: DetailViewFragment? = null
-        fun getInstance() = INSTANCE ?: synchronized(DetailViewFragment::class.java) {
-            INSTANCE ?: DetailViewFragment().also { INSTANCE = it }
-        }
+        fun newInstance() = DetailViewFragment()
     }
 
 }
