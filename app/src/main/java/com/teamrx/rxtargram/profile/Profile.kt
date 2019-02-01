@@ -1,6 +1,7 @@
 package com.teamrx.rxtargram.profile
 
 import android.log.Log
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -19,15 +20,12 @@ import com.teamrx.rxtargram.inject.Injection
 class Profile : AppActivity() {
     private lateinit var bb: ProfileWriteBinding
     private lateinit var vm: ProfileViewModel
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         vm = ViewModelProviders.of(mActivity, Injection.provideViewModelFactory()).get(ProfileViewModel::class.java)
-
         val binding = DataBindingUtil.setContentView<ProfileWriteBinding>(mActivity, R.layout.profile_write)
         bb = binding.apply {
             profileViewModel = vm
-            profileImageViewModel = ViewModelProviders.of(mActivity).get(ProfileImageViewModel::class.java)
             setLifecycleOwner(mActivity)
         }
 
@@ -44,13 +42,11 @@ class Profile : AppActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.save -> {
-                saveProfile()
-                true
-            }
+        when (item.itemId) {
+            R.id.save -> saveProfile()
             else -> super.onOptionsItemSelected(item)
         }
+        return true
     }
 
     private fun saveProfile() {
@@ -64,12 +60,12 @@ class Profile : AppActivity() {
 fun ImageView.load(imageUrl: String?) {
     Log.e(imageUrl)
     Glide.with(this)
-        .setDefaultRequestOptions(RequestOptions().apply {
-            //            placeholder(R.drawable.ic_face_black_24dp)
-            error(R.drawable.test_00)
-        })
-//        .load(imageUrl)
-        .load(R.drawable.test_01)
-        .apply(RequestOptions.circleCropTransform())
-        .into(this)
+            .setDefaultRequestOptions(RequestOptions().apply {
+                //            placeholder(R.drawable.ic_face_black_24dp)
+                error(R.drawable.ic_face_black_24dp)
+            })
+            .load(imageUrl)
+//            .load(  "content://com.teamrx.rxtargram.provider/gloader/result_20190130_174417_8270220685296630039.jpg")
+            .apply(RequestOptions.circleCropTransform())
+            .into(this)
 }

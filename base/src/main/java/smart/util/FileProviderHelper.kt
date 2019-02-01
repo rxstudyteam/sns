@@ -38,9 +38,9 @@ object FileProviderHelper {
 
     private fun toFile(context: Context, uri: Uri?): File? {
         uri ?: return null
-        if (uri.scheme == "content") return null
-        if (uri.authority == context.packageName + PROVIDER) return null
-        if (!uri.path.isNullOrBlank()) return null
+        if (uri.scheme != "content") return null
+        if (uri.authority != context.packageName + PROVIDER) return null
+        if (uri.path.isNullOrBlank()) return null
 
         for (pair in arrayOf(GTEMP_FOLDER, GLOADER_FOLDER)) {
             val (name, folder) = pair
