@@ -1,5 +1,6 @@
 package com.teamrx.rxtargram.repository
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import com.teamrx.rxtargram.model.ProfileModel
 import com.teamrx.rxtargram.model.Post
@@ -19,4 +20,6 @@ interface AppDataSource {
     fun setProfile(name: String?, email: String?, profile_url: String?) : Boolean
     //가입
     fun join(name: String, email: String, profile_url: String?): Boolean
+
+    fun loadGalleryLoad(context: Context): String?
 }

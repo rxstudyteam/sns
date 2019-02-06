@@ -1,10 +1,15 @@
 package com.teamrx.rxtargram.repository
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.model.ProfileModel
 
 class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppDataSource {
+    override fun loadGalleryLoad(context: Context): String? {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun setProfile(name: String?, email: String?, profile_url: String?) = remoteAppDataSource.setProfile(name, email, profile_url)
 

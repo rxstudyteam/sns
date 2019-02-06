@@ -50,46 +50,46 @@ class EastarEgg(val activity: Activity) {
     fun GALLERY_LOADER_BY_CAMERA() {
         GalleryLoader.builder(activity)
 //                .setCrop(true, 100, 100)
-            .setSource(GalleryLoader.Source.CAMERA)
-            .setOnGalleryLoadedListener(this::showToast)
-            .setOnCancelListener { Log.toast(activity, "canceled") }
-            .load()
+                .setSource(GalleryLoader.Source.CAMERA)
+                .setOnGalleryLoadedListener(this::showToast)
+                .setOnCancelListener { Log.toast(activity, "canceled") }
+                .load()
     }
 
     fun GALLERY_LOADER_BY_GALLERY() {
         GalleryLoader.builder(activity)
 //                .setCrop(true, 100, 100)
-            .setSource(GalleryLoader.Source.GALLERY)
-            .setOnGalleryLoadedListener(this::showToast)
-            .setOnCancelListener { Log.toast(activity, "canceled") }
-            .load()
+                .setSource(GalleryLoader.Source.GALLERY)
+                .setOnGalleryLoadedListener(this::showToast)
+                .setOnCancelListener { Log.toast(activity, "canceled") }
+                .load()
     }
 
     fun GALLERY_LOADER_BY_CAMERA_CROP() {
         GalleryLoader.builder(activity)
-            .setCrop(true, 100, 100)
-            .setSource(GalleryLoader.Source.CAMERA)
-            .setOnGalleryLoadedListener(this::showToast)
-            .setOnCancelListener { Log.toast(activity, "canceled") }
-            .load()
+                .setCrop(true, 100, 100)
+                .setSource(GalleryLoader.Source.CAMERA)
+                .setOnGalleryLoadedListener(this::showToast)
+                .setOnCancelListener { Log.toast(activity, "canceled") }
+                .load()
     }
 
     fun GALLERY_LOADER_BY_GALLERY_CROP() {
         GalleryLoader.builder(activity)
-            .setCrop(true, 100, 100)
-            .setSource(GalleryLoader.Source.GALLERY)
-            .setOnGalleryLoadedListener(this::showToast)
-            .setOnCancelListener { Log.toast(activity, "canceled") }
-            .load()
+                .setCrop(true, 100, 100)
+                .setSource(GalleryLoader.Source.GALLERY)
+                .setOnGalleryLoadedListener(this::showToast)
+                .setOnCancelListener { Log.toast(activity, "canceled") }
+                .load()
     }
 
     fun GALLERY_LOADER_BY_SELECT_CROP() {
         GalleryLoader.builder(activity)
-            .setCrop(true, 100, 100)
+                .setCrop(true, 100, 100)
 //                .setSource(GalleryLoader.eSource.GALLERY)
-            .setOnGalleryLoadedListener(this::showToast)
-            .setOnCancelListener { Log.toast(activity, "canceled") }
-            .load()
+                .setOnGalleryLoadedListener(this::showToast)
+                .setOnCancelListener { Log.toast(activity, "canceled") }
+                .load()
     }
 
     fun PROFILE_WRITER() {
@@ -100,7 +100,7 @@ class EastarEgg(val activity: Activity) {
         Log.w(1)
         var result: ProfileModel? = null
         Log.w(2)
-        var job = CoroutineScope(Dispatchers.Main).launch {
+        CoroutineScope(Dispatchers.Main).launch {
             Log.e(3)
             result = getProfile2()
             Log.w(4, result)
@@ -111,43 +111,66 @@ class EastarEgg(val activity: Activity) {
     }
 
     suspend fun getProfile2(): ProfileModel? {
-        return suspendCancellableCoroutine<ProfileModel?> { cancellableContinuation: CancellableContinuation<ProfileModel?> ->
-            val task = FirebaseFirestore.getInstance().collection(RemoteAppDataSource.USER_COLLECTION).document("KxUypfZKf2cKmJs4jOeU").get()
+        return suspendCancellableCoroutine { cancellableContinuation: CancellableContinuation<ProfileModel?> ->
+            val task = FirebaseFirestore.getInstance()
+                    .collection(RemoteAppDataSource.USER_COLLECTION)
+                    .document("KxUypfZKf2cKmJs4jOeU")
+                    .get()
+
             task.addOnCompleteListener {
                 Log.e("addOnCompleteListener")
-                if (it.isComplete && it.isSuccessful && it.result?.exists()!!) else cancellableContinuation.resumeWithException(EmptyStackException())
+                if (it.isComplete && it.isSuccessful && it.result?.exists()!!)
+                    Log.i("addOnCompleteListener maybe success?")
+                else
+                    Log.w("addOnCompleteListener maybe fail?")
                 Log.w("addOnCompleteListener")
             }
+
             task.addOnSuccessListener {
-                Log.w("addOnCanceledListener")
+                Log.e("addOnSuccessListener")
                 cancellableContinuation.resume(it.toObject(ProfileModel::class.java)!!)
+                Log.w("addOnSuccessListener", "cancellableContinuation.resume(it.toObject(ProfileModel::class.java)!!)")
             }
             task.addOnCanceledListener {
                 Log.e("addOnCanceledListener")
                 cancellableContinuation.cancel(EmptyStackException())
+                Log.w("addOnCanceledListener", "cancellableContinuation.cancel(EmptyStackException())")
             }
             task.addOnFailureListener {
                 Log.e("addOnFailureListener")
                 cancellableContinuation.resumeWithException(it)
+                Log.w("addOnFailureListener", "cancellableContinuation.resumeWithException(it)")
             }
             cancellableContinuation.invokeOnCancellation {
-                Log.e("invokeOnCancellation")
+                Log.e("cancellableContinuation.invokeOnCancellation")
             }
+//                cancellableContinuation.resumeWithException(EmptyStackException())
         }
     }
 
+    //W/EastarEgg.CoroutineFirestore.......................(EastarEgg.kt:100): ``1
+    //W/EastarEgg.CoroutineFirestore.......................(EastarEgg.kt:102): ``2
+    //E/EastarEgg.CoroutineFirestore.......................(EastarEgg.kt:109): ``5,null
+    //W/EastarEgg.CoroutineFirestore.......................(EastarEgg.kt:110): ``6
+    //E/EastarEgg_CoroutineFirestore_job_1.invokeSuspend...(EastarEgg.kt:104): ``3
+    //E/EastarEgg_getProfile2_2_1.onComplete...............(EastarEgg.kt:121): ``addOnCompleteListener
+    //I/EastarEgg_getProfile2_2_1.onComplete...............(EastarEgg.kt:123): ``addOnCompleteListener maybe success?
+    //W/EastarEgg_getProfile2_2_1.onComplete...............(EastarEgg.kt:126): ``addOnCompleteListener
+    //E/EastarEgg_getProfile2_2_2.onSuccess................(EastarEgg.kt:130): ``addOnSuccessListener
+    //W/EastarEgg_getProfile2_2_2.onSuccess................(EastarEgg.kt:132): ``addOnSuccessListener,cancellableContinuation.resume(it.toObject(ProfileModel::class.java)!!)
+    //W/EastarEgg_CoroutineFirestore_job_1.invokeSuspend...(EastarEgg.kt:106): ``4,ProfileModel(user_id=KxUypfZKf2cKmJs4jOeU, name=eastar Jeong, email=eastarj@gmail.com, profile_url=https://firebasestorage.googleapis.com/v0/b/rxteam-sns.appspot.com/o/profile%2Favatar.png?alt=media&token=5d68ae9e-34e4-4b7c-a32d-32577ce944af)
     private fun showToast(uri: Uri) {
         Log.toast(activity, uri.toString())
         Observable.fromFuture(Glide.with(activity).asBitmap().load(uri).submit())
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { bitmap ->
-                Toast(activity).apply {
-                    val iv = ImageView(activity)
-                    iv.setImageBitmap(bitmap)
-                    view = iv
-                    show()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { bitmap ->
+                    Toast(activity).apply {
+                        val iv = ImageView(activity)
+                        iv.setImageBitmap(bitmap)
+                        view = iv
+                        show()
+                    }
                 }
-            }
     }
 }

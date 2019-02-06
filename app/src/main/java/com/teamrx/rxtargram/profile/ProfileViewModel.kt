@@ -8,8 +8,6 @@ import androidx.lifecycle.ViewModel
 import com.teamrx.rxtargram.model.ProfileModel
 import com.teamrx.rxtargram.repository.AppDataSource
 import smart.base.PP
-import smart.util.GalleryLoader
-import smart.util.dp
 
 class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
     lateinit var profileModel: MutableLiveData<ProfileModel>
@@ -47,14 +45,9 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
     fun getTitle() = if (PP.user_id.get().isNullOrBlank()) "회원가입" else "프로필"
     fun getUserImage(view: View) {
         Log.e("getUserImage")
+        val profile_url: String? = dataSource.loadGalleryLoad(view.context)
 
-        GalleryLoader.builder(view.context)
-            .setCrop(true, 100.dp, 100.dp)
-//                .setSource(GalleryLoader.eSource.GALLERY)
-            .setOnGalleryLoadedListener {
-                profileModel.value = profileModel.value?.copy(profile_url = it.toString()) ?: ProfileModel(profile_url = it.toString())
-            }
-            .setOnCancelListener { Log.toast(view.context, "canceled") }
-            .load()
+        profile_url ?: return
+        profileModel.value = profileModel.value?.copy(profile_url = profile_url) ?: ProfileModel(profile_url = profile_url)
     }
 }

@@ -1,5 +1,6 @@
 package com.teamrx.rxtargram.repository
 
+import android.content.Context
 import android.log.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -136,4 +137,9 @@ object RemoteAppDataSource : AppDataSource {
 
         return postLiveData
     }
+
+    override fun loadGalleryLoad(context: Context): String? {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 }
