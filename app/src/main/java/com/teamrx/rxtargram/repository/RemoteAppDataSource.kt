@@ -4,15 +4,12 @@ import android.content.Context
 import android.log.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.model.ProfileModel
 import kotlinx.coroutines.suspendCancellableCoroutine
-import smart.base.PP
 import smart.util.GalleryLoader
 import smart.util.dp
 import java.io.InputStream
@@ -38,7 +35,7 @@ object RemoteAppDataSource : AppDataSource {
         const val CREATED_AT = "created_at"
     }
 
-    override fun getProfile(user_id: String): ProfileModel? = try {
+    override fun getProfile(user_id: String): ProfileModel = try {
         Executors.newSingleThreadExecutor().submit<ProfileModel> {
             val db = FirebaseFirestore.getInstance()
             var task = db.collection(USER_COLLECTION).document(user_id).get()
@@ -47,63 +44,91 @@ object RemoteAppDataSource : AppDataSource {
             if (document.exists())
                 document.toObject(ProfileModel::class.java)
             else
-                null
+                ProfileModel()
         }.get(5, TimeUnit.SECONDS)
     } catch (e: Exception) {
-        null
+        ProfileModel()
     }
 
-    override fun setProfile(name: String?, email: String?, profile_url: String?): Boolean {
-        val userId = PP.user_id.get()
-        if (userId.isNullOrEmpty())
-            throw IllegalArgumentException("PP.user_id.get() is empty")
+    override suspend fun setProfile(userId: String, name: CharSequence?, email: CharSequence?, profile_url: String?): Boolean {
+        return suspendCancellableCoroutine { continuation ->
+            //            val userId = PP.user_id.get()
+//            if (userId.isNullOrEmpty())
+//                throw IllegalArgumentException("PP.user_id.get() is empty")
 
-        val db = FirebaseFirestore.getInstance()
-        val ref = db.collection(USER_COLLECTION).document(userId)
-        val map = hashMapOf<String, Any>()
-        name?.let { map[USER_DOCUMENT.NAME] = name }
-        email?.let { map[USER_DOCUMENT.EMAIL] = email }
-        profile_url?.let { map[USER_DOCUMENT.PROFILE_URL] = profile_url }
-        val task = ref.update(map as Map<String, Any>)
-        task.addOnCompleteListener {
-            Log.d("addOnCompleteListener")
-        }.addOnSuccessListener {
-            Log.d("addOnSuccessListener")
-        }.addOnFailureListener {
-            Log.d("addOnFailureListener")
-        }
-        task.await()
-        return true
-    }
-
-    override fun join(name: String, email: String, profile_url: String?): Boolean {
-        val db = FirebaseFirestore.getInstance()
-        val ref = db.collection(USER_COLLECTION)
-        val task = ref.add(mapOf(USER_DOCUMENT.NAME to name
-                , USER_DOCUMENT.EMAIL to email
-                , USER_DOCUMENT.PROFILE_URL to profile_url))
-        task.addOnCompleteListener {
-            Log.d("addOnCompleteListener")
-        }.addOnSuccessListener {
-            Log.d("addOnSuccessListener")
-        }.addOnFailureListener {
-            Log.d("addOnFailureListener")
-        }
-        val result: DocumentReference? = task.await()
-        result?.id?.let { PP.user_id.set(it) }
-
-        Log.e(PP.user_id.get(), "회원가입이 완료됨")
-        return true
-    }
-
-    fun <T : Any?> Task<T>.await(sec: Long = 5): T? =
-            try {
-                Executors.newSingleThreadExecutor().submit<T> {
-                    Tasks.await(this, sec, TimeUnit.SECONDS)
-                }.get(sec, TimeUnit.SECONDS)
-            } catch (e: Exception) {
-                null
+            val db = FirebaseFirestore.getInstance()
+            val ref = db.collection(USER_COLLECTION).document(userId)
+            val map = hashMapOf<String, Any>()
+            name?.let { map[USER_DOCUMENT.NAME] = name }
+            email?.let { map[USER_DOCUMENT.EMAIL] = email }
+            profile_url?.let { map[USER_DOCUMENT.PROFILE_URL] = profile_url }
+            val task = ref.update(map as Map<String, Any>)
+            task.addOnCompleteListener {
+                Log.e("addOnCompleteListener")
+                if (it.isComplete && it.isSuccessful)
+                    Log.i("addOnCompleteListener maybe success?")
+                else
+                    Log.w("addOnCompleteListener maybe fail?")
+                Log.w("addOnCompleteListener")
             }
+
+            task.addOnSuccessListener {
+                Log.e("addOnSuccessListener")
+                continuation.resume(true)
+                Log.w("addOnSuccessListener")
+            }
+            task.addOnCanceledListener {
+                Log.e("addOnCanceledListener")
+                continuation.cancel()
+                Log.w("addOnCanceledListener")
+            }
+            task.addOnFailureListener {
+                Log.e("addOnFailureListener")
+                continuation.resumeWithException(it)
+                Log.w("addOnFailureListener", "continuation.resumeWithException(it)")
+            }
+            continuation.invokeOnCancellation {
+                Log.e("continuation.invokeOnCancellation")
+                continuation.cancel()
+            }
+        }
+    }
+
+    override suspend fun join(name: CharSequence, email: CharSequence): String {
+        return suspendCancellableCoroutine { continuation ->
+            val db = FirebaseFirestore.getInstance()
+            val ref = db.collection(USER_COLLECTION)
+            val task = ref.add(hashMapOf<String, Any>(USER_DOCUMENT.NAME to name.toString(), USER_DOCUMENT.EMAIL to email.toString()))
+            task.addOnCompleteListener {
+                Log.e("addOnCompleteListener")
+                if (it.isComplete && it.isSuccessful)
+                    Log.i("addOnCompleteListener maybe success?")
+                else
+                    Log.w("addOnCompleteListener maybe fail?")
+                Log.w("addOnCompleteListener")
+            }
+
+            task.addOnSuccessListener {
+                Log.e("addOnSuccessListener")
+                continuation.resume(it.id)
+                Log.w("addOnSuccessListener", it.id)
+            }
+            task.addOnCanceledListener {
+                Log.e("addOnCanceledListener")
+                continuation.cancel()
+                Log.w("addOnCanceledListener")
+            }
+            task.addOnFailureListener {
+                Log.e("addOnFailureListener")
+                continuation.resumeWithException(it)
+                Log.w("addOnFailureListener")
+            }
+            continuation.invokeOnCancellation {
+                Log.e("continuation.invokeOnCancellation")
+                continuation.cancel()
+            }
+        }
+    }
 
 //    override fun join(name: String, email: String, imageUrl: String?): Boolean {
 //        FirebaseFirestore.getInstance().collection(USER_COLLECTION)
@@ -158,7 +183,7 @@ object RemoteAppDataSource : AppDataSource {
                         }
                         .setOnCancelListener {
                             Log.e("continuation.setOnCancelListener")
-                            continuation.cancel(EmptyStackException())
+                            continuation.cancel()
                             Log.w("continuation.setOnCancelListener")
                         }
                         .load()
@@ -172,12 +197,13 @@ object RemoteAppDataSource : AppDataSource {
         }
     }
 
-    override suspend fun uploadToFireStorage(context: Context, user_id: String, stream: InputStream): String? {
+    override suspend fun uploadToFireStorage(user_id: String, stream: InputStream): String? {
         return suspendCancellableCoroutine { continuation ->
-            val task = FirebaseStorage.getInstance()
+            var ref = FirebaseStorage.getInstance()
                     .reference
-                    .child("profile/${user_id}.jpg")
-                    .putStream(stream)
+                    .child("profile/${user_id}")
+
+            val task = ref.putStream(stream)
 
             task.addOnCompleteListener {
                 Log.e("addOnCompleteListener")
@@ -187,31 +213,29 @@ object RemoteAppDataSource : AppDataSource {
                     Log.w("addOnCompleteListener maybe fail?")
                 Log.w("addOnCompleteListener")
             }
-
             task.addOnSuccessListener {
-                Log.e("addOnSuccessListener", it.uploadSessionUri)
-                continuation.resume(it.uploadSessionUri.toString())
-                Log.w("addOnSuccessListener", "continuation.resume(it.toObject(ProfileModel::class.java)!!)")
+                Log.e("addOnSuccessListener1")
+                ref.downloadUrl.addOnSuccessListener {
+                    Log.e("addOnSuccessListener2")
+                    continuation.resume(it.toString())
+                    Log.w("addOnSuccessListener2", it.toString())
+                }
+                Log.w("addOnSuccessListener1")
             }
             task.addOnCanceledListener {
                 Log.e("addOnCanceledListener")
                 continuation.cancel(EmptyStackException())
-                Log.w("addOnCanceledListener", "continuation.cancel(EmptyStackException())")
+                Log.w("addOnCanceledListener")
             }
             task.addOnFailureListener {
                 Log.e("addOnFailureListener")
                 continuation.resumeWithException(it)
-                Log.w("addOnFailureListener", "continuation.resumeWithException(it)")
+                Log.w("addOnFailureListener")
             }
-            continuation.invokeOnCancellation {
-                Log.e("continuation.invokeOnCancellation")
-            }
-//                continuation.resumeWithException(EmptyStackException())
             continuation.invokeOnCancellation {
                 Log.e("continuation.invokeOnCancellation")
                 continuation.resumeWithException(EmptyStackException())
             }
         }
     }
-
 }

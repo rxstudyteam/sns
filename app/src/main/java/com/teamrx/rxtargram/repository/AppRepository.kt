@@ -14,16 +14,12 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppD
                 ?: synchronized(AppRepository::class.java) {
                     INSTANCE ?: AppRepository(remoteDataSource).also { INSTANCE = it }
                 }
+
+        private const val DEFAULT_PROFILE_URL = "https://firebasestorage.googleapis.com/v0/b/rxteam-sns.appspot.com/o/profile%2Funnamed.png?alt=media&token=bd08fa0e-84b4-438c-8f25-c7014075bf6e"
     }
 
-    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
-    override fun setProfile(name: String?, email: String?, profile_url: String?) = remoteAppDataSource.setProfile(name, email, profile_url)
-
-    override fun join(name: String, email: String, profile_url: String?) = remoteAppDataSource.join(name, email, profile_url)
-    override fun getProfile(user_id: String): ProfileModel? {
-        return remoteAppDataSource.getProfile(user_id)?.apply {
-            profile_url = "content//com.teamrx.rxtargram.provider/gloader/result_20190130_174417_8270220685296630039.jpg"
-        }
+    override fun getProfile(user_id: String): ProfileModel {
+        return remoteAppDataSource.getProfile(user_id).apply { profile_url = profile_url ?: DEFAULT_PROFILE_URL }
     }
 
     override fun getPosts(): LiveData<List<Post>> {
@@ -34,8 +30,16 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppD
         return remoteAppDataSource.loadGalleryLoad(context)
     }
 
-    override suspend fun uploadToFireStorage(context: Context, user_id: String, stream: InputStream): String? {
-        return remoteAppDataSource.uploadToFireStorage(context, user_id, stream)
+    override suspend fun uploadToFireStorage(user_id: String, stream: InputStream): String? {
+        return remoteAppDataSource.uploadToFireStorage(user_id, stream)
+    }
+
+    override suspend fun setProfile(user_id: String, name: CharSequence?, email: CharSequence?, profile_url: String?): Boolean {
+        return remoteAppDataSource.setProfile(user_id, name, email, profile_url)
+    }
+
+    override suspend fun join(name: CharSequence, email: CharSequence): String {
+        return remoteAppDataSource.join(name, email)
     }
 
 }

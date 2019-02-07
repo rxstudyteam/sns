@@ -98,8 +98,11 @@ object FileProviderHelper {
     }
 
     fun deleteTempFolder(context: Context) {
-        val source = createFolder(context, GTEMP_FOLDER.second)
-        val target = File(getRootFolder(context), System.nanoTime().toString())
+        val source = File(getRootFolder(context), GTEMP_FOLDER.second)
+        if (!source.exists()) return
+//        val source = createFolder(context, GTEMP_FOLDER.second)
+        val target = File.createTempFile("delete_", "", getRootFolder(context))
+//        createTempFile(getRootFolder(context), System.nanoTime().toString())
 
         if (source.renameTo(target)) {
             deleteRecursive(target)

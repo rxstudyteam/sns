@@ -1,10 +1,8 @@
 package com.teamrx.rxtargram.profile
 
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import android.log.Log
 import android.view.View
-import android.widget.ImageView
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,126 +12,75 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import smart.base.PP
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.InputStream
 
 class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
     lateinit var profileModel: MutableLiveData<ProfileModel>
+    private lateinit var keepProfile: ProfileModel
+
     fun getProfile(): LiveData<ProfileModel> {
         Log.e(1)
         if (!::profileModel.isInitialized) {
             Log.e(2)
             profileModel = MutableLiveData()
-            val userId = PP.user_id.get("")!!
-            profileModel.value = dataSource.getProfile(userId)
+            val userId = PP.user_id.get()!!
+            keepProfile = dataSource.getProfile(userId)
+            Log.w(3, keepProfile)
+            profileModel.value = keepProfile
+            Log.w(2, profileModel.value)
         }
-        Log.e(profileModel.value)
+        Log.w(1, profileModel.value)
         return profileModel
     }
 
-    fun saveProfile(name: String?, email: String?, imageUrl: String?): Boolean {
+    fun saveProfile(name: CharSequence, email: CharSequence, img: Bitmap?) {
         val userId = PP.user_id.get()
-        return if (userId.isNullOrEmpty()) {
-            Log.w("join")
-            try {
-                dataSource.join(name!!, email!!, imageUrl)
-            } catch (e: Exception) {
-                false
-            }
-        } else {
-            Log.w("update")
-            try {
-                dataSource.setProfile(name, email, imageUrl)
-            } catch (e: Exception) {
-                false
-            }
+        if (userId.isNullOrEmpty()) {
+            join(name, email, img)
+//        } else {
+//            setProfile(name, email, img)
         }
     }
 
-    fun imageView2bitmap(imageView: ImageView): ByteArray? {
-        // Get the data from an ImageView as bytes
-        imageView.isDrawingCacheEnabled = true
-        imageView.buildDrawingCache()
-        val bitmap = (imageView.drawable as BitmapDrawable).bitmap
-        val baos = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-        val data = baos.toByteArray()
-        return data
+    private fun join(name: CharSequence, email: CharSequence, img: Bitmap?) {
+        Log.e(0, "join", name, email, img)
+        CoroutineScope(Dispatchers.Main).launch {
+            Log.e(1)
+            val user_id = dataSource.join(name, email)
+            Log.w(1, user_id)
+
+            Log.e(2)
+            var url = dataSource.uploadToFireStorage(user_id, img?.toStream()!!)
+            Log.w(2, user_id)
+
+            dataSource.setProfile(user_id, null, null, url)
+
+        }
+        Log.w(99, "join", name, email, img)
     }
+
+//    private fun setProfile(name: CharSequence, email: CharSequence, image_url: Bitmap?) {
+//        val imageUrl = ""
+//        Log.w("update")
+//        dataSource.setProfile(name, email, img.toStream()!!)
+//    }
 
     fun getTitle() = if (PP.user_id.get().isNullOrBlank()) "회원가입" else "프로필"
 
     fun getUserImage(view: View) {
-        Log.e(0, "getUserImage")
         CoroutineScope(Dispatchers.Main).launch {
-            Log.e(1, "getUserImage")
             val context = view.context
-            Log.e(2, "getUserImage")
             var profile_url = dataSource.loadGalleryLoad(context)
-            Log.w(2, "getUserImage")
-//            Log.e(3, "getUserImage")
-//            profile_url = dataSource.uploadToFireStorage(context, profile_url)
-//            Log.w(3, "getUserImage")
-            profile_url?.run {
-                Log.e(4, "getUserImage")
-                profileModel.value = profileModel.value?.copy(profile_url = profile_url) ?: ProfileModel(profile_url = profile_url)
-                Log.w(4, "getUserImage")
-            }
-            Log.w(1, "getUserImage")
+            profile_url?.run { profileModel.value = profileModel.value?.copy(profile_url = profile_url) ?: ProfileModel(profile_url = profile_url) }
         }
-        Log.w(99, "getUserImage")
     }
 }
-/*
 
-    fun CoroutineFirestore() {
-        Log.w(1)
-        var result: ProfileModel? = null
-        Log.w(2)
-        CoroutineScope(Dispatchers.Main).launch {
-            Log.e(3)
-            result = getProfile2()
-            Log.w(4, result)
-        }
-
-        Log.e(5, result)
-        Log.w(6)
-    }
-
-    suspend fun getProfile2(): ProfileModel? {
-        return suspendCancellableCoroutine { cancellableContinuation: CancellableContinuation<ProfileModel?> ->
-            val task = FirebaseFirestore.getInstance()
-                    .collection(RemoteAppDataSource.USER_COLLECTION)
-                    .document("KxUypfZKf2cKmJs4jOeU")
-                    .get()
-
-            task.addOnCompleteListener {
-                Log.e("addOnCompleteListener")
-                if (it.isComplete && it.isSuccessful && it.result?.exists()!!)
-                    Log.i("addOnCompleteListener maybe success?")
-                else
-                    Log.w("addOnCompleteListener maybe fail?")
-                Log.w("addOnCompleteListener")
-            }
-
-            task.addOnSuccessListener {
-                Log.e("addOnSuccessListener")
-                cancellableContinuation.resume(it.toObject(ProfileModel::class.java)!!)
-                Log.w("addOnSuccessListener", "cancellableContinuation.resume(it.toObject(ProfileModel::class.java)!!)")
-            }
-            task.addOnCanceledListener {
-                Log.e("addOnCanceledListener")
-                cancellableContinuation.cancel(EmptyStackException())
-                Log.w("addOnCanceledListener", "cancellableContinuation.cancel(EmptyStackException())")
-            }
-            task.addOnFailureListener {
-                Log.e("addOnFailureListener")
-                cancellableContinuation.resumeWithException(it)
-                Log.w("addOnFailureListener", "cancellableContinuation.resumeWithException(it)")
-            }
-            cancellableContinuation.invokeOnCancellation {
-                Log.e("cancellableContinuation.invokeOnCancellation")
-            }
-//                cancellableContinuation.resumeWithException(EmptyStackException())
-        }
-    }
- */
+private fun Bitmap.toStream(): InputStream {
+    val bos = ByteArrayOutputStream()
+    compress(Bitmap.CompressFormat.JPEG, 100, bos)
+    val bytes = bos.toByteArray()
+    return ByteArrayInputStream(bytes)
+}

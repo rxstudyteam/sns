@@ -74,14 +74,14 @@ class GalleryLoader : AppCompatActivity() {
             Source.CAMERA -> startCamera()
             else -> {
                 AlertDialog.Builder(this@GalleryLoader)
-                    .setTitle("Select from?")
-                    .setItems(R.array.camera_or_gallery) { _, position ->
-                        intent?.putExtra(EXTRA.SOURCE, Source.values()[position])
-                        load()
-                    }
-                    .setOnCancelListener { finish() }
-                    .show()
-                    .setCanceledOnTouchOutside(false)
+                        .setTitle("Select from?")
+                        .setItems(R.array.camera_or_gallery) { _, position ->
+                            intent?.putExtra(EXTRA.SOURCE, Source.values()[position])
+                            load()
+                        }
+                        .setOnCancelListener { finish() }
+                        .show()
+                        .setCanceledOnTouchOutside(false)
             }
         }
     }
@@ -181,7 +181,8 @@ class GalleryLoader : AppCompatActivity() {
         }
     }
 
-    private fun fire(data: Any?) {
+    private fun fire(data: Uri?) {
+        Log.p(if (data == null) Log.WARN else Log.INFO, data ?: Uri.EMPTY)
         GalleryLoaderObserver.notifyObservers(data)
         FileProviderHelper.deleteTempFolder(this)
         finish()
@@ -206,9 +207,9 @@ class GalleryLoader : AppCompatActivity() {
 
         @JvmOverloads
         fun setCrop(
-            isCrop: Boolean,
-            width: Int = context.resources.displayMetrics.widthPixels,
-            height: Int = context.resources.displayMetrics.heightPixels
+                isCrop: Boolean,
+                width: Int = context.resources.displayMetrics.widthPixels,
+                height: Int = context.resources.displayMetrics.heightPixels
         ): Builder {
             this@Builder.isCrop = isCrop
             this@Builder.width = width
@@ -226,13 +227,13 @@ class GalleryLoader : AppCompatActivity() {
                 if (arg is Uri) mOnGalleryLoadedListener?.invoke(arg)
                 else mOnCancelListener?.invoke()
             })
-            val intent = Intent(context, GalleryLoader::class.java).apply {
+
+            Intent(context, GalleryLoader::class.java).apply {
                 putExtra(GalleryLoader.EXTRA.CROP, isCrop && !android.os.Build.MODEL.contains("Android SDK"))
                 putExtra(GalleryLoader.EXTRA.CROP_WIDTH, width)
                 putExtra(GalleryLoader.EXTRA.CROP_HEIGHT, height)
                 putExtra(GalleryLoader.EXTRA.SOURCE, mSource)
-            }
-            context.startActivity(intent)
+            }.also { context.startActivity(it) }
         }
     }
 }
