@@ -1,9 +1,5 @@
 package com.teamrx.rxtargram
 
-import android.log.Log
-import com.teamrx.rxtargram.repository.RemoteAppDataSource
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -17,17 +13,4 @@ class ExampleUnitTest {
     fun addition_isCorrect() {
         assertEquals(4, 2 + 2)
     }
-
-    @Test
-    fun coroutineScope() {
-        Log.MODE = Log.eMODE.SYSTEMOUT
-        runBlocking {
-            val job = launch {
-                Log.e("01_job")
-            }
-            Log.e("00_start")
-        }
-        Log.e("99_end")
-    }
-
 }

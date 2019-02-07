@@ -24,6 +24,18 @@ import java.util.*
  *  .setOnGalleryLoadedListener(this::showToast)
  *  .setOnCancelListener { Log.toast(activity, "canceled") }
  *  .load()
+ *
+ * <style name="GalleryLoaderTheme" parent="Theme.AppCompat.Light.NoActionBar">
+ *     <item name="android:windowIsTranslucent">true</item>
+ *     <item name="android:windowBackground">@android:color/transparent</item>
+ *     <item name="android:windowContentOverlay">@null</item>
+ *     <item name="android:windowIsFloating">false</item>
+ *     <item name="android:backgroundDimEnabled">false</item>
+ *     <item name="android:windowNoTitle">true</item>
+ *     <item name="windowNoTitle">true</item>
+ *     <item name="windowActionBar">false</item>
+ *     <item name="android:windowAnimationStyle">@null</item>
+ * </style>
  *```
  */
 class GalleryLoader : AppCompatActivity() {
@@ -93,7 +105,7 @@ class GalleryLoader : AppCompatActivity() {
     fun startCamera() {
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
             takePictureIntent.resolveActivity(packageManager)?.also {
-                val photoURI: Uri = FileProviderHelper.getTempUri(this@GalleryLoader, "camera", ".jpg")
+                val photoURI: Uri = FileProviderHelper.createTempUri(this@GalleryLoader, "camera", ".jpg")
                 mTragetUri = photoURI
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
                 startActivityForResult(takePictureIntent, REQ_CAMERA)
@@ -104,7 +116,7 @@ class GalleryLoader : AppCompatActivity() {
     private var mTragetUri: Uri? = null
     @Suppress("MemberVisibilityCanBePrivate")
     fun startCrop(sourceUri: Uri, w: Int, h: Int) {
-        val targetUri = FileProviderHelper.getTempUri(this@GalleryLoader, "crop", ".jpg")
+        val targetUri = FileProviderHelper.createTempUri(this@GalleryLoader, "crop", ".jpg")
         val intent = Intent("com.android.camera.action.CROP").apply {
             setDataAndType(sourceUri, "image/*")
             putExtra("crop", "true")
@@ -171,12 +183,8 @@ class GalleryLoader : AppCompatActivity() {
 
     private fun fire(data: Any?) {
         GalleryLoaderObserver.notifyObservers(data)
-        deleteTempFiles()
+        FileProviderHelper.deleteTempFolder(this)
         finish()
-    }
-
-    private fun deleteTempFiles() {
-        FileProviderHelper.deleteTemp(this)
     }
 
     class Builder internal constructor(private val context: Context) {

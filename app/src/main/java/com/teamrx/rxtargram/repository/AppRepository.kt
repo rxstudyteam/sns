@@ -4,10 +4,16 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.model.ProfileModel
+import java.io.InputStream
 
 class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppDataSource {
-    override fun loadGalleryLoad(context: Context): String? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
+    companion object {
+        private var INSTANCE: AppRepository? = null
+        fun getInstance(remoteDataSource: RemoteAppDataSource) = INSTANCE
+                ?: synchronized(AppRepository::class.java) {
+                    INSTANCE ?: AppRepository(remoteDataSource).also { INSTANCE = it }
+                }
     }
 
     @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
@@ -24,11 +30,12 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppD
         return remoteAppDataSource.getPosts()
     }
 
-    companion object {
-        private var INSTANCE: AppRepository? = null
-        fun getInstance(remoteDataSource: RemoteAppDataSource) = INSTANCE
-                ?: synchronized(AppRepository::class.java) {
-                    INSTANCE ?: AppRepository(remoteDataSource).also { INSTANCE = it }
-                }
+    override suspend fun loadGalleryLoad(context: Context): String? {
+        return remoteAppDataSource.loadGalleryLoad(context)
     }
+
+    override suspend fun uploadToFireStorage(context: Context, user_id: String, stream: InputStream): String? {
+        return remoteAppDataSource.uploadToFireStorage(context, user_id, stream)
+    }
+
 }

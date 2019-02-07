@@ -8,11 +8,19 @@ import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.model.ProfileModel
+import kotlinx.coroutines.suspendCancellableCoroutine
 import smart.base.PP
+import smart.util.GalleryLoader
+import smart.util.dp
+import java.io.InputStream
+import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 @Suppress("ClassName")
 object RemoteAppDataSource : AppDataSource {
@@ -138,8 +146,72 @@ object RemoteAppDataSource : AppDataSource {
         return postLiveData
     }
 
-    override fun loadGalleryLoad(context: Context): String? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override suspend fun loadGalleryLoad(context: Context): String? {
+        return suspendCancellableCoroutine { continuation ->
+            try {
+                GalleryLoader.builder(context)
+                        .setCrop(true, 100.dp, 100.dp)
+                        .setOnGalleryLoadedListener { uri ->
+                            Log.e("continuation.setOnGalleryLoadedListener", uri)
+                            continuation.resume(uri.toString())
+                            Log.w("continuation.setOnGalleryLoadedListener")
+                        }
+                        .setOnCancelListener {
+                            Log.e("continuation.setOnCancelListener")
+                            continuation.cancel(EmptyStackException())
+                            Log.w("continuation.setOnCancelListener")
+                        }
+                        .load()
+            } catch (e: Exception) {
+                continuation.resumeWithException(e)
+            }
+            continuation.invokeOnCancellation {
+                Log.e("continuation.invokeOnCancellation")
+                continuation.resumeWithException(EmptyStackException())
+            }
+        }
+    }
+
+    override suspend fun uploadToFireStorage(context: Context, user_id: String, stream: InputStream): String? {
+        return suspendCancellableCoroutine { continuation ->
+            val task = FirebaseStorage.getInstance()
+                    .reference
+                    .child("profile/${user_id}.jpg")
+                    .putStream(stream)
+
+            task.addOnCompleteListener {
+                Log.e("addOnCompleteListener")
+                if (it.isComplete && it.isSuccessful)
+                    Log.i("addOnCompleteListener maybe success?")
+                else
+                    Log.w("addOnCompleteListener maybe fail?")
+                Log.w("addOnCompleteListener")
+            }
+
+            task.addOnSuccessListener {
+                Log.e("addOnSuccessListener", it.uploadSessionUri)
+                continuation.resume(it.uploadSessionUri.toString())
+                Log.w("addOnSuccessListener", "continuation.resume(it.toObject(ProfileModel::class.java)!!)")
+            }
+            task.addOnCanceledListener {
+                Log.e("addOnCanceledListener")
+                continuation.cancel(EmptyStackException())
+                Log.w("addOnCanceledListener", "continuation.cancel(EmptyStackException())")
+            }
+            task.addOnFailureListener {
+                Log.e("addOnFailureListener")
+                continuation.resumeWithException(it)
+                Log.w("addOnFailureListener", "continuation.resumeWithException(it)")
+            }
+            continuation.invokeOnCancellation {
+                Log.e("continuation.invokeOnCancellation")
+            }
+//                continuation.resumeWithException(EmptyStackException())
+            continuation.invokeOnCancellation {
+                Log.e("continuation.invokeOnCancellation")
+                continuation.resumeWithException(EmptyStackException())
+            }
+        }
     }
 
 }

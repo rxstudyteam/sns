@@ -1,7 +1,6 @@
 package com.teamrx.rxtargram.profile
 
 import android.log.Log
-import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -56,7 +55,7 @@ class Profile : AppActivity() {
     }
 }
 
-@BindingAdapter("bind:load")
+@BindingAdapter("load")
 fun ImageView.load(imageUrl: String?) {
     Log.e(imageUrl)
     Glide.with(this)

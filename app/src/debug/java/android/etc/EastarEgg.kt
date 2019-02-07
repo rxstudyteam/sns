@@ -96,6 +96,18 @@ class EastarEgg(val activity: Activity) {
         activity.startActivity(Intent(activity, Profile::class.java))
     }
 
+    fun CoroutineFirestore2() {
+        Log.w(1)
+        runBlocking {
+            Log.w(2)
+            Log.e(3)
+            var result = getProfile2()
+            Log.w(4, result)
+            Log.e(5, "to do your work")
+        }
+        Log.w(6)
+    }
+
     fun CoroutineFirestore() {
         Log.w(1)
         var result: ProfileModel? = null
@@ -111,7 +123,7 @@ class EastarEgg(val activity: Activity) {
     }
 
     suspend fun getProfile2(): ProfileModel? {
-        return suspendCancellableCoroutine { cancellableContinuation: CancellableContinuation<ProfileModel?> ->
+        return suspendCancellableCoroutine { continuation ->
             val task = FirebaseFirestore.getInstance()
                     .collection(RemoteAppDataSource.USER_COLLECTION)
                     .document("KxUypfZKf2cKmJs4jOeU")
@@ -128,23 +140,23 @@ class EastarEgg(val activity: Activity) {
 
             task.addOnSuccessListener {
                 Log.e("addOnSuccessListener")
-                cancellableContinuation.resume(it.toObject(ProfileModel::class.java)!!)
-                Log.w("addOnSuccessListener", "cancellableContinuation.resume(it.toObject(ProfileModel::class.java)!!)")
+                continuation.resume(it.toObject(ProfileModel::class.java)!!)
+                Log.w("addOnSuccessListener", "continuation.resume(it.toObject(ProfileModel::class.java)!!)")
             }
             task.addOnCanceledListener {
                 Log.e("addOnCanceledListener")
-                cancellableContinuation.cancel(EmptyStackException())
-                Log.w("addOnCanceledListener", "cancellableContinuation.cancel(EmptyStackException())")
+                continuation.cancel(EmptyStackException())
+                Log.w("addOnCanceledListener", "continuation.cancel(EmptyStackException())")
             }
             task.addOnFailureListener {
                 Log.e("addOnFailureListener")
-                cancellableContinuation.resumeWithException(it)
-                Log.w("addOnFailureListener", "cancellableContinuation.resumeWithException(it)")
+                continuation.resumeWithException(it)
+                Log.w("addOnFailureListener", "continuation.resumeWithException(it)")
             }
-            cancellableContinuation.invokeOnCancellation {
-                Log.e("cancellableContinuation.invokeOnCancellation")
+            continuation.invokeOnCancellation {
+                Log.e("continuation.invokeOnCancellation")
             }
-//                cancellableContinuation.resumeWithException(EmptyStackException())
+//                continuation.resumeWithException(EmptyStackException())
         }
     }
 
