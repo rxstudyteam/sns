@@ -92,6 +92,10 @@ class EastarEgg(val activity: Activity) {
                 .load()
     }
 
+    fun ACTION_CREDIT_CARD_OCR() {
+        activity.startActivity(Intent.parseUri("intent:#Intent;action=com.google.android.gms.ocr.ACTION_CREDIT_CARD_OCR;end", Intent.URI_INTENT_SCHEME))
+    }
+
     fun PROFILE_WRITER() {
         activity.startActivity(Intent(activity, Profile::class.java))
     }

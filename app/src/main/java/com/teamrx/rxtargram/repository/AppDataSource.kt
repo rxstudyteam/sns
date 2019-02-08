@@ -11,13 +11,17 @@ interface AppDataSource {
     fun getPosts(): LiveData<List<Post>>
 
     //프로필가져오기
-    fun getProfile(user_id: String): ProfileModel
+    suspend fun getProfile(user_id: String): ProfileModel
+
     //내프로필변경
     suspend fun setProfile(user_id: String, name: CharSequence?, email: CharSequence?, profile_url: String?): Boolean
+
     //가입
     suspend fun join(name: CharSequence, email: CharSequence): String
 
+    //사진가져오기
     suspend fun loadGalleryLoad(context: Context): String?
 
+    //사진업로드하기
     suspend fun uploadToFireStorage(user_id: String, stream: InputStream): String?
 }

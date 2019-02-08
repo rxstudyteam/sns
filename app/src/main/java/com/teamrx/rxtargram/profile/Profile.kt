@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.databinding.BindingAdapter
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
@@ -36,6 +35,8 @@ class Profile : AppActivity() {
             setDisplayShowHomeEnabled(true)
             setDisplayHomeAsUpEnabled(true)
         }
+
+        vm.updateProfile()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -55,7 +56,7 @@ class Profile : AppActivity() {
         if (!check())
             return
 
-        bb.profileViewModel!!.saveProfile(bb.name.text!!, bb.email.text!!, bb.profileUrl.getTag(R.id.icon) as Bitmap)
+        bb.profileViewModel!!.saveProfile(bb.name.text.toString(), bb.email.text.toString(), bb.profileUrl.getTag(R.id.text) as String?, bb.profileUrl.getTag(R.id.icon) as Bitmap?)
 //        if (bb.profileViewModel!!.saveProfile(bb.name.text, bb.email.text, bb.profileUrl.getTag(R.id.icon) as Bitmap)) {
 //            Toast.makeText(this, "변경됨", Toast.LENGTH_SHORT).show()
 //        }

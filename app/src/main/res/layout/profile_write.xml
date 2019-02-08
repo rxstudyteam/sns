@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:bind="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="profileModel.Profile">
 
@@ -30,7 +29,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            bind:load="@{profileViewModel.profile.profile_url}"
+            app:load="@{profileViewModel.profile_url}"
             tools:src="@drawable/test_00" />
 
         <androidx.appcompat.widget.AppCompatImageButton
@@ -54,7 +53,7 @@
             android:hint="name"
             android:inputType="textPersonName|textFilter|textNoSuggestions"
             android:maxLines="1"
-            android:text="@{profileViewModel.profile.name}"
+            android:text="@{profileViewModel.name}"
             android:textColor="@color/primary_text"
             app:layout_constraintEnd_toEndOf="@+id/profile_url"
             app:layout_constraintHorizontal_bias="0.0"
@@ -70,7 +69,7 @@
             android:hint="email"
             android:inputType="textEmailAddress|textFilter|textNoSuggestions"
             android:maxLines="1"
-            android:text="@{profileViewModel.profile.email}"
+            android:text="@{profileViewModel.email}"
             android:textColor="@color/secondary_text"
             app:layout_constraintEnd_toEndOf="@+id/name"
             app:layout_constraintStart_toStartOf="@+id/name"
