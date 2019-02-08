@@ -8,6 +8,7 @@ import com.teamrx.rxtargram.model.PostDTO
 object RemoteAppDataSource: AppDataSource {
 
     private val fireStore: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
+    private val cachedPostDTOs: HashMap<String, PostDTO> by lazy { HashMap<String, PostDTO>() }
 
     override fun getPosts(callback: (List<PostDTO>) -> Unit) {
 
@@ -24,6 +25,7 @@ object RemoteAppDataSource: AppDataSource {
                         // 팔로우한 유저만 구분.
                         if (item != null) {
                             posts.add(item)
+                            cachedPostDTOs[snapshot.id] = item
                         }
                     } catch (e: Exception) {
                         firebaseFirestoreException?.printStackTrace()
@@ -32,6 +34,26 @@ object RemoteAppDataSource: AppDataSource {
                 }
 
                 callback(posts)
+            }
+    }
+
+    override fun getPostById(post_id: String, callback: (PostDTO) -> Unit) {
+        cachedPostDTOs[post_id]?.let {
+            callback(it)
+            println("get cached post")
+            return
+        }
+
+        fireStore.collection("post").document(post_id).get()
+            .addOnCompleteListener { task ->
+                if(task.isSuccessful) {
+                    task.result?.let { documentSnapshot ->
+                        documentSnapshot.toObject(PostDTO::class.java)?.let {
+                            callback(it)
+                            println("post from network")
+                        }
+                    }
+                }
             }
     }
 

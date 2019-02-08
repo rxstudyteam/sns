@@ -7,6 +7,9 @@ interface AppDataSource {
     // 글 목록 가져오기
     fun getPosts(callback: (List<PostDTO>) -> Unit)
 
+    // 글 상세정보 가져오기
+    fun getPostById(post_id: String, callback: (PostDTO) -> Unit)
+
     // 댓글 목록 가져오기
     fun getComments(post_id: String, callback: (List<CommentDTO>) -> Unit)
 }

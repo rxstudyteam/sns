@@ -8,11 +8,13 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.BaseViewModel
+import com.teamrx.rxtargram.detail.DetailViewModel
 import com.teamrx.rxtargram.inject.Injection
 
 class CommentActivity : AppCompatActivity() {
 
     private lateinit var commentViewModel: CommentViewModel
+    private lateinit var detailViewModel: DetailViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,12 +23,20 @@ class CommentActivity : AppCompatActivity() {
         val arguments = intent.extras
         val postId = arguments.getString("post_id")
 
+        detailViewModel = getViewModel()
         commentViewModel = getViewModel()
+
+        detailViewModel.getPostById().observe(this, Observer { post ->
+            println("${post.title}  ${post.user_id}  ${post.content}")
+        })
+
         commentViewModel.getComments().observe(this, Observer { lists ->
             for(comment in lists) {
                 println("${comment.title}  ${comment.user_id}  ${comment.parent_post_no}")
             }
         })
+
+        detailViewModel.loadPostById(postId)
         commentViewModel.loadComments(postId)
     }
 

@@ -8,12 +8,20 @@ import com.teamrx.rxtargram.repository.AppDataSource
 
 class DetailViewModel(dataSource: AppDataSource): BaseViewModel(dataSource) {
 
-    private val postDTOLiveData: MutableLiveData<List<PostDTO>> by lazy { MutableLiveData<List<PostDTO>>() }
+    private val postDTOs: MutableLiveData<List<PostDTO>> by lazy { MutableLiveData<List<PostDTO>>() }
+    private val postDTO: MutableLiveData<PostDTO> by lazy { MutableLiveData<PostDTO>() }
 
-    fun getPosts(): LiveData<List<PostDTO>> = postDTOLiveData
+    fun getPosts(): LiveData<List<PostDTO>> = postDTOs
     fun loadPosts() {
         dataSource.getPosts { posts ->
-            postDTOLiveData.value = posts
+            postDTOs.value = posts
+        }
+    }
+
+    fun getPostById(): LiveData<PostDTO> = postDTO
+    fun loadPostById(post_id: String) {
+        dataSource.getPostById(post_id) { post ->
+            postDTO.value = post
         }
     }
 }
