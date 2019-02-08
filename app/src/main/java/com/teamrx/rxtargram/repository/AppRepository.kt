@@ -1,11 +1,11 @@
 package com.teamrx.rxtargram.repository
 
 import com.teamrx.rxtargram.model.CommentDTO
-import com.teamrx.rxtargram.model.Post
+import com.teamrx.rxtargram.model.PostDTO
 
 class AppRepository(private val remoteAppDataSource: RemoteAppDataSource): AppDataSource {
 
-    override fun getPosts(callback: (List<Post>) -> Unit) {
+    override fun getPosts(callback: (List<PostDTO>) -> Unit) {
         remoteAppDataSource.getPosts(callback)
     }
 

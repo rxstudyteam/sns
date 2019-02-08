@@ -15,8 +15,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.BaseViewModel
 import com.teamrx.rxtargram.comment.CommentActivity
+import com.teamrx.rxtargram.comment.CommentViewModel
 import com.teamrx.rxtargram.inject.Injection
-import com.teamrx.rxtargram.model.Post
+import com.teamrx.rxtargram.model.PostDTO
 import com.teamrx.rxtargram.util.getStringArray
 import kotlinx.android.synthetic.main.fragment_detail_view.*
 
@@ -36,15 +37,16 @@ class DetailViewFragment : Fragment(), OptionClickListener {
         recyclerView.adapter = adapter
 
         detailViewModel = getViewModel()
-        detailViewModel.postLiveData.observe(this, Observer { posts ->
+
+        detailViewModel.getPosts().observe(this, Observer { posts ->
             println("detail viewmodel observe..")
             updateUI(posts)
         })
 
-        detailViewModel.getPosts()
+        detailViewModel.loadPosts()
     }
 
-    override fun onOptionClick(post: Post?) {
+    override fun onOptionClick(postDTO: PostDTO?) {
         val context = this.context ?: return
 
         val alertBuilder = AlertDialog.Builder(context)
@@ -70,8 +72,8 @@ class DetailViewFragment : Fragment(), OptionClickListener {
         CommentActivity.startActivity(activity, post_id)
     }
 
-    private fun updateUI(posts: List<Post>) {
-        adapter.addPosts(posts)
+    private fun updateUI(postDTOS: List<PostDTO>) {
+        adapter.addPosts(postDTOS)
     }
 
     // base activity

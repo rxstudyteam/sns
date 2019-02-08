@@ -6,14 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.teamrx.rxtargram.R
-import com.teamrx.rxtargram.model.Post
+import com.teamrx.rxtargram.model.PostDTO
 import com.teamrx.rxtargram.util.GlideApp
 import kotlinx.android.synthetic.main.detail_item.view.*
 import java.util.*
 
 class PostRecyclerViewAdapter(private val mContext: Context, private val optionClickListener: OptionClickListener): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private val posts = ArrayList<Post>()
+    private val posts = ArrayList<PostDTO>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.detail_item, parent, false))
@@ -31,19 +31,17 @@ class PostRecyclerViewAdapter(private val mContext: Context, private val optionC
         item.tvTitle.text = posts[position].title
         item.tvContent.text = posts[position].content
         item.tvCreatedAt.text = posts[position].created_at?.toDate().toString()
-        item.tvComments.text = "댓글 모두 보기"
 
         item.tvComments.setOnClickListener {
             posts[position].post_id?.let { optionClickListener.onCommentClick(it) }
-
         }
     }
 
-    fun addPosts(posts: List<Post>) {
-        this.posts.addAll(posts)
+    fun addPosts(postDTOS: List<PostDTO>) {
+        this.posts.addAll(postDTOS)
         notifyDataSetChanged()
 
-        println("${this.posts.size}      ${posts.size}")
+        println("${this.posts.size}      ${postDTOS.size}")
     }
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view)

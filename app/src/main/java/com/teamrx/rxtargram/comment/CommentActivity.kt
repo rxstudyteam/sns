@@ -22,12 +22,12 @@ class CommentActivity : AppCompatActivity() {
         val postId = arguments.getString("post_id")
 
         commentViewModel = getViewModel()
-        commentViewModel.commentLiveData.observe(this, Observer { lists ->
+        commentViewModel.getComments().observe(this, Observer { lists ->
             for(comment in lists) {
                 println("${comment.title}  ${comment.user_id}  ${comment.parent_post_no}")
             }
         })
-        commentViewModel.getComments(postId)
+        commentViewModel.loadComments(postId)
     }
 
     private inline fun <reified T : BaseViewModel> getViewModel(): T {

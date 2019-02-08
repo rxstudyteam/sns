@@ -72,6 +72,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             android:layout_marginTop="8dp"
             android:layout_marginStart="8dp"
+            android:text="댓글 모두 보기"
             tools:text="댓글 모두 보기"/>
 
     <TextView
