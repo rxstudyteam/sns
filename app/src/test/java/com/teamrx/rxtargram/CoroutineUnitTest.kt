@@ -1,9 +1,9 @@
 package com.teamrx.rxtargram
 
-import android.content.res.Resources
+import android.log.nano
+import android.log.sano
 import kotlinx.coroutines.*
 import org.junit.Test
-import java.util.*
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -217,11 +217,4 @@ class CoroutineUnitTest {
         Thread.sleep(3000)
         println("--wait--")
     }
-
-    var keep = 0L
-    val Int.dp: Int get() = (this * Resources.getSystem().displayMetrics.density).toInt()
-    val Long.cn: String get() = String.format(Locale.getDefault(), "%,25d", this)
-
-    fun nano() = (if (keep == 0L) 0L.cn else (System.nanoTime() - keep).cn).apply { keep = System.nanoTime() }
-    fun sano() = (0L.cn).apply { keep = System.nanoTime() }
 }

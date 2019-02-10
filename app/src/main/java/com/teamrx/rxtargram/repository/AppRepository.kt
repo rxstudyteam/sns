@@ -28,8 +28,12 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppD
         return remoteAppDataSource.loadGalleryLoad(context)
     }
 
-    override suspend fun uploadToFireStorage(user_id: String, stream: InputStream): String? {
-        return remoteAppDataSource.uploadToFireStorage(user_id, stream)
+    override suspend fun uploadToFireStorage(user_id: String, stream: InputStream) {
+        remoteAppDataSource.uploadToFireStorage(user_id, stream)
+    }
+
+    override suspend fun getDownloadUrl(user_id: String): String? {
+        return remoteAppDataSource.getDownloadUrl(user_id)
     }
 
     override suspend fun setProfile(user_id: String, name: CharSequence?, email: CharSequence?, profile_url: String?): Boolean {

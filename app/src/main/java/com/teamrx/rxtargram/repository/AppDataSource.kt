@@ -23,5 +23,7 @@ interface AppDataSource {
     suspend fun loadGalleryLoad(context: Context): String?
 
     //사진업로드하기
-    suspend fun uploadToFireStorage(user_id: String, stream: InputStream): String?
+    suspend fun uploadToFireStorage(user_id: String, stream: InputStream)
+
+    suspend fun getDownloadUrl(user_id: String): String?
 }

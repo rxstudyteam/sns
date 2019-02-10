@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -17,6 +18,9 @@ import com.teamrx.rxtargram.base.AppActivity
 import com.teamrx.rxtargram.databinding.ProfileWriteBinding
 import com.teamrx.rxtargram.inject.Injection
 import smart.util.check
+import androidx.core.app.NavUtils
+
+
 
 class Profile : AppActivity() {
     private lateinit var bb: ProfileWriteBinding
@@ -32,11 +36,17 @@ class Profile : AppActivity() {
 
         supportActionBar?.apply {
             title = vm.getTitle()
-            setDisplayShowHomeEnabled(true)
             setDisplayHomeAsUpEnabled(true)
         }
 
         vm.updateProfile()
+
+        vm.loading.observe(this, Observer<Boolean> {
+            if (it)
+                showProgress()
+            else
+                dismissProgress()
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -45,8 +55,11 @@ class Profile : AppActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
         when (item.itemId) {
             R.id.save -> saveProfile()
+            android.R.id.home -> NavUtils.navigateUpFromSameTask(this)
+
             else -> super.onOptionsItemSelected(item)
         }
         return true
@@ -73,7 +86,10 @@ class Profile : AppActivity() {
 fun ImageView.load(imageUrl: String?) {
     Log.e(imageUrl)
     Glide.with(this)
-            .setDefaultRequestOptions(RequestOptions().apply { error(R.drawable.ic_face_black_24dp) })
+            .setDefaultRequestOptions(RequestOptions().apply {
+                placeholder(R.drawable.ic_face_black_24dp)
+                error(R.drawable.ic_face_black_24dp)
+            })
             .asBitmap()
             .load(imageUrl)
             .apply(RequestOptions.circleCropTransform())

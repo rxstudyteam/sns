@@ -11,14 +11,14 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.model.ProfileModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.suspendCancellableCoroutine
 import smart.util.GalleryLoader
 import smart.util.dp
 import java.io.InputStream
 import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 @Suppress("ClassName")
 object RemoteAppDataSource : AppDataSource {
@@ -120,41 +120,34 @@ object RemoteAppDataSource : AppDataSource {
         }
     }
 
-    override suspend fun uploadToFireStorage(user_id: String, stream: InputStream): String? {
+    override suspend fun uploadToFireStorage(user_id: String, stream: InputStream) {
         return suspendCancellableCoroutine { continuation ->
-            var ref = FirebaseStorage.getInstance()
+            val task = FirebaseStorage.getInstance()
                     .reference
                     .child("profile/${user_id}")
-            val task = ref.putStream(stream)
+                    .putStream(stream)
 
-            //            runBlocking {
-            CoroutineScope(Dispatchers.Main).launch {
-                Log.e("addOnSuccessListener0")
-
-                suspendCoroutine<Unit> { co ->
-                    task.addOnSuccessListener {
-                        Log.e("addOnSuccessListener1")
-                        co.resume(Unit)
-                        Log.w("addOnSuccessListener1")
-                    }
-                }
-
-                Log.e("addOnSuccessListener3")
-
-                var url = suspendCoroutine<String> { co ->
-                    ref.downloadUrl.addOnSuccessListener {
-                        Log.e("addOnSuccessListener2")
-                        co.resume(it.toString())
-                        Log.w("addOnSuccessListener2", it.toString())
-                    }
-                }
-                Log.e("addOnSuccessListener4")
-                continuation.resume(url)
-
-                Log.w("addOnSuccessListener0")
+            task.addOnSuccessListener {
+                Log.e("addOnSuccessListener1")
+                continuation.resume(Unit)
+                Log.w("addOnSuccessListener1")
             }
+            suspendCancellableCoroutineTask(continuation, task)
+        }
+    }
 
+    override suspend fun getDownloadUrl(user_id: String): String? {
+        return suspendCancellableCoroutine { continuation ->
+            val task = FirebaseStorage.getInstance()
+                    .reference
+                    .child("profile/${user_id}")
+                    .downloadUrl
 
+            task.addOnSuccessListener {
+                Log.e("addOnSuccessListener2")
+                continuation.resume(it.toString())
+                Log.w("addOnSuccessListener2", it.toString())
+            }
             suspendCancellableCoroutineTask(continuation, task)
         }
     }
@@ -214,7 +207,7 @@ object RemoteAppDataSource : AppDataSource {
         }
         task.addOnFailureListener {
             Log.e("addOnFailureListener")
-            continuation.resumeWithException(it)
+            continuation.cancel()
             Log.w("addOnFailureListener", "continuation.resumeWithException(it)")
         }
         continuation.invokeOnCancellation {

@@ -4,6 +4,8 @@ package com.teamrx.rxtargram.profile
 
 import android.graphics.Bitmap
 import android.log.Log
+import android.log.nano
+import android.log.sano
 import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,7 +14,6 @@ import com.teamrx.rxtargram.repository.AppDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import smart.base.PP
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -23,6 +24,7 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
     val name: MutableLiveData<String> = MutableLiveData()
     val email: MutableLiveData<String> = MutableLiveData()
     val profile_url: MutableLiveData<String> = MutableLiveData()
+    val loading: MutableLiveData<Boolean> = MutableLiveData()
 
     companion object {
         private const val DEFAULT_PROFILE_URL = "https://firebasestorage.googleapis.com/v0/b/rxteam-sns.appspot.com/o/profile%2Funnamed.png?alt=media&token=bd08fa0e-84b4-438c-8f25-c7014075bf6e"
@@ -47,45 +49,47 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
         Log.w(0)
     }
 
-    fun saveProfile(name: String, email: String, image_url: String?, bitmap: Bitmap?) {
+    fun saveProfile(name: String, email: String, profile_url: String?, bitmap: Bitmap?) {
         val userId = PP.user_id.get()
         if (userId.isNullOrBlank()) {
             join(name, email, bitmap)
         } else {
-            setProfile(userId, name, email, bitmap)
+            update(userId, name, email, profile_url, bitmap)
         }
     }
 
     private fun join(name: String, email: String, img: Bitmap?) {
-        runBlocking {
-            Log.e(0, "join", name, email, img)
-//            var job = CoroutineScope(Dispatchers.Main).launch {
-            val job = launch {
-                //            launch(Dispatchers.Default) {
-                Log.e(1)
-                val user_id = dataSource.join(name, email)
-                Log.w(1, user_id)
-
-                Log.e(2)
-                val image_url = dataSource.uploadToFireStorage(user_id, img?.toStream()!!)
-                Log.w(2, user_id)
-                dataSource.setProfile(user_id, null, null, image_url)
-            }
-            Log.w(98, "join", name, email, img)
-            job.join()
-            Log.w(99, "join", name, email, img)
+        Log.e(0, "join", name, email, img)
+        CoroutineScope(Dispatchers.Main).launch {
+            Log.e(1, sano())
+            loading.value = true
+            Log.e(2, nano())
+            val user_id = dataSource.join(name, email)
+            Log.w(3, nano(), user_id)
+            dataSource.uploadToFireStorage(user_id, img?.toStream()!!)
+            Log.w(4, nano())
+            var image_url = dataSource.getDownloadUrl(user_id)
+            Log.w(5, nano(), image_url)
+            dataSource.setProfile(user_id, null, null, image_url)
+            Log.w(6, nano())
+            loading.value = false
+            Log.w(7, nano())
+            PP.user_id.set(user_id)
         }
         Log.w(100, "join", name, email, img)
     }
 
-    private fun setProfile(user_id: String, name: String?, email: String?, img: Bitmap?) {
+    private fun update(user_id: String, name: String?, email: String?, profile_url: String?, bitmap: Bitmap?) {
         Log.w("update")
-        CoroutineScope(Dispatchers.Main).launch {
-            Log.e(2)
-            var image_url = dataSource.uploadToFireStorage(user_id, img?.toStream()!!)
-            Log.w(2, user_id)
 
-            dataSource.setProfile(user_id, name, email, image_url)
+        CoroutineScope(Dispatchers.Main).launch {
+            if( this@ProfileViewModel.profile_url.value == profile_url)
+
+            dataSource.setProfile(user_id
+                    , name?.takeIf { this@ProfileViewModel.name.value == name }
+                    , email?.takeIf { this@ProfileViewModel.email.value == email }
+                    , profile_url?.takeIf { this@ProfileViewModel.profile_url.value == profile_url }
+            )
         }
     }
 
