@@ -6,15 +6,20 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.BaseViewModel
 import com.teamrx.rxtargram.detail.DetailViewModel
 import com.teamrx.rxtargram.inject.Injection
+import com.teamrx.rxtargram.model.CommentDTO
+import com.teamrx.rxtargram.model.PostDTO
+import kotlinx.android.synthetic.main.activity_comment.*
 
 class CommentActivity : AppCompatActivity() {
 
     private lateinit var commentViewModel: CommentViewModel
     private lateinit var detailViewModel: DetailViewModel
+    private lateinit var adapter: CommentAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,21 +28,33 @@ class CommentActivity : AppCompatActivity() {
         val arguments = intent.extras
         val postId = arguments.getString("post_id")
 
+        adapter = CommentAdapter()
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = LinearLayoutManager(this@CommentActivity)
+
         detailViewModel = getViewModel()
         commentViewModel = getViewModel()
 
         detailViewModel.getPostById().observe(this, Observer { post ->
-            println("${post.title}  ${post.user_id}  ${post.content}")
+            updatePost(post)
         })
 
-        commentViewModel.getComments().observe(this, Observer { lists ->
-            for(comment in lists) {
-                println("${comment.title}  ${comment.user_id}  ${comment.parent_post_no}")
-            }
+        commentViewModel.getComments().observe(this, Observer { comments ->
+            updateComments(comments)
         })
 
         detailViewModel.loadPostById(postId)
         commentViewModel.loadComments(postId)
+    }
+
+    private fun updatePost(post: PostDTO) {
+        tvUserId.text = post.user_id
+        tvContent.text = post.content
+        tvCreatedAt.text = post.created_at?.toDate().toString()
+    }
+
+    private fun updateComments(comments: List<CommentDTO>) {
+        adapter.setComments(comments)
     }
 
     private inline fun <reified T : BaseViewModel> getViewModel(): T {
