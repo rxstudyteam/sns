@@ -21,7 +21,41 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 @Suppress("ClassName")
-object RemoteAppDataSource : AppDataSource {
+object RemoteAppDataSource: AppDataSource {
+
+    private lateinit var postLiveData: MutableLiveData<List<Post>>
+
+    // https://github.com/kunny/RxFirebase
+    // Firebase + Rxjava를 이용해 Obserbable을 리턴하고 ViewModel에서 Livedata로 데이터를 관리하고 싶었으나
+    // 위 라이브러리의 기능이 얼만큼 있는지 확인이 안되어 Repo에서 LiveData로 관리하도록 구현함
+    override fun getPosts(): LiveData<List<Post>> {
+        if(!::postLiveData.isInitialized) {
+            postLiveData = MutableLiveData()
+
+            val firestore = FirebaseFirestore.getInstance()
+            firestore.collection("post").orderBy("created_at")
+                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                    if(querySnapshot == null) return@addSnapshotListener
+
+                    val posts = mutableListOf<Post>()
+                    for(snapshot in querySnapshot.documents) {
+                        try {
+                            val item = snapshot.toObject(Post::class.java)
+                            // 팔로우한 유저만 구분.
+                            if (item != null)
+                                posts.add(item)
+                        } catch (e: Exception) {
+                            firebaseFirestoreException?.printStackTrace()
+                            e.printStackTrace()
+                        }
+                    }
+
+                    postLiveData.postValue(posts)
+                }
+        }
+
+        return postLiveData
+    }
 
     const val USER_COLLECTION = "user"
     const val POST_COLLECTION = "post"
@@ -134,35 +168,4 @@ object RemoteAppDataSource : AppDataSource {
         task.addOnFailureListener { continuation.cancel() }
         continuation.invokeOnCancellation { continuation.cancel() }
     }
-
-    // https://github.com/kunny/RxFirebase
-// Firebase + Rxjava를 이용해 Obserbable을 리턴하고 ViewModel에서 Livedata로 데이터를 관리하고 싶었으나
-// 위 라이브러리의 기능이 얼만큼 있는지 확인이 안되어 Repo에서 LiveData로 관리하도록 구현함
-    override fun getPosts(): LiveData<List<Post>> {
-        val postLiveData = MutableLiveData<List<Post>>()
-
-        val firestore = FirebaseFirestore.getInstance()
-        firestore.collection(POST_COLLECTION).orderBy(POST_DOCUMENT.CREATED_AT)
-                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                    if (querySnapshot == null) return@addSnapshotListener
-
-                    val posts = mutableListOf<Post>()
-                    for (snapshot in querySnapshot.documents) {
-                        try {
-                            val item = snapshot.toObject(Post::class.java)
-                            // 팔로우한 유저만 구분.
-                            if (item != null)
-                                posts.add(item)
-                        } catch (e: Exception) {
-                            firebaseFirestoreException?.printStackTrace()
-                            e.printStackTrace()
-                        }
-                    }
-
-                    postLiveData.postValue(posts)
-                }
-
-        return postLiveData
-    }
-
 }

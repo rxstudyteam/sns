@@ -6,22 +6,22 @@ import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.model.ProfileModel
 import java.io.InputStream
 
-class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppDataSource {
+class AppRepository(private val remoteAppDataSource: RemoteAppDataSource): AppDataSource {
+
+    override fun getPosts(): LiveData<List<Post>> {
+        return remoteAppDataSource.getPosts()
+    }
+
 
     companion object {
         private var INSTANCE: AppRepository? = null
-        fun getInstance(remoteDataSource: RemoteAppDataSource) = INSTANCE
-                ?: synchronized(AppRepository::class.java) {
-                    INSTANCE ?: AppRepository(remoteDataSource).also { INSTANCE = it }
-                }
+        fun getInstance(remoteDataSource: RemoteAppDataSource) = INSTANCE ?: synchronized(AppRepository::class.java) {
+            INSTANCE ?: AppRepository(remoteDataSource).also { INSTANCE = it }
+        }
     }
 
     override suspend fun getProfile(user_id: String): ProfileModel {
         return remoteAppDataSource.getProfile(user_id)
-    }
-
-    override fun getPosts(): LiveData<List<Post>> {
-        return remoteAppDataSource.getPosts()
     }
 
     override suspend fun loadGalleryLoad(context: Context): String? {
@@ -43,5 +43,4 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppD
     override suspend fun join(name: CharSequence, email: CharSequence): String {
         return remoteAppDataSource.join(name, email)
     }
-
 }
