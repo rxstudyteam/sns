@@ -3,82 +3,86 @@ package com.teamrx.rxtargram.profile
 import android.graphics.Bitmap
 import android.log.Log
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
+import android.view.*
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.BitmapImageViewTarget
 import com.teamrx.rxtargram.R
-import com.teamrx.rxtargram.base.AppActivity
+import com.teamrx.rxtargram.base.AppFragment
 import com.teamrx.rxtargram.databinding.ProfileWriteBinding
 import com.teamrx.rxtargram.inject.Injection
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import smart.util.check
-import androidx.core.app.NavUtils
 
-
-
-class Profile : AppActivity() {
+class Profile : AppFragment() {
     private lateinit var bb: ProfileWriteBinding
     private lateinit var vm: ProfileViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return DataBindingUtil.inflate<ProfileWriteBinding>(inflater, R.layout.profile_write, container, false).let { binding ->
+            bb = binding
+            binding.root
+        }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         vm = ViewModelProviders.of(mActivity, Injection.provideViewModelFactory()).get(ProfileViewModel::class.java)
-        val binding = DataBindingUtil.setContentView<ProfileWriteBinding>(mActivity, R.layout.profile_write)
-        bb = binding.apply {
+        bb.apply {
             profileViewModel = vm
             lifecycleOwner = mActivity
         }
 
-        supportActionBar?.apply {
-            title = vm.getTitle()
-            setDisplayHomeAsUpEnabled(true)
-        }
+        supportActionBar?.apply { title = vm.getTitle() }
 
+        loadProfile()
+    }
+
+    private fun loadProfile() = CoroutineScope(Dispatchers.Main).launch {
+        showProgress()
         vm.updateProfile()
-
-        vm.loading.observe(this, Observer<Boolean> {
-            if (it)
-                showProgress()
-            else
-                dismissProgress()
-        })
+        dismissProgress()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.profile, menu)
-        return super.onCreateOptionsMenu(menu)
+    private fun saveProfile() = CoroutineScope(Dispatchers.Main).launch {
+        if (check()) {
+            showProgress()
+            vm.saveProfile(bb.name.text.toString()
+                    , bb.email.text.toString()
+                    , bb.profileUrl.getTag(R.id.text) as String?
+                    , bb.profileUrl.getTag(R.id.icon) as Bitmap?)
+
+            supportActionBar?.apply { title = vm.getTitle() }
+            
+            dismissProgress()
+        }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    private fun check() = bb.name.check() && bb.email.check()
 
-        when (item.itemId) {
-            R.id.save -> saveProfile()
-            android.R.id.home -> NavUtils.navigateUpFromSameTask(this)
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        inflater?.inflate(R.menu.profile, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
 
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        return when (item?.itemId) {
+            R.id.save -> saveProfile().let { true }
             else -> super.onOptionsItemSelected(item)
         }
-        return true
-    }
-
-    private fun saveProfile() {
-        if (!check())
-            return
-
-        bb.profileViewModel!!.saveProfile(bb.name.text.toString(), bb.email.text.toString(), bb.profileUrl.getTag(R.id.text) as String?, bb.profileUrl.getTag(R.id.icon) as Bitmap?)
-//        if (bb.profileViewModel!!.saveProfile(bb.name.text, bb.email.text, bb.profileUrl.getTag(R.id.icon) as Bitmap)) {
-//            Toast.makeText(this, "변경됨", Toast.LENGTH_SHORT).show()
-//        }
-    }
-
-    private fun check(): Boolean {
-        if (!bb.name.check()) return false
-        if (!bb.email.check()) return false
-        return true
     }
 }
 
@@ -98,8 +102,8 @@ fun ImageView.load(imageUrl: String?) {
                     resource?.let { bitmap ->
                         setTag(R.id.text, imageUrl)
                         setTag(R.id.icon, bitmap)
-                        Log.e(getTag(R.id.text))
-                        Log.e(getTag(R.id.icon))
+//                        Log.e(getTag(R.id.text))
+//                        Log.e(getTag(R.id.icon))
                     }
                     super.setResource(resource)
                 }
