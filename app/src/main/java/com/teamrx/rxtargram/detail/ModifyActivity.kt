@@ -3,9 +3,12 @@ package com.teamrx.rxtargram.detail
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.AppActivity
+import com.teamrx.rxtargram.base.AppApplication.Companion.context
 import com.teamrx.rxtargram.base.BaseViewModel
 import com.teamrx.rxtargram.inject.Injection
 import com.teamrx.rxtargram.model.Post
@@ -53,7 +56,19 @@ class ModifyActivity : AppActivity() {
     }
 
     fun done() {
-        detailViewModel.modifyPost(post)
+        updateContent()
+
+        detailViewModel.modifyPost(post) { success ->
+            if (success) {
+                finish()
+            } else {
+                Toast.makeText(context, "수정에 실패하였습니다.", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun updateContent() {
+        post.content = tvContent.text.toString()
     }
 
     private inline fun <reified T : BaseViewModel> getViewModel(): T {

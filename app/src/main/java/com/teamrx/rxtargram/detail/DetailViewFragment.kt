@@ -1,5 +1,6 @@
 package com.teamrx.rxtargram.detail
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
@@ -23,6 +24,7 @@ class DetailViewFragment : Fragment(), OptionClickListener {
 
     private lateinit var detailViewModel: DetailViewModel
     private lateinit var adapter: PostRecyclerViewAdapter
+    private val REQUEST_MODYFY = 1001
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.fragment_detail_view, container, false)
@@ -51,11 +53,8 @@ class DetailViewFragment : Fragment(), OptionClickListener {
     }
 
     private fun updateUI(posts: List<Post>) {
-        adapter.addPosts(posts)
+        adapter.setPostDatas(posts)
     }
-
-//    fun <T : ViewModel> AppCompatActivity.obtainViewModel(viewModelClass: Class<T>) =
-//            ViewModelProviders.of(this, ViewModelFactory.getInstance(application)).get(viewModelClass)
 
     private inline fun <reified T : BaseViewModel> getViewModel(): T {
         val viewModelFactory = Injection.provideViewModelFactory()

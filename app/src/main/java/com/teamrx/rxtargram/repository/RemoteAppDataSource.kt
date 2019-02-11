@@ -3,6 +3,7 @@ package com.teamrx.rxtargram.repository
 import android.log.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.FirebaseFirestore
 import com.teamrx.rxtargram.model.Post
@@ -95,8 +96,16 @@ object RemoteAppDataSource : AppDataSource {
         return postLiveData
     }
 
-    override fun modifyPost(post: Post) {
-        val firestore = FirebaseFirestore.getInstance()
-        firestore.collection(POST_COLLECTION).document()
+    override fun modifyPost(post: Post, callback : (Boolean) -> Unit) {
+
+        post.snapshotId?.let {
+            println("post : $post")
+            val firestore = FirebaseFirestore.getInstance()
+            firestore.collection(POST_COLLECTION).document(it).set(post)
+                    .addOnCompleteListener { it ->
+                        callback(it.isSuccessful)
+
+                    }
+        }
     }
 }

@@ -20,6 +20,5 @@ interface AppDataSource {
     fun join(profileModel: ProfileModel)
 
     // 글 수정
-    fun modifyPost(post:Post)
-
+    fun modifyPost(post: Post, callback: (Boolean) -> Unit)
 }

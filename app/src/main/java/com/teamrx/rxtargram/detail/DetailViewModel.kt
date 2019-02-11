@@ -9,5 +9,5 @@ class DetailViewModel(dataSource: AppDataSource) : BaseViewModel(dataSource) {
 
     fun getPosts(): LiveData<List<Post>> = dataSource.getPosts()
 
-    fun modifyPost(post: Post) = dataSource.modifyPost(post)
+    fun modifyPost(post: Post, callback : (Boolean) -> Unit) = dataSource.modifyPost(post, callback)
 }

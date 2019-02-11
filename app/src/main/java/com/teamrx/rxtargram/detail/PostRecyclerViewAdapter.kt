@@ -35,7 +35,8 @@ class PostRecyclerViewAdapter(private val mContext: Context, private val optionC
         item.tvCreatedAt.text = posts[position].created_at?.toDate().toString()
     }
 
-    fun addPosts(posts: List<Post>) {
+    fun setPostDatas(posts: List<Post>) {
+        this.posts.clear()
         this.posts.addAll(posts)
         notifyDataSetChanged()
     }
