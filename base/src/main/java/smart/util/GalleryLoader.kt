@@ -3,6 +3,7 @@ package smart.util
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.log.Log
 import android.net.Uri
@@ -12,7 +13,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.teamrx.base.R
 import java.util.*
-
 
 /**
  *```kotlin
@@ -24,36 +24,43 @@ import java.util.*
  *  .setOnGalleryLoadedListener(this::showToast)
  *  .setOnCancelListener { Log.toast(activity, "canceled") }
  *  .load()
+ *
+ * <style name="GalleryLoaderTheme" parent="Theme.AppCompat.Light.NoActionBar">
+ *     <item name="android:windowIsTranslucent">true</item>
+ *     <item name="android:windowBackground">@android:color/transparent</item>
+ *     <item name="android:windowContentOverlay">@null</item>
+ *     <item name="android:windowIsFloating">false</item>
+ *     <item name="android:backgroundDimEnabled">false</item>
+ *     <item name="android:windowNoTitle">true</item>
+ *     <item name="windowNoTitle">true</item>
+ *     <item name="windowActionBar">false</item>
+ *     <item name="android:windowAnimationStyle">@null</item>
+ * </style>
  *```
  */
 class GalleryLoader : AppCompatActivity() {
-
-
     companion object {
         const val REQ_CAMERA = 4901
         const val REQ_GALLERY = 4902
         const val REQ_CROP = 4913
-
         @JvmStatic
         fun builder(context: Context): Builder {
             return GalleryLoader.Builder(context)
         }
     }
 
-    private var w = 480
-    private var h = 800
-
     interface EXTRA {
         companion object {
             const val CROP = "CROP"
             const val SOURCE = "SOURCE"
+            const val CROP_WIDTH = "CROP_WIDTH"
+            const val CROP_HEIGHT = "CROP_HEIGHT"
         }
     }
 
     enum class Source {
         CAMERA, GALLERY, UNKNOWN
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,14 +74,14 @@ class GalleryLoader : AppCompatActivity() {
             Source.CAMERA -> startCamera()
             else -> {
                 AlertDialog.Builder(this@GalleryLoader)
-                    .setTitle("Select from?")
-                    .setItems(R.array.camera_or_gallery) { _, position ->
-                        intent?.putExtra(EXTRA.SOURCE, Source.values()[position])
-                        load()
-                    }
-                    .setOnCancelListener { finish() }
-                    .show()
-                    .setCanceledOnTouchOutside(false)
+                        .setTitle("Select from?")
+                        .setItems(R.array.camera_or_gallery) { _, position ->
+                            intent?.putExtra(EXTRA.SOURCE, Source.values()[position])
+                            load()
+                        }
+                        .setOnCancelListener { finish() }
+                        .show()
+                        .setCanceledOnTouchOutside(false)
             }
         }
     }
@@ -87,10 +94,7 @@ class GalleryLoader : AppCompatActivity() {
     @Suppress("MemberVisibilityCanBePrivate")
     fun startGallery() {
         Intent(Intent.ACTION_PICK).also { galleryIntent ->
-            galleryIntent.setDataAndType(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                MediaStore.Images.Media.CONTENT_TYPE
-            )
+            galleryIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, MediaStore.Images.Media.CONTENT_TYPE)
             galleryIntent.resolveActivity(packageManager)?.also {
                 startActivityForResult(galleryIntent, REQ_GALLERY)
             }
@@ -101,7 +105,7 @@ class GalleryLoader : AppCompatActivity() {
     fun startCamera() {
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
             takePictureIntent.resolveActivity(packageManager)?.also {
-                val photoURI: Uri = FileProviderHelper.getTempUri(this@GalleryLoader, "camera", ".jpg")
+                val photoURI: Uri = FileProviderHelper.createTempUri(this@GalleryLoader, "camera", ".jpg")
                 mTragetUri = photoURI
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
                 startActivityForResult(takePictureIntent, REQ_CAMERA)
@@ -111,8 +115,8 @@ class GalleryLoader : AppCompatActivity() {
 
     private var mTragetUri: Uri? = null
     @Suppress("MemberVisibilityCanBePrivate")
-    fun startCrop(sourceUri: Uri) {
-        val targetUri = FileProviderHelper.getTempUri(this@GalleryLoader, "crop", ".jpg")
+    fun startCrop(sourceUri: Uri, w: Int, h: Int) {
+        val targetUri = FileProviderHelper.createTempUri(this@GalleryLoader, "crop", ".jpg")
         val intent = Intent("com.android.camera.action.CROP").apply {
             setDataAndType(sourceUri, "image/*")
             putExtra("crop", "true")
@@ -129,16 +133,8 @@ class GalleryLoader : AppCompatActivity() {
         val list = packageManager.queryIntentActivities(intent, 0)
         for (resolveInfo in list) {
             try {
-                grantUriPermission(
-                    resolveInfo.activityInfo.packageName,
-                    sourceUri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
-                grantUriPermission(
-                    resolveInfo.activityInfo.packageName,
-                    targetUri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                )
+                grantUriPermission(resolveInfo.activityInfo.packageName, sourceUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                grantUriPermission(resolveInfo.activityInfo.packageName, targetUri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             } catch (e: Exception) {
                 Log.w(resolveInfo)
             }
@@ -154,19 +150,27 @@ class GalleryLoader : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        Log.e(requestCode, resultCode, data)
+//        Log.e(requestCode, resultCode, data)
+        val result = if (resultCode == Activity.RESULT_OK) "RESULT_OK" else "RESULT_CANCELED"
+        when (requestCode) {
+            REQ_GALLERY -> Log.e(result, "REQ_GALLERY", data?.data)
+            REQ_CROP -> Log.e(result, "REQ_CROP", mTragetUri)
+            REQ_CAMERA -> Log.e(result, "REQ_CAMERA", mTragetUri)
+        }
+
 
         if (resultCode != Activity.RESULT_OK) {
             fire(null)
             return
         }
-
         val crop = intent?.getBooleanExtra(EXTRA.CROP, false) ?: false
         if (crop) {
             intent?.putExtra(EXTRA.CROP, false)
+            val w = intent?.getIntExtra(EXTRA.CROP_WIDTH, (100 * resources.displayMetrics.density).toInt())!!
+            val h = intent?.getIntExtra(EXTRA.CROP_HEIGHT, (100 * resources.displayMetrics.density).toInt())!!
             when (requestCode) {
-                REQ_GALLERY -> startCrop(FileProviderHelper.copyForCrop(this, data?.data))
-                REQ_CAMERA -> mTragetUri?.also { sourceUri -> startCrop(sourceUri) }
+                REQ_GALLERY -> startCrop(FileProviderHelper.copyForCrop(this, data?.data), w, h)
+                REQ_CAMERA -> mTragetUri?.also { sourceUri -> startCrop(sourceUri, w, h) }
             }
             return
         }
@@ -177,39 +181,35 @@ class GalleryLoader : AppCompatActivity() {
         }
     }
 
-    private fun fire(data: Any?) {
+    private fun fire(data: Uri?) {
+        Log.p(if (data == null) Log.WARN else Log.INFO, data ?: Uri.EMPTY)
         GalleryLoaderObserver.notifyObservers(data)
-        deleteTempFiles()
+        FileProviderHelper.deleteTempFolder(this)
         finish()
     }
 
-    private fun deleteTempFiles() {
-        FileProviderHelper.deleteTemp(this)
-    }
-
     class Builder internal constructor(private val context: Context) {
-        private var mOnGalleryLoadedListener: ((Uri) -> Any)? = null
-        private var mOnCancelListener: (() -> Any)? = null
+        private var mOnGalleryLoadedListener: ((Uri) -> Unit)? = null
+        private var mOnCancelListener: (() -> Unit)? = null
         private var mSource: Source = Source.UNKNOWN
         private var isCrop = false
         private var width = 0
         private var height = 0
-
-        fun setOnGalleryLoadedListener(onGalleryLoadedListener: ((Uri) -> Any)?): Builder {
+        fun setOnGalleryLoadedListener(onGalleryLoadedListener: ((Uri) -> Unit)?): Builder {
             mOnGalleryLoadedListener = onGalleryLoadedListener
             return this
         }
 
-        fun setOnCancelListener(onCancelListener: (() -> Any)?): Builder {
+        fun setOnCancelListener(onCancelListener: (() -> Unit)?): Builder {
             mOnCancelListener = onCancelListener
             return this
         }
 
         @JvmOverloads
         fun setCrop(
-            isCrop: Boolean,
-            width: Int = context.resources.displayMetrics.widthPixels,
-            height: Int = context.resources.displayMetrics.heightPixels
+                isCrop: Boolean,
+                width: Int = context.resources.displayMetrics.widthPixels,
+                height: Int = context.resources.displayMetrics.heightPixels
         ): Builder {
             this@Builder.isCrop = isCrop
             this@Builder.width = width
@@ -227,12 +227,15 @@ class GalleryLoader : AppCompatActivity() {
                 if (arg is Uri) mOnGalleryLoadedListener?.invoke(arg)
                 else mOnCancelListener?.invoke()
             })
-            val intent = Intent(context, GalleryLoader::class.java).apply {
-                putExtra(GalleryLoader.EXTRA.CROP, isCrop)
+
+            Intent(context, GalleryLoader::class.java).apply {
+                putExtra(GalleryLoader.EXTRA.CROP, isCrop && !android.os.Build.MODEL.contains("Android SDK"))
+                putExtra(GalleryLoader.EXTRA.CROP_WIDTH, width)
+                putExtra(GalleryLoader.EXTRA.CROP_HEIGHT, height)
                 putExtra(GalleryLoader.EXTRA.SOURCE, mSource)
-            }
-            context.startActivity(intent)
+            }.also { context.startActivity(it) }
         }
     }
 }
 
+val Int.dp: Int get() = (this * Resources.getSystem().displayMetrics.density).toInt()
