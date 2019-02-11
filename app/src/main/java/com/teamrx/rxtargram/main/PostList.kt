@@ -15,7 +15,7 @@ class PostList : AppFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         bb = DataBindingUtil.inflate(inflater, R.layout.main_postlist, container, false)
-        bb.vm = ViewModelProviders.of(mActivity).get(PostListViewModel::class.java)
+        bb.postlistViewModel = ViewModelProviders.of(mActivity).get(PostListViewModel::class.java)
         return bb.root
     }
 }
