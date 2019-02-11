@@ -37,7 +37,8 @@ class PostRecyclerViewAdapter(private val mContext: Context, private val optionC
         }
     }
 
-    fun addPosts(postDTOS: List<PostDTO>) {
+    fun setPostDatas(postDTOS: List<PostDTO>) {
+        this.posts.clear()
         this.posts.addAll(postDTOS)
         notifyDataSetChanged()
 

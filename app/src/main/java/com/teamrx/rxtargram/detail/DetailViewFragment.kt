@@ -73,7 +73,7 @@ class DetailViewFragment : Fragment(), OptionClickListener {
     }
 
     private fun updateUI(postDTOS: List<PostDTO>) {
-        adapter.addPosts(postDTOS)
+        adapter.setPostDatas(postDTOS)
     }
 
     // base activity
