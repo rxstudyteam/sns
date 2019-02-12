@@ -6,14 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.teamrx.rxtargram.R
-import com.teamrx.rxtargram.model.PostDTO
+import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.util.GlideApp
 import kotlinx.android.synthetic.main.detail_item.view.*
 import java.util.*
 
 class PostRecyclerViewAdapter(private val mContext: Context, private val optionClickListener: OptionClickListener): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private val posts = ArrayList<PostDTO>()
+    private val posts = ArrayList<Post>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.detail_item, parent, false))
@@ -37,12 +37,12 @@ class PostRecyclerViewAdapter(private val mContext: Context, private val optionC
         }
     }
 
-    fun setPostDatas(postDTOS: List<PostDTO>) {
+    fun setPostDatas(posts: List<Post>) {
         this.posts.clear()
-        this.posts.addAll(postDTOS)
+        this.posts.addAll(posts)
         notifyDataSetChanged()
 
-        println("${this.posts.size}      ${postDTOS.size}")
+        println("${this.posts.size}      ${posts.size}")
     }
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view)

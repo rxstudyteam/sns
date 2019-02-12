@@ -1,15 +1,18 @@
 package com.teamrx.rxtargram.repository
 
 import com.teamrx.rxtargram.model.CommentDTO
-import com.teamrx.rxtargram.model.PostDTO
+import com.teamrx.rxtargram.model.Post
+import android.content.Context
+import com.teamrx.rxtargram.model.ProfileModel
+import java.io.InputStream
 
 class AppRepository(private val remoteAppDataSource: RemoteAppDataSource): AppDataSource {
 
-    override fun getPosts(callback: (List<PostDTO>) -> Unit) {
+    override fun getPosts(callback: (List<Post>) -> Unit) {
         remoteAppDataSource.getPosts(callback)
     }
 
-    override fun getPostById(post_id: String, callback: (PostDTO) -> Unit) {
+    override fun getPostById(post_id: String, callback: (Post) -> Unit) {
         remoteAppDataSource.getPostById(post_id, callback)
     }
 
@@ -22,5 +25,29 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource): AppDa
         fun getInstance(remoteDataSource: RemoteAppDataSource) = INSTANCE ?: synchronized(AppRepository::class.java) {
             INSTANCE ?: AppRepository(remoteDataSource).also { INSTANCE = it }
         }
+    }
+
+    override suspend fun getProfile(user_id: String): ProfileModel {
+        return remoteAppDataSource.getProfile(user_id)
+    }
+
+    override suspend fun loadGalleryLoad(context: Context): String? {
+        return remoteAppDataSource.loadGalleryLoad(context)
+    }
+
+    override suspend fun uploadToFireStorage(user_id: String, stream: InputStream) {
+        remoteAppDataSource.uploadToFireStorage(user_id, stream)
+    }
+
+    override suspend fun getDownloadUrl(user_id: String): String? {
+        return remoteAppDataSource.getDownloadUrl(user_id)
+    }
+
+    override suspend fun setProfile(user_id: String, name: CharSequence?, email: CharSequence?, profile_url: String?): Boolean {
+        return remoteAppDataSource.setProfile(user_id, name, email, profile_url)
+    }
+
+    override suspend fun join(name: CharSequence, email: CharSequence): String {
+        return remoteAppDataSource.join(name, email)
     }
 }

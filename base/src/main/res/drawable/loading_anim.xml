@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item  android:drawable="@drawable/ic_firebase_logo" android:duration="300"/>
+    <item  android:drawable="@drawable/ic_gitlab_logo" android:duration="300"/>
+    <item  android:drawable="@drawable/ic_instagram_logo_2016" android:duration="300"/>
+</animation-list>

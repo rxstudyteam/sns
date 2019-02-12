@@ -12,7 +12,7 @@ import com.teamrx.rxtargram.base.BaseViewModel
 import com.teamrx.rxtargram.detail.DetailViewModel
 import com.teamrx.rxtargram.inject.Injection
 import com.teamrx.rxtargram.model.CommentDTO
-import com.teamrx.rxtargram.model.PostDTO
+import com.teamrx.rxtargram.model.Post
 import kotlinx.android.synthetic.main.activity_comment.*
 
 class CommentActivity : AppCompatActivity() {
@@ -47,7 +47,7 @@ class CommentActivity : AppCompatActivity() {
         commentViewModel.loadComments(postId)
     }
 
-    private fun updatePost(post: PostDTO) {
+    private fun updatePost(post: Post) {
         tvUserId.text = post.user_id
         tvContent.text = post.content
         tvCreatedAt.text = post.created_at?.toDate().toString()

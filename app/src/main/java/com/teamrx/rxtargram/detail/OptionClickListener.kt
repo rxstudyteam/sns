@@ -1,8 +1,8 @@
 package com.teamrx.rxtargram.detail
 
-import com.teamrx.rxtargram.model.PostDTO
+import com.teamrx.rxtargram.model.Post
 
 interface OptionClickListener {
-    fun onOptionClick(postDTO: PostDTO?)
+    fun onOptionClick(post: Post?)
     fun onCommentClick(post_id: String)
 }

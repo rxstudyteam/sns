@@ -6,7 +6,7 @@
     <data>
 
         <variable
-            name="vm"
+            name="postlistViewModel"
             type="com.teamrx.rxtargram.main.PostListViewModel" />
     </data>
 
