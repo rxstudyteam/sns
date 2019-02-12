@@ -8,7 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.lifecycle.Observer
 import com.teamrx.rxtargram.R
+import com.teamrx.rxtargram.base.BaseViewModel
+import com.teamrx.rxtargram.inject.Injection
+import com.teamrx.rxtargram.profile.load
 import kotlinx.android.synthetic.main.editor_fragment.*
 
 class EditorFragment : Fragment() {
@@ -28,8 +32,9 @@ class EditorFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
- 
-        val adapter = ArrayAdapter.createFromResource(requireContext(), R.array.user_names, android.R.layout.simple_spinner_item)
+
+        val adapter =
+            ArrayAdapter.createFromResource(requireContext(), R.array.user_names, android.R.layout.simple_spinner_item)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         user_spinner.setAdapter(adapter)
         user_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -44,16 +49,36 @@ class EditorFragment : Fragment() {
 
         // 이미지 첨부는 어떻게 해야하는 것일까?
 
-        viewModel = ViewModelProviders.of(this).get(EditorViewModel::class.java)
+        viewModel =
+            ViewModelProviders.of(this, Injection.provideViewModelFactory()).get(EditorViewModel::class.java).apply {
+                postImageUrl.observe(this@EditorFragment, Observer {
+                    it?.run { post_image.load(this) }
+                })
+
+            }
+
+
 
         editor_write_post_button.setOnClickListener {
             val titleText = title_edit_text.text
             val contentText = context_edit_text.text
-            if (titleText.isBlank()|| contentText.isBlank()){
+            if (titleText.isBlank() || contentText.isBlank()) {
                 return@setOnClickListener
             }
             viewModel.createPost(contentText.toString(), null, titleText.toString())
         }
+
+        editor_image_post_button.setOnClickListener {
+            it?.run {
+                viewModel.getPostImage(this)
+            }
+        }
+    }
+
+    //todo super class
+    private inline fun <reified T : BaseViewModel> getViewModel(): T {
+        val viewModelFactory = Injection.provideViewModelFactory()
+        return ViewModelProviders.of(this, viewModelFactory).get(T::class.java)
     }
 
 }
