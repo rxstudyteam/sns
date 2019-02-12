@@ -3,11 +3,9 @@
           xmlns:dist="http://schemas.android.com/apk/distribution"
           xmlns:tools="http://schemas.android.com/tools"
           package="com.teamrx.rxtargram">
-
-    <dist:module dist:instant="true"/>
-
     <uses-permission android:name="android.permission.INTERNET"/>
 
+    <dist:module dist:instant="true"/>
     <application
             android:name=".base.AppApplication"
             android:allowBackup="true"
@@ -17,18 +15,19 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".main.AppMain">
+        <activity
+                android:name=".main.AppMain"
+                android:label="@string/app_name">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
         <activity android:name=".editor.EditorActivity">
         </activity>
-        <activity
-                android:name=".profile.Profile"
-                android:exported="true"/>
     </application>
 
 </manifest>

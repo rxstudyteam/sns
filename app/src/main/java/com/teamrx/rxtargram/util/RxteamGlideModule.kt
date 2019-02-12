@@ -13,14 +13,12 @@ import com.bumptech.glide.request.RequestOptions
 
 /**
  * https://bumptech.github.io/glide/doc/configuration.html
- *```
+ *
  * build.gradle requirement
  * apply plugin: 'kotlin-kapt'
- * ...
  * implementation 'com.github.bumptech.glide:glide:x.x.x'
  * annotationProcessor 'com.github.bumptech.glide:compiler:x.x.x'
  * kapt 'com.github.bumptech.glide:compiler:x.x.x'
- * ```
  */
 @GlideModule
 class RxteamGlideModule: AppGlideModule() {

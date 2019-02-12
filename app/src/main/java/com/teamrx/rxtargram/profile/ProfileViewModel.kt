@@ -20,36 +20,26 @@ import java.io.ByteArrayOutputStream
 import java.io.InputStream
 
 class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
-    private lateinit var keepProfile: ProfileModel
     val name: MutableLiveData<String> = MutableLiveData()
     val email: MutableLiveData<String> = MutableLiveData()
     val profile_url: MutableLiveData<String> = MutableLiveData()
-    val loading: MutableLiveData<Boolean> = MutableLiveData()
 
     companion object {
         private const val DEFAULT_PROFILE_URL = "https://firebasestorage.googleapis.com/v0/b/rxteam-sns.appspot.com/o/profile%2Funnamed.png?alt=media&token=bd08fa0e-84b4-438c-8f25-c7014075bf6e"
     }
 
-    fun updateProfile() {
-        Log.e(0)
-        CoroutineScope(Dispatchers.Main).launch {
-            Log.e(0)
-            var user_id = PP.user_id.get()
-            user_id = "KxUypfZKf2cKmJs4jOeU"
-
-            keepProfile = if (user_id.isNullOrBlank()) ProfileModel() else dataSource.getProfile(user_id)
-            Log.e(1, keepProfile)
-
-            Log.w(2)
-            name.value = keepProfile.name
-            email.value = keepProfile.email
-            profile_url.value = keepProfile.profile_url ?: DEFAULT_PROFILE_URL
-            Log.w(0)
-        }
-        Log.w(0)
+    suspend fun updateProfile() {
+        var user_id = PP.user_id.get()
+//            user_id = "KxUypfZKf2cKmJs4jOeU"
+        val profile = if (user_id.isNullOrBlank()) ProfileModel() else dataSource.getProfile(user_id)
+        Log.w(profile)
+        name.value = profile.name
+        email.value = profile.email
+        profile_url.value = profile.profile_url ?: DEFAULT_PROFILE_URL
     }
 
-    fun saveProfile(name: String, email: String, profile_url: String?, bitmap: Bitmap?) {
+    suspend fun saveProfile(name: String, email: String, profile_url: String?, bitmap: Bitmap?) {
+//        return join(name, email, bitmap)
         val userId = PP.user_id.get()
         if (userId.isNullOrBlank()) {
             join(name, email, bitmap)
@@ -58,62 +48,52 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
         }
     }
 
-    private fun join(name: String, email: String, bitmap: Bitmap?) {
+    private suspend fun join(name: String, email: String, bitmap: Bitmap?) {
         Log.e(0, "join", name, email, bitmap)
-        CoroutineScope(Dispatchers.Main).launch {
-            Log.e(1, sano())
-            loading.value = true
-            Log.e(2, nano())
-            val user_id = dataSource.join(name, email)
-            Log.w(3, nano(), user_id)
-            dataSource.uploadToFireStorage(user_id, bitmap?.toStream()!!)
-            Log.w(4, nano())
-            var image_url = dataSource.getDownloadUrl(user_id)
-            Log.w(5, nano(), image_url)
-            dataSource.setProfile(user_id, null, null, image_url)
-            Log.w(6, nano())
-            this@ProfileViewModel.name.value = name
-            this@ProfileViewModel.email.value = email
-            this@ProfileViewModel.profile_url.value = image_url
-            loading.value = false
-            Log.w(7, nano())
-            PP.user_id.set(user_id)
-        }
-        Log.w(100, "join", name, email, bitmap)
+//        Log.e(1, sano())
+        val user_id = dataSource.join(name, email)
+//        Log.w(2, nano(), user_id)
+        dataSource.uploadToFireStorage(user_id, bitmap?.toStream()!!)
+//        Log.w(3, nano())
+        var image_url = dataSource.getDownloadUrl(user_id)
+//        Log.w(4, nano(), image_url)
+        dataSource.setProfile(user_id, null, null, image_url)
+//        Log.w(5, nano())
+        this@ProfileViewModel.name.value = name
+        this@ProfileViewModel.email.value = email
+        this@ProfileViewModel.profile_url.value = image_url
+//        Log.w(6, nano())
+        PP.user_id.set(user_id)
+        Log.w(0)
     }
 
-    private fun update(user_id: String, name: String?, email: String?, profile_url: String?, bitmap: Bitmap?) {
-        Log.w(0, sano(), "update")
-        CoroutineScope(Dispatchers.Main).launch {
-            Log.e(1, nano())
-            loading.value = true
-            Log.e(2, nano())
-            var profile_url: String? = profile_url
-            if (this@ProfileViewModel.profile_url.value != profile_url) {
-                Log.w(3, nano(), user_id)
-                dataSource.uploadToFireStorage(user_id, bitmap?.toStream()!!)
-                Log.w(4, nano())
-                profile_url = dataSource.getDownloadUrl(user_id)
-                Log.w(5, nano())
-            }
-            Log.w(6, nano(), profile_url)
-            dataSource.setProfile(user_id
-                    , name?.takeUnless { this@ProfileViewModel.name.value == name }
-                    , email?.takeUnless { this@ProfileViewModel.email.value == email }
-                    , profile_url?.takeUnless { this@ProfileViewModel.profile_url.value == profile_url }
-            )
-            Log.w(7, nano())
-            name?.takeUnless { this@ProfileViewModel.name.value == name }?.let { this@ProfileViewModel.name.value = name }
-            email?.takeUnless { this@ProfileViewModel.email.value == email }?.let { this@ProfileViewModel.email.value = email }
-            profile_url?.takeUnless { this@ProfileViewModel.profile_url.value == profile_url }?.let { this@ProfileViewModel.profile_url.value = profile_url }
-            loading.value = false
-            Log.w(8, nano())
+    private suspend fun update(user_id: String, name: String?, email: String?, profile_url: String?, bitmap: Bitmap?) {
+        Log.e(0, sano(), "update", user_id, name, email, profile_url, bitmap)
+        var profileUrl: String? = profile_url
+        if (this@ProfileViewModel.profile_url.value != profileUrl) {
+//            Log.w(3, nano(), user_id)
+            dataSource.uploadToFireStorage(user_id, bitmap?.toStream()!!)
+//            Log.w(4, nano())
+            profileUrl = dataSource.getDownloadUrl(user_id)
+//            Log.w(5, nano())
         }
-        Log.w(99, nano())
+//        Log.w(6, nano(), profile_url)
+        dataSource.setProfile(user_id
+                , name?.takeUnless { this@ProfileViewModel.name.value == name }
+                , email?.takeUnless { this@ProfileViewModel.email.value == email }
+                , profileUrl?.takeUnless { this@ProfileViewModel.profile_url.value == profileUrl }
+        )
+//        Log.w(7, nano())
+        name?.takeUnless { this@ProfileViewModel.name.value == name }?.let { this@ProfileViewModel.name.value = name }
+        email?.takeUnless { this@ProfileViewModel.email.value == email }?.let { this@ProfileViewModel.email.value = email }
+        profileUrl?.takeUnless { this@ProfileViewModel.profile_url.value == profileUrl }?.let { this@ProfileViewModel.profile_url.value = profileUrl }
+//        Log.w(8, nano())
+        Log.w(0, nano())
     }
 
     fun getTitle() = if (PP.user_id.get().isNullOrBlank()) "회원가입" else "프로필"
 
+    //!!DO NOT HOF
     fun getUserImage(view: View) {
         CoroutineScope(Dispatchers.Main).launch {
             profile_url.value = dataSource.loadGalleryLoad(view.context) ?: DEFAULT_PROFILE_URL

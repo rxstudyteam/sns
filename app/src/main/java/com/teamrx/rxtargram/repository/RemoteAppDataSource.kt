@@ -21,7 +21,41 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 @Suppress("ClassName")
-object RemoteAppDataSource : AppDataSource {
+object RemoteAppDataSource: AppDataSource {
+
+    private lateinit var postLiveData: MutableLiveData<List<Post>>
+
+    // https://github.com/kunny/RxFirebase
+    // Firebase + Rxjava를 이용해 Obserbable을 리턴하고 ViewModel에서 Livedata로 데이터를 관리하고 싶었으나
+    // 위 라이브러리의 기능이 얼만큼 있는지 확인이 안되어 Repo에서 LiveData로 관리하도록 구현함
+    override fun getPosts(): LiveData<List<Post>> {
+        if(!::postLiveData.isInitialized) {
+            postLiveData = MutableLiveData()
+
+            val firestore = FirebaseFirestore.getInstance()
+            firestore.collection("post").orderBy("created_at")
+                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                    if(querySnapshot == null) return@addSnapshotListener
+
+                    val posts = mutableListOf<Post>()
+                    for(snapshot in querySnapshot.documents) {
+                        try {
+                            val item = snapshot.toObject(Post::class.java)
+                            // 팔로우한 유저만 구분.
+                            if (item != null)
+                                posts.add(item)
+                        } catch (e: Exception) {
+                            firebaseFirestoreException?.printStackTrace()
+                            e.printStackTrace()
+                        }
+                    }
+
+                    postLiveData.postValue(posts)
+                }
+        }
+
+        return postLiveData
+    }
 
     const val USER_COLLECTION = "user"
     const val POST_COLLECTION = "post"
@@ -41,24 +75,13 @@ object RemoteAppDataSource : AppDataSource {
             try {
                 GalleryLoader.builder(context)
                         .setCrop(true, 100.dp, 100.dp)
-                        .setOnGalleryLoadedListener { uri ->
-                            Log.e("continuation.setOnGalleryLoadedListener", uri)
-                            continuation.resume(uri.toString())
-                            Log.w("continuation.setOnGalleryLoadedListener")
-                        }
-                        .setOnCancelListener {
-                            Log.e("continuation.setOnCancelListener")
-                            continuation.cancel()
-                            Log.w("continuation.setOnCancelListener")
-                        }
+                        .setOnGalleryLoadedListener { continuation.resume(it.toString()) }
+                        .setOnCancelListener { continuation.cancel() }
                         .load()
             } catch (e: Exception) {
                 continuation.resumeWithException(e)
             }
-            continuation.invokeOnCancellation {
-                Log.e("continuation.invokeOnCancellation")
-                continuation.resumeWithException(EmptyStackException())
-            }
+            continuation.invokeOnCancellation { continuation.resumeWithException(EmptyStackException()) }
         }
     }
 
@@ -97,9 +120,7 @@ object RemoteAppDataSource : AppDataSource {
             profile_url?.let { map[USER_DOCUMENT.PROFILE_URL] = profile_url }
             val task = ref.update(map as Map<String, Any>)
             task.addOnSuccessListener {
-                Log.e("addOnSuccessListener")
                 continuation.resume(true)
-                Log.w("addOnSuccessListener", true)
             }
             suspendCancellableCoroutineTask(continuation, task)
         }
@@ -110,11 +131,7 @@ object RemoteAppDataSource : AppDataSource {
             val db = FirebaseFirestore.getInstance()
             val ref = db.collection(USER_COLLECTION)
             val task = ref.add(hashMapOf<String, Any>(USER_DOCUMENT.NAME to name.toString(), USER_DOCUMENT.EMAIL to email.toString()))
-            task.addOnSuccessListener {
-                Log.e("addOnSuccessListener")
-                continuation.resume(it.id)
-                Log.w("addOnSuccessListener", it.id)
-            }
+            task.addOnSuccessListener { continuation.resume(it.id) }
 
             suspendCancellableCoroutineTask(continuation, task)
         }
@@ -127,11 +144,7 @@ object RemoteAppDataSource : AppDataSource {
                     .child("profile/${user_id}")
                     .putStream(stream)
 
-            task.addOnSuccessListener {
-                Log.e("addOnSuccessListener1")
-                continuation.resume(Unit)
-                Log.w("addOnSuccessListener1")
-            }
+            task.addOnSuccessListener { continuation.resume(Unit) }
             suspendCancellableCoroutineTask(continuation, task)
         }
     }
@@ -143,77 +156,16 @@ object RemoteAppDataSource : AppDataSource {
                     .child("profile/${user_id}")
                     .downloadUrl
 
-            task.addOnSuccessListener {
-                Log.e("addOnSuccessListener2")
-                continuation.resume(it.toString())
-                Log.w("addOnSuccessListener2", it.toString())
-            }
+            task.addOnSuccessListener { continuation.resume(it.toString()) }
             suspendCancellableCoroutineTask(continuation, task)
         }
     }
 
-//    override fun join(name: String, email: String, imageUrl: String?): Boolean {
-//        FirebaseFirestore.getInstance().collection(USER_COLLECTION)
-//                .add(profileModel)
-//                .addOnSuccessListener { documentReference ->
-//                    PP.user_id.set(documentReference.id)
-//                    Log.e(PP.user_id.get(), "회원가입이 완료됨")
-//                }
-//                .addOnFailureListener { e -> e.printStackTrace() }
-//        return true
-//    }
-
-    // https://github.com/kunny/RxFirebase
-// Firebase + Rxjava를 이용해 Obserbable을 리턴하고 ViewModel에서 Livedata로 데이터를 관리하고 싶었으나
-// 위 라이브러리의 기능이 얼만큼 있는지 확인이 안되어 Repo에서 LiveData로 관리하도록 구현함
-    override fun getPosts(): LiveData<List<Post>> {
-        val postLiveData = MutableLiveData<List<Post>>()
-
-        val firestore = FirebaseFirestore.getInstance()
-        firestore.collection(POST_COLLECTION).orderBy(POST_DOCUMENT.CREATED_AT)
-                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                    if (querySnapshot == null) return@addSnapshotListener
-
-                    val posts = mutableListOf<Post>()
-                    for (snapshot in querySnapshot.documents) {
-                        try {
-                            val item = snapshot.toObject(Post::class.java)
-                            // 팔로우한 유저만 구분.
-                            if (item != null)
-                                posts.add(item)
-                        } catch (e: Exception) {
-                            firebaseFirestoreException?.printStackTrace()
-                            e.printStackTrace()
-                        }
-                    }
-
-                    postLiveData.postValue(posts)
-                }
-
-        return postLiveData
-    }
-
     private fun <T, R> suspendCancellableCoroutineTask(continuation: CancellableContinuation<T>, task: Task<R>) {
-        task.addOnCompleteListener {
-            if (it.isComplete && it.isSuccessful)
-                Log.i("addOnCompleteListener maybe success?")
-            else
-                Log.w("addOnCompleteListener maybe fail?")
-        }
-        task.addOnCanceledListener {
-            Log.e("addOnCanceledListener")
-            continuation.cancel()
-            Log.w("addOnCanceledListener")
-        }
-        task.addOnFailureListener {
-            Log.e("addOnFailureListener")
-            continuation.cancel()
-            Log.w("addOnFailureListener", "continuation.resumeWithException(it)")
-        }
-        continuation.invokeOnCancellation {
-            Log.e("continuation.invokeOnCancellation")
-            continuation.cancel()
-        }
+        //for log
+        Exception().stackTrace[2].run { task.addOnCompleteListener { Log.ps(if (it.isSuccessful) Log.INFO else Log.WARN, this, it.isComplete && it.isSuccessful) } }
+        task.addOnCanceledListener { continuation.cancel() }
+        task.addOnFailureListener { continuation.cancel() }
+        continuation.invokeOnCancellation { continuation.cancel() }
     }
-
 }
