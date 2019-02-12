@@ -75,25 +75,31 @@ object RemoteAppDataSource: AppDataSource {
 
     override fun getComments(post_id: String, callback: (List<CommentDTO>) -> Unit) {
 
-        // 새로고침 방식
-        fireStore.collection("post").whereEqualTo("parent_post_no", post_id).get()
-            .addOnCompleteListener { task ->
-                if(task.isSuccessful) {
-                    task.result?.let { querySnapshot ->
-                        val commentDTOs = mutableListOf<CommentDTO>()
+        fireStore.collection("post").whereEqualTo("parent_post_no", post_id)
+            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                if(querySnapshot == null) return@addSnapshotListener
 
-                        for(dc in querySnapshot.documents) {
-                            val item = dc.toObject(CommentDTO::class.java)
-
-                            if(item?.parent_post_no == post_id) {
-                                commentDTOs.add(item)
-                            }
+                val commentDTOs = mutableListOf<CommentDTO>()
+                for(snapshot in querySnapshot.documents) {
+                    try {
+                        val item = snapshot.toObject(CommentDTO::class.java)
+                        if(item?.parent_post_no == post_id) {
+                            commentDTOs.add(item)
                         }
-
-                        callback(commentDTOs)
+                    } catch (e: Exception) {
+                        firebaseFirestoreException?.printStackTrace()
+                        e.printStackTrace()
                     }
-
                 }
+
+                callback(commentDTOs)
+            }
+    }
+
+    override fun addComment(parent_post_id: String, user_id: String, content: String, callback: (Boolean) -> Unit) {
+        fireStore.collection("post").document().set(CommentDTO(parent_post_id, content,user_id))
+            .addOnCompleteListener {
+                callback(it.isSuccessful)
             }
     }
 

@@ -16,6 +16,9 @@ interface AppDataSource {
     // 댓글 목록 가져오기
     fun getComments(post_id: String, callback: (List<CommentDTO>) -> Unit)
 
+    // 댓글 추가하기
+    fun addComment(parent_post_id: String, user_id: String, content: String, callback: (Boolean) -> Unit)
+
     //프로필가져오기
     suspend fun getProfile(user_id: String): ProfileModel
 

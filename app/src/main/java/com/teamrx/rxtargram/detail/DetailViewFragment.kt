@@ -31,18 +31,8 @@ class DetailViewFragment : Fragment(), OptionClickListener {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        adapter = PostRecyclerViewAdapter(requireContext(), this)
-        recyclerView.layoutManager = LinearLayoutManager(activity)
-        recyclerView.adapter = adapter
-
-        detailViewModel = getViewModel()
-
-        detailViewModel.getPosts().observe(this, Observer { posts ->
-            println("detail viewmodel observe..")
-            updateUI(posts)
-        })
-
-        detailViewModel.loadPosts()
+        setupRecyclerView()
+        setupViewModel()
     }
 
     override fun onOptionClick(post: Post?) {
@@ -69,6 +59,22 @@ class DetailViewFragment : Fragment(), OptionClickListener {
         // comment 목록보기 화면
         val activity = activity ?: return
         CommentActivity.startActivity(activity, post_id)
+    }
+
+    private fun setupRecyclerView() {
+        adapter = PostRecyclerViewAdapter(requireContext(), this)
+        recyclerView.layoutManager = LinearLayoutManager(activity)
+        recyclerView.adapter = adapter
+    }
+
+    private fun setupViewModel() {
+        detailViewModel = getViewModel()
+        detailViewModel.getPosts().observe(this, Observer { posts ->
+            println("detail viewmodel observe..")
+            updateUI(posts)
+        })
+
+        detailViewModel.loadPosts()
     }
 
     private fun updateUI(posts: List<Post>) {

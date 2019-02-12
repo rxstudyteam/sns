@@ -30,6 +30,7 @@ class CommentAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     fun setComments(comments: List<CommentDTO>) {
         this.comments.clear()
         this.comments.addAll(comments)
+
         notifyDataSetChanged()
     }
 

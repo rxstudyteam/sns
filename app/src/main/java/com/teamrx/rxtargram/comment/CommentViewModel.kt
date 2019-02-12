@@ -17,4 +17,8 @@ class CommentViewModel(appDataSource: AppDataSource): BaseViewModel(appDataSourc
         }
     }
 
+    fun addComment(parent_post_id: String, user_id: String, content: String, callback: (Boolean) -> Unit) {
+        dataSource.addComment(parent_post_id, user_id, content, callback)
+    }
+
 }

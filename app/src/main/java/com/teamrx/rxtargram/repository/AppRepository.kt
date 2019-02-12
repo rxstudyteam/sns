@@ -20,6 +20,10 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource): AppDa
         remoteAppDataSource.getComments(post_id, callback)
     }
 
+    override fun addComment(parent_post_id: String, user_id: String, content: String, callback: (Boolean) -> Unit) {
+        remoteAppDataSource.addComment(parent_post_id, user_id, content, callback)
+    }
+
     companion object {
         private var INSTANCE: AppRepository? = null
         fun getInstance(remoteDataSource: RemoteAppDataSource) = INSTANCE ?: synchronized(AppRepository::class.java) {
