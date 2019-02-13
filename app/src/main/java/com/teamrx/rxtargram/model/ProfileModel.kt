@@ -5,10 +5,6 @@ data class ProfileModel(
         var email: String = "",
         var profile_url: String? = null
 )
-//{
-//    init {
-//    }
-//}
 
 
 

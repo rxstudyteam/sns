@@ -1,61 +1,111 @@
 package com.teamrx.rxtargram.profile
 
+import android.graphics.Bitmap
+import android.log.Log
 import android.os.Bundle
+import android.view.*
+import android.widget.ImageView
+import androidx.databinding.BindingAdapter
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProviders
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.BitmapImageViewTarget
 import com.teamrx.rxtargram.R
-import com.teamrx.rxtargram.base.AppActivity
+import com.teamrx.rxtargram.base.AppFragment
 import com.teamrx.rxtargram.databinding.ProfileWriteBinding
 import com.teamrx.rxtargram.inject.Injection
-import com.teamrx.rxtargram.model.ProfileModel
-import com.teamrx.rxtargram.repository.AppDataSource
-import smart.base.PP
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import smart.util.check
 
-class Profile : AppActivity() {
+class Profile : AppFragment() {
     private lateinit var bb: ProfileWriteBinding
+    private lateinit var vm: ProfileViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        bb = DataBindingUtil.setContentView(this, R.layout.profile_write)
-        bb.profileViewModel = ViewModelProviders.of(mActivity, Injection.provideViewModelFactory()).get(ProfileViewModel::class.java)
-        bb.setLifecycleOwner(this)
+        setHasOptionsMenu(true)
+
     }
-}
 
-class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
-    lateinit var profileModel: MutableLiveData<ProfileModel>
-
-    fun getProfile(): LiveData<ProfileModel> {
-        if (!::profileModel.isInitialized) {
-            profileModel = MutableLiveData()
-            val userId = PP.user_id.get("")!!
-            profileModel.value = dataSource.getProfile(userId)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return DataBindingUtil.inflate<ProfileWriteBinding>(inflater, R.layout.profile_write, container, false).let { binding ->
+            bb = binding
+            binding.root
         }
-        return profileModel
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        vm = ViewModelProviders.of(mActivity, Injection.provideViewModelFactory()).get(ProfileViewModel::class.java)
+        bb.apply {
+            profileViewModel = vm
+            lifecycleOwner = mActivity
+        }
+
+        supportActionBar?.apply { title = vm.getTitle() }
+
+        loadProfile()
+    }
+
+    private fun loadProfile() = CoroutineScope(Dispatchers.Main).launch {
+        showProgress()
+        vm.updateProfile()
+        dismissProgress()
+    }
+
+    private fun saveProfile() = CoroutineScope(Dispatchers.Main).launch {
+        if (check()) {
+            showProgress()
+            vm.saveProfile(bb.name.text.toString()
+                    , bb.email.text.toString()
+                    , bb.profileUrl.getTag(R.id.text) as String?
+                    , bb.profileUrl.getTag(R.id.icon) as Bitmap?)
+
+            supportActionBar?.apply { title = vm.getTitle() }
+            
+            dismissProgress()
+        }
+    }
+
+    private fun check() = bb.name.check() && bb.email.check()
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        inflater?.inflate(R.menu.profile, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        return when (item?.itemId) {
+            R.id.save -> saveProfile().let { true }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 }
 
-//@BindingAdapter("bind:imageUrl")
-//fun ImageView.loadImage(imageUrl: String?) {
-//    Log.e(imageUrl)
-//    Glide.with(context)
-//            .load(imageUrl)
-//            .into(this)
-//}
-
-//@BindingAdapter("time")
-//@JvmStatic fun setTime(view: MyView, newValue: Time) {
-//    // Important to break potential infinite loops.
-//    if (view.time != newValue) {
-//        view.time = newValue
-//    }
-//}
-
-//@BindingAdapter("android:text")
-//fun TextView.loadText(text: String?) {
-//    Log.e(text)
-//    this.text = "~$text~"
-//}
+@BindingAdapter("load")
+fun ImageView.load(imageUrl: String?) {
+    Log.e(imageUrl)
+    Glide.with(this)
+            .setDefaultRequestOptions(RequestOptions().apply {
+                placeholder(R.drawable.ic_face_black_24dp)
+                error(R.drawable.ic_face_black_24dp)
+            })
+            .asBitmap()
+            .load(imageUrl)
+            .apply(RequestOptions.circleCropTransform())
+            .into(object : BitmapImageViewTarget(this) {
+                override fun setResource(resource: Bitmap?) {
+                    resource?.let { bitmap ->
+                        setTag(R.id.text, imageUrl)
+                        setTag(R.id.icon, bitmap)
+//                        Log.e(getTag(R.id.text))
+//                        Log.e(getTag(R.id.icon))
+                    }
+                    super.setResource(resource)
+                }
+            })
+}

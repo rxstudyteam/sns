@@ -1,9 +1,12 @@
 package com.teamrx.rxtargram;
 
+import android.app.Activity;
 import android.content.Context;
+import android.widget.ImageView;
 
-import androidx.test.InstrumentationRegistry;
-
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -15,6 +18,8 @@ import org.junit.Test;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import androidx.test.InstrumentationRegistry;
 
 import static com.teamrx.rxtargram.repository.RemoteAppDataSource.USER_COLLECTION;
 import static org.junit.Assert.assertEquals;
@@ -31,7 +36,6 @@ public class ExampleInstrumentedTestJ {
         Context appContext = InstrumentationRegistry.getTargetContext();
         assertEquals("com.teamrx.rxtargram", appContext.getPackageName());
     }
-
     @Test
     public void sdf() {
         String user_id = null;
@@ -48,5 +52,22 @@ public class ExampleInstrumentedTestJ {
             }
         });
     }
+    @Test
+    public void sdfssss() {
+        Activity context = null;
+        byte[] imageUrl = new byte[0];
+        ImageView imageView = null;
+        Glide.with(context)
+                .asBitmap()
+                .load(imageUrl)
+                .apply(RequestOptions.circleCropTransform())
+                .into(new BitmapImageViewTarget(imageView) {
+                });
+    }
 }
+//    @BindingAdapter(value = {"imageUrl"})
+//    public static void setImage(ImageView imageView, String url) {
+//        Log.e(url);
+//    }
+
 

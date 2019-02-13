@@ -16,7 +16,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class RemoteAppDataSource {
     @Test
-    fun getProfile() {
+    suspend fun getProfile() {
         Log.MODE = Log.eMODE.SYSTEMOUT
         var user_id = "KxUypfZKf2cKmJs4jOeU"
         val pm = RemoteAppDataSource.getProfile(user_id)
