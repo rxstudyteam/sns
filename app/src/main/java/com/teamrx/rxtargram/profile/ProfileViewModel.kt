@@ -4,7 +4,6 @@ package com.teamrx.rxtargram.profile
 
 import android.graphics.Bitmap
 import android.log.Log
-import android.log.nano
 import android.log.sano
 import android.view.View
 import androidx.lifecycle.MutableLiveData
@@ -50,45 +49,42 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
 
     private suspend fun join(name: String, email: String, bitmap: Bitmap?) {
         Log.e(0, "join", name, email, bitmap)
-//        Log.e(1, sano())
         val user_id = dataSource.join(name, email)
-//        Log.w(2, nano(), user_id)
         dataSource.uploadToFireStorage(user_id, bitmap?.toStream()!!)
-//        Log.w(3, nano())
         var image_url = dataSource.getDownloadUrl(user_id)
-//        Log.w(4, nano(), image_url)
         dataSource.setProfile(user_id, null, null, image_url)
-//        Log.w(5, nano())
-        this@ProfileViewModel.name.value = name
-        this@ProfileViewModel.email.value = email
-        this@ProfileViewModel.profile_url.value = image_url
-//        Log.w(6, nano())
+        this.name.value = name
+        this.email.value = email
+        this.profile_url.value = image_url
         PP.user_id.set(user_id)
-        Log.w(0)
     }
 
     private suspend fun update(user_id: String, name: String?, email: String?, profile_url: String?, bitmap: Bitmap?) {
         Log.e(0, sano(), "update", user_id, name, email, profile_url, bitmap)
         var profileUrl: String? = profile_url
-        if (this@ProfileViewModel.profile_url.value != profileUrl) {
-//            Log.w(3, nano(), user_id)
-            dataSource.uploadToFireStorage(user_id, bitmap?.toStream()!!)
-//            Log.w(4, nano())
-            profileUrl = dataSource.getDownloadUrl(user_id)
-//            Log.w(5, nano())
+        //url이 변경됐을때만등록
+        if (this.profile_url.value != profileUrl) {
+            dataSource.uploadToFireStorage(user_id, bitmap?.toStream()!!)//이미지등록
+            profileUrl = dataSource.getDownloadUrl(user_id)//이미지등록한주소가져오기
         }
-//        Log.w(6, nano(), profile_url)
+
+        //달라진항목만 setProfile 등록
         dataSource.setProfile(user_id
-                , name?.takeUnless { this@ProfileViewModel.name.value == name }
-                , email?.takeUnless { this@ProfileViewModel.email.value == email }
-                , profileUrl?.takeUnless { this@ProfileViewModel.profile_url.value == profileUrl }
+                , name?.takeUnless { this.name.value == name }
+                , email?.takeUnless { this.email.value == email }
+                , profileUrl?.takeUnless { this.profile_url.value == profileUrl }
         )
-//        Log.w(7, nano())
-        name?.takeUnless { this@ProfileViewModel.name.value == name }?.let { this@ProfileViewModel.name.value = name }
-        email?.takeUnless { this@ProfileViewModel.email.value == email }?.let { this@ProfileViewModel.email.value = email }
-        profileUrl?.takeUnless { this@ProfileViewModel.profile_url.value == profileUrl }?.let { this@ProfileViewModel.profile_url.value = profileUrl }
-//        Log.w(8, nano())
-        Log.w(0, nano())
+
+        //UI Update
+        name?.takeUnless { this.name.value == name }?.let {
+            this.name.value = name
+        }
+        email?.takeUnless { this.email.value == email }?.let {
+            this.email.value = email
+        }
+        profileUrl?.takeUnless { this.profile_url.value == profileUrl }?.let {
+            this.profile_url.value = profileUrl
+        }
     }
 
     fun getTitle() = if (PP.user_id.get().isNullOrBlank()) "회원가입" else "프로필"
