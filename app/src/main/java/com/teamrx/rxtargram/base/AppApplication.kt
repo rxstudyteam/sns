@@ -12,5 +12,4 @@ class AppApplication : BApplication() {
         super.onCreate()
         context = baseContext
     }
-
 }

@@ -6,7 +6,7 @@ import com.teamrx.rxtargram.base.BaseViewModel
 import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.repository.AppDataSource
 
-class DetailViewModel(dataSource: AppDataSource): BaseViewModel(dataSource) {
+class DetailViewModel(dataSource: AppDataSource) : BaseViewModel(dataSource) {
 
     private val postDTOs: MutableLiveData<List<Post>> by lazy { MutableLiveData<List<Post>>() }
     private val post: MutableLiveData<Post> by lazy { MutableLiveData<Post>() }
@@ -24,4 +24,7 @@ class DetailViewModel(dataSource: AppDataSource): BaseViewModel(dataSource) {
             this.post.value = post
         }
     }
+
+
+    fun modifyPost(post: Post, callback : (Boolean) -> Unit) = dataSource.modifyPost(post, callback)
 }

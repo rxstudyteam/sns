@@ -1,7 +1,7 @@
 package com.teamrx.rxtargram.detail
 
-
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -24,20 +24,51 @@ class DetailViewFragment : Fragment(), OptionClickListener {
 
     private lateinit var detailViewModel: DetailViewModel
     private lateinit var adapter: PostRecyclerViewAdapter
+    private val REQUEST_MODYFY = 1001
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
-            = inflater.inflate(R.layout.fragment_detail_view, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        inflater.inflate(R.layout.fragment_detail_view, container, false)
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        // 컴포넌트 리스너
         setupRecyclerView()
+
+        // 활성화 되었을 때 데이터를 다시 로드 하기 위해 뷰모델 observe
         setupViewModel()
     }
 
-    override fun onOptionClick(post: Post?) {
-        val context = this.context ?: return
+    private fun setupRecyclerView() {
+        adapter = PostRecyclerViewAdapter(requireContext(), this)
+        recyclerView.layoutManager = LinearLayoutManager(activity)
+        recyclerView.adapter = adapter
+    }
 
+    private fun setupViewModel() {
+        detailViewModel = getViewModel()
+        detailViewModel.getPosts().observe(this, Observer { posts ->
+            updateUI(posts)
+        })
+
+        detailViewModel.loadPosts()
+
+    }
+
+    private fun updateUI(posts: List<Post>) {
+        adapter.setPostDatas(posts)
+    }
+
+    private inline fun <reified T : BaseViewModel> getViewModel(): T {
+        val viewModelFactory = Injection.provideViewModelFactory()
+        return ViewModelProviders.of(this, viewModelFactory).get(T::class.java)
+    }
+
+    companion object {
+        fun newInstance() = DetailViewFragment()
+    }
+
+    override fun onOptionClick(post: Post?) {
         val alertBuilder = AlertDialog.Builder(context)
         val adapter = ArrayAdapter<String>(context, android.R.layout.select_dialog_item)
         adapter.addAll(getStringArray(R.array.post_option).toMutableList())
@@ -47,7 +78,7 @@ class DetailViewFragment : Fragment(), OptionClickListener {
             val strName = adapter.getItem(id)
 
             when (strName) {
-                getString(R.string.crystal) -> println("수정!!")
+                getString(R.string.modify) -> startModifyActivity(post)
             }
 
             Toast.makeText(context, "selected $strName", Toast.LENGTH_SHORT).show()
@@ -61,34 +92,10 @@ class DetailViewFragment : Fragment(), OptionClickListener {
         CommentActivity.startActivity(activity, post_id)
     }
 
-    private fun setupRecyclerView() {
-        adapter = PostRecyclerViewAdapter(requireContext(), this)
-        recyclerView.layoutManager = LinearLayoutManager(activity)
-        recyclerView.adapter = adapter
+    private fun startModifyActivity(post: Post?) {
+        val intent = Intent(activity?.applicationContext, ModifyActivity::class.java)
+        intent.putExtra("post", post)
+
+        activity?.startActivity(intent)
     }
-
-    private fun setupViewModel() {
-        detailViewModel = getViewModel()
-        detailViewModel.getPosts().observe(this, Observer { posts ->
-            println("detail viewmodel observe..")
-            updateUI(posts)
-        })
-
-        detailViewModel.loadPosts()
-    }
-
-    private fun updateUI(posts: List<Post>) {
-        adapter.setPostDatas(posts)
-    }
-
-    // base activity
-    private inline fun <reified T : BaseViewModel> getViewModel(): T {
-        val viewModelFactory = Injection.provideViewModelFactory()
-        return ViewModelProviders.of(this, viewModelFactory).get(T::class.java)
-    }
-
-    companion object {
-        fun newInstance() = DetailViewFragment()
-    }
-
 }

@@ -6,7 +6,8 @@ import android.content.Context
 import com.teamrx.rxtargram.model.ProfileModel
 import java.io.InputStream
 
-class AppRepository(private val remoteAppDataSource: RemoteAppDataSource): AppDataSource {
+class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppDataSource {
+    override fun modifyPost(post: Post, callback: (Boolean) -> Unit) = remoteAppDataSource.modifyPost(post, callback)
 
     override fun getPosts(callback: (List<Post>) -> Unit) {
         remoteAppDataSource.getPosts(callback)
@@ -22,13 +23,6 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource): AppDa
 
     override fun addComment(parent_post_id: String, user_id: String, content: String, callback: (Boolean) -> Unit) {
         remoteAppDataSource.addComment(parent_post_id, user_id, content, callback)
-    }
-
-    companion object {
-        private var INSTANCE: AppRepository? = null
-        fun getInstance(remoteDataSource: RemoteAppDataSource) = INSTANCE ?: synchronized(AppRepository::class.java) {
-            INSTANCE ?: AppRepository(remoteDataSource).also { INSTANCE = it }
-        }
     }
 
     override suspend fun getProfile(user_id: String): ProfileModel {
@@ -53,5 +47,12 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource): AppDa
 
     override suspend fun join(name: CharSequence, email: CharSequence): String {
         return remoteAppDataSource.join(name, email)
+    }
+
+    companion object {
+        private var INSTANCE: AppRepository? = null
+        fun getInstance(remoteDataSource: RemoteAppDataSource) = INSTANCE ?: synchronized(AppRepository::class.java) {
+            INSTANCE ?: AppRepository(remoteDataSource).also { INSTANCE = it }
+        }
     }
 }

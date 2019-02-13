@@ -21,7 +21,20 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 @Suppress("ClassName")
-object RemoteAppDataSource: AppDataSource {
+object RemoteAppDataSource : AppDataSource {
+
+    const val USER_COLLECTION = "user"
+    const val POST_COLLECTION = "post"
+
+    object USER_DOCUMENT {
+        const val EMAIL = "email"
+        const val NAME = "name"
+        const val PROFILE_URL = "profile_url"
+    }
+
+    object POST_DOCUMENT {
+        const val CREATED_AT = "created_at"
+    }
 
     private val fireStore: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
     private val cachedPosts: HashMap<String, Post> by lazy { HashMap<String, Post>() }
@@ -103,17 +116,17 @@ object RemoteAppDataSource: AppDataSource {
             }
     }
 
-    const val USER_COLLECTION = "user"
-    const val POST_COLLECTION = "post"
+    override fun modifyPost(post: Post, callback: (Boolean) -> Unit) {
 
-    object USER_DOCUMENT {
-        const val EMAIL = "email"
-        const val NAME = "name"
-        const val PROFILE_URL = "profile_url"
-    }
+        post.snapshotId?.let {
+            println("post : $post")
+            val firestore = FirebaseFirestore.getInstance()
+            firestore.collection(POST_COLLECTION).document(it).set(post)
+                    .addOnCompleteListener { it ->
+                        callback(it.isSuccessful)
 
-    object POST_DOCUMENT {
-        const val CREATED_AT = "created_at"
+                    }
+        }
     }
 
     override suspend fun loadGalleryLoad(context: Context): String? {
