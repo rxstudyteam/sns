@@ -65,6 +65,7 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
         //url이 변경됐을때만등록
         if (this.profile_url.value != profileUrl) {
             dataSource.uploadToFireStorage(user_id, bitmap?.toStream()!!)//이미지등록
+            //TODO : 카메라 , CROP 에서 가져온경우 원본을 삭제하는 기능이 있어야 한다. FileProviderHelper.deleteResults(Context)를 사용해서
             profileUrl = dataSource.getDownloadUrl(user_id)//이미지등록한주소가져오기
         }
 
