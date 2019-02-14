@@ -37,6 +37,7 @@ import java.util.*
 
 object FileProviderHelper {
     private const val PROVIDER = ".provider"
+    private const val RESULT_PREFIX = "result"
     private val GLOADER_FOLDER = "gloader" to "galleryloader/"
     private val GTEMP_FOLDER = "gtemp" to "galleryloader/temp/"
     private fun getRootFolder(context: Context): File {
@@ -121,7 +122,7 @@ object FileProviderHelper {
     fun moveForResult(context: Context, uri: Uri?): Uri? {
         return try {
             val source = toFile(context, uri)
-            val target = createTempFile(context, "result", ".jpg")
+            val target = createTempFile(context, RESULT_PREFIX, ".jpg")
             val result = source?.renameTo(target)
             if (result!!)
                 toUri(context, target)
@@ -129,6 +130,20 @@ object FileProviderHelper {
                 uri
         } catch (e: Exception) {
             uri
+        }
+    }
+
+    fun deleteResults(context: Context) {
+        val results = File(getRootFolder(context), GLOADER_FOLDER.second).listFiles { _, name -> name.startsWith(RESULT_PREFIX) }
+        for (result in results) {
+            if (!result.exists())
+                continue
+            val target = File.createTempFile("delete_", "", getRootFolder(context))
+            if (result.renameTo(target)) {
+                deleteRecursive(target)
+            } else {
+                deleteRecursive(result)
+            }
         }
     }
 
