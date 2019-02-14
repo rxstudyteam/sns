@@ -10,7 +10,7 @@ import kotlinx.android.synthetic.main.comment_item.view.*
 
 class CommentAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    val comments: ArrayList<CommentDTO> by lazy { arrayListOf<CommentDTO>() }
+    val comments = arrayListOf<CommentDTO>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder
         = ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.comment_item, parent, false))
