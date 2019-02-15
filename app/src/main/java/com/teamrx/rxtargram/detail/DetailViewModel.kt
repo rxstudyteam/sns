@@ -1,13 +1,30 @@
 package com.teamrx.rxtargram.detail
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.teamrx.rxtargram.base.BaseViewModel
 import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.repository.AppDataSource
 
 class DetailViewModel(dataSource: AppDataSource) : BaseViewModel(dataSource) {
 
-    fun getPosts(): LiveData<List<Post>> = dataSource.getPosts()
+    private val postDTOs: MutableLiveData<List<Post>> by lazy { MutableLiveData<List<Post>>() }
+    private val post: MutableLiveData<Post> by lazy { MutableLiveData<Post>() }
+
+    fun getPosts(): LiveData<List<Post>> = postDTOs
+    fun loadPosts() {
+        dataSource.getPosts { posts ->
+            postDTOs.value = posts
+        }
+    }
+
+    fun getPostById(): LiveData<Post> = post
+    fun loadPostById(post_id: String) {
+        dataSource.getPostById(post_id) { post ->
+            this.post.value = post
+        }
+    }
+
 
     fun modifyPost(post: Post, callback : (Boolean) -> Unit) = dataSource.modifyPost(post, callback)
 }

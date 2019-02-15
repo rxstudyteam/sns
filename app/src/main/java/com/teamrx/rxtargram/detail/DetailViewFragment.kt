@@ -1,6 +1,5 @@
 package com.teamrx.rxtargram.detail
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
@@ -15,6 +14,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.BaseViewModel
+import com.teamrx.rxtargram.comment.CommentActivity
 import com.teamrx.rxtargram.inject.Injection
 import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.util.getStringArray
@@ -27,7 +27,7 @@ class DetailViewFragment : Fragment(), OptionClickListener {
     private val REQUEST_MODYFY = 1001
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.fragment_detail_view, container, false)
+        inflater.inflate(R.layout.fragment_detail_view, container, false)
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -50,6 +50,9 @@ class DetailViewFragment : Fragment(), OptionClickListener {
         detailViewModel.getPosts().observe(this, Observer { posts ->
             updateUI(posts)
         })
+
+        detailViewModel.loadPosts()
+
     }
 
     private fun updateUI(posts: List<Post>) {
@@ -62,10 +65,7 @@ class DetailViewFragment : Fragment(), OptionClickListener {
     }
 
     companion object {
-        private var INSTANCE: DetailViewFragment? = null
-        fun getInstance() = INSTANCE ?: synchronized(DetailViewFragment::class.java) {
-            INSTANCE ?: DetailViewFragment().also { INSTANCE = it }
-        }
+        fun newInstance() = DetailViewFragment()
     }
 
     override fun onOptionClick(post: Post?) {
@@ -84,6 +84,12 @@ class DetailViewFragment : Fragment(), OptionClickListener {
             Toast.makeText(context, "selected $strName", Toast.LENGTH_SHORT).show()
         }
         alertBuilder.show()
+    }
+
+    override fun onCommentClick(post_id: String) {
+        // comment 목록보기 화면
+        val activity = activity ?: return
+        CommentActivity.startActivity(activity, post_id)
     }
 
     private fun startModifyActivity(post: Post?) {

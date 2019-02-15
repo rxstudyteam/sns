@@ -23,9 +23,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".profile.Profile"
-            android:exported="true" />
+        <activity android:name=".comment.CommentActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden">
+        </activity>
         <activity android:name=".detail.ModifyActivity" />
     </application>
 </manifest>

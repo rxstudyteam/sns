@@ -15,7 +15,7 @@ class AppMain : AppActivity() {
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         return@OnNavigationItemSelectedListener when (item.itemId) {
             R.id.navigation_home ->
-                supportFragmentManager.transaction { replace(R.id.main_content, DetailViewFragment.getInstance()) }.let { true }
+                supportFragmentManager.transaction { replace(R.id.main_content, DetailViewFragment.newInstance()) }.let { true }
             R.id.navigation_dashboard ->
                 true
             R.id.navigation_notifications ->

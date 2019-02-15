@@ -2,14 +2,14 @@
 
 package com.teamrx.rxtargram.repository
 
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import com.teamrx.rxtargram.model.CommentDTO
+import com.teamrx.rxtargram.model.Post
 import android.content.Context
 import android.log.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.tasks.Task
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.model.ProfileModel
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -36,41 +36,84 @@ object RemoteAppDataSource : AppDataSource {
         const val CREATED_AT = "created_at"
     }
 
-    private lateinit var postLiveData: MutableLiveData<List<Post>>
+    private val fireStore: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
+    private val cachedPosts: HashMap<String, Post> by lazy { HashMap<String, Post>() }
 
-    // https://github.com/kunny/RxFirebase
-    // Firebase + Rxjava를 이용해 Obserbable을 리턴하고 ViewModel에서 Livedata로 데이터를 관리하고 싶었으나
-    // 위 라이브러리의 기능이 얼만큼 있는지 확인이 안되어 Repo에서 LiveData로 관리하도록 구현함
-    override fun getPosts(): LiveData<List<Post>> {
-        if (!::postLiveData.isInitialized) {
-            postLiveData = MutableLiveData()
+    override fun getPosts(callback: (List<Post>) -> Unit) {
 
-            val firestore = FirebaseFirestore.getInstance()
-            firestore.collection("post").orderBy("created_at")
-                    .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                        if (querySnapshot == null) return@addSnapshotListener
+        fireStore.collection("post").orderBy("created_at", Query.Direction.DESCENDING)
+            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                if(querySnapshot == null) return@addSnapshotListener
 
-                        val posts = mutableListOf<Post>()
-                        for (snapshot in querySnapshot.documents) {
-                            try {
-                                println("snapshot.id : ${snapshot.id}")
+                val posts = mutableListOf<Post>()
+                for(snapshot in querySnapshot.documents) {
+                    try {
+                        val item = snapshot.toObject(Post::class.java)
+                        item?.post_id = snapshot.id
 
-                                val item = snapshot.toObject(Post::class.java)
-                                item?.snapshotId = snapshot.id
-                                // 팔로우한 유저만 구분.
-                                if (item != null)
-                                    posts.add(item)
-                            } catch (e: Exception) {
-                                firebaseFirestoreException?.printStackTrace()
-                                e.printStackTrace()
-                            }
+                        // 팔로우한 유저만 구분.
+                        if (item != null) {
+                            posts.add(item)
+                            cachedPosts[snapshot.id] = item
                         }
-
-                        postLiveData.postValue(posts)
+                    } catch (e: Exception) {
+                        firebaseFirestoreException?.printStackTrace()
+                        e.printStackTrace()
                     }
+                }
+
+                callback(posts)
+            }
+    }
+
+    override fun getPostById(post_id: String, callback: (Post) -> Unit) {
+        cachedPosts[post_id]?.let {
+            callback(it)
+            println("get cached post")
+            return
         }
 
-        return postLiveData
+        fireStore.collection("post").document(post_id).get()
+            .addOnCompleteListener { task ->
+                if(task.isSuccessful) {
+                    task.result?.let { documentSnapshot ->
+                        documentSnapshot.toObject(Post::class.java)?.let {
+                            callback(it)
+                            println("post from network")
+                        }
+                    }
+                }
+            }
+    }
+
+    override fun getComments(post_id: String, callback: (List<CommentDTO>) -> Unit) {
+
+        fireStore.collection("post").whereEqualTo("parent_post_no", post_id)
+            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                if(querySnapshot == null) return@addSnapshotListener
+
+                val commentDTOs = mutableListOf<CommentDTO>()
+                for(snapshot in querySnapshot.documents) {
+                    try {
+                        val item = snapshot.toObject(CommentDTO::class.java)
+                        if(item?.parent_post_no == post_id) {
+                            commentDTOs.add(item)
+                        }
+                    } catch (e: Exception) {
+                        firebaseFirestoreException?.printStackTrace()
+                        e.printStackTrace()
+                    }
+                }
+
+                callback(commentDTOs)
+            }
+    }
+
+    override fun addComment(parent_post_id: String, user_id: String, content: String, callback: (Boolean) -> Unit) {
+        fireStore.collection("post").document().set(CommentDTO(parent_post_id, content,user_id))
+            .addOnCompleteListener {
+                callback(it.isSuccessful)
+            }
     }
 
     override fun modifyPost(post: Post, callback: (Boolean) -> Unit) {

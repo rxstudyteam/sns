@@ -33,12 +33,18 @@ class PostRecyclerViewAdapter(private val mContext: Context, private val optionC
         item.tvTitle.text = posts[position].title
         item.tvContent.text = posts[position].content
         item.tvCreatedAt.text = posts[position].created_at?.toDate().toString()
+
+        item.tvComments.setOnClickListener {
+            posts[position].post_id?.let { optionClickListener.onCommentClick(it) }
+        }
     }
 
     fun setPostDatas(posts: List<Post>) {
         this.posts.clear()
         this.posts.addAll(posts)
         notifyDataSetChanged()
+
+        println("${this.posts.size}      ${posts.size}")
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

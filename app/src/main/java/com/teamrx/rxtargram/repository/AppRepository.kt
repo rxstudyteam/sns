@@ -1,16 +1,28 @@
 package com.teamrx.rxtargram.repository
 
-import android.content.Context
-import androidx.lifecycle.LiveData
+import com.teamrx.rxtargram.model.CommentDTO
 import com.teamrx.rxtargram.model.Post
+import android.content.Context
 import com.teamrx.rxtargram.model.ProfileModel
 import java.io.InputStream
 
 class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppDataSource {
     override fun modifyPost(post: Post, callback: (Boolean) -> Unit) = remoteAppDataSource.modifyPost(post, callback)
 
-    override fun getPosts(): LiveData<List<Post>> {
-        return remoteAppDataSource.getPosts()
+    override fun getPosts(callback: (List<Post>) -> Unit) {
+        remoteAppDataSource.getPosts(callback)
+    }
+
+    override fun getPostById(post_id: String, callback: (Post) -> Unit) {
+        remoteAppDataSource.getPostById(post_id, callback)
+    }
+
+    override fun getComments(post_id: String, callback: (List<CommentDTO>) -> Unit) {
+        remoteAppDataSource.getComments(post_id, callback)
+    }
+
+    override fun addComment(parent_post_id: String, user_id: String, content: String, callback: (Boolean) -> Unit) {
+        remoteAppDataSource.addComment(parent_post_id, user_id, content, callback)
     }
 
     override suspend fun getProfile(user_id: String): ProfileModel {
