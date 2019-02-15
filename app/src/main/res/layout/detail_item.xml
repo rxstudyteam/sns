@@ -64,6 +64,18 @@
         tools:text="This is Rxteam's SNS Sample App!! Welcome~" />
 
     <TextView
+        android:id="@+id/tvComments"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/tvContent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="8dp"
+        android:text="댓글 모두 보기"
+        tools:text="댓글 모두 보기"/>
+
+
+    <TextView
         android:id="@+id/tvCreatedAt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -71,7 +83,7 @@
         android:layout_marginTop="8dp"
         android:textSize="12sp"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvContent"
+        app:layout_constraintTop_toBottomOf="@+id/tvComments"
         tools:text="15시간전" />
 
     <ImageButton
