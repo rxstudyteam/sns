@@ -1,5 +1,6 @@
 package com.teamrx.rxtargram.editor
 
+import android.graphics.Bitmap
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -8,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.BaseViewModel
@@ -49,8 +51,7 @@ class EditorFragment : Fragment() {
 
         // 이미지 첨부는 어떻게 해야하는 것일까?
 
-        viewModel =
-            ViewModelProviders.of(this, Injection.provideViewModelFactory()).get(EditorViewModel::class.java).apply {
+        viewModel = ViewModelProviders.of(this, Injection.provideViewModelFactory()).get(EditorViewModel::class.java).apply {
                 postImageUrl.observe(this@EditorFragment, Observer {
                     it?.run { post_image.load(this) }
                 })
@@ -63,14 +64,19 @@ class EditorFragment : Fragment() {
             val titleText = title_edit_text.text
             val contentText = context_edit_text.text
             if (titleText.isBlank() || contentText.isBlank()) {
+                Toast.makeText(context, "내용을 입력해주세요.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            viewModel.createPost(contentText.toString(), null, titleText.toString())
+
+            val bitmap = post_image.getTag(R.id.icon) as? Bitmap
+            viewModel.createPost(contentText.toString(), null, titleText.toString(), bitmap){
+                activity?.finish()
+            }
         }
 
         editor_image_post_button.setOnClickListener {
             it?.run {
-                viewModel.getPostImage(this)
+                viewModel.getPostImage(post_image)
             }
         }
     }

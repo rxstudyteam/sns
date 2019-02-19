@@ -55,7 +55,7 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
 //        Log.w(2, nano(), user_id)
         dataSource.uploadToFireStorage(user_id, bitmap?.toStream()!!)
 //        Log.w(3, nano())
-        var image_url = dataSource.getDownloadUrl(user_id)
+        val image_url = dataSource.getDownloadUrl("profile/${user_id}")
 //        Log.w(4, nano(), image_url)
         dataSource.setProfile(user_id, null, null, image_url)
 //        Log.w(5, nano())
@@ -74,7 +74,7 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
 //            Log.w(3, nano(), user_id)
             dataSource.uploadToFireStorage(user_id, bitmap?.toStream()!!)
 //            Log.w(4, nano())
-            profileUrl = dataSource.getDownloadUrl(user_id)
+            profileUrl = dataSource.getDownloadUrl("profile/${user_id}")
 //            Log.w(5, nano())
         }
 //        Log.w(6, nano(), profile_url)
@@ -101,7 +101,7 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
     }
 }
 
-private fun Bitmap.toStream(): InputStream {
+fun Bitmap.toStream(): InputStream {
     val bos = ByteArrayOutputStream()
     compress(Bitmap.CompressFormat.JPEG, 100, bos)
     val bytes = bos.toByteArray()

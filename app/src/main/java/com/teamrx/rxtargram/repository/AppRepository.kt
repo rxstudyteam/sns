@@ -3,6 +3,7 @@ package com.teamrx.rxtargram.repository
 import android.content.Context
 import androidx.lifecycle.LiveData
 import com.teamrx.rxtargram.model.Post
+import com.teamrx.rxtargram.model.PostDTO
 import com.teamrx.rxtargram.model.ProfileModel
 import java.io.InputStream
 
@@ -32,6 +33,10 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource): AppDa
         remoteAppDataSource.uploadToFireStorage(user_id, stream)
     }
 
+    override suspend fun uploadToFireStoragePostImage(image_id: String, stream: InputStream) {
+        remoteAppDataSource.uploadToFireStoragePostImage(image_id, stream)
+    }
+
     override suspend fun getDownloadUrl(user_id: String): String? {
         return remoteAppDataSource.getDownloadUrl(user_id)
     }
@@ -42,5 +47,9 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource): AppDa
 
     override suspend fun join(name: CharSequence, email: CharSequence): String {
         return remoteAppDataSource.join(name, email)
+    }
+
+    override suspend fun createPost(postDTO: PostDTO): String{
+        return remoteAppDataSource.createPost(postDTO)
     }
 }
