@@ -22,19 +22,22 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
     val name: MutableLiveData<String> = MutableLiveData()
     val email: MutableLiveData<String> = MutableLiveData()
     val profile_url: MutableLiveData<String> = MutableLiveData()
+    val loading: MutableLiveData<Boolean> = MutableLiveData()
 
     companion object {
         private const val DEFAULT_PROFILE_URL = "https://firebasestorage.googleapis.com/v0/b/rxteam-sns.appspot.com/o/profile%2Funnamed.png?alt=media&token=bd08fa0e-84b4-438c-8f25-c7014075bf6e"
     }
 
-    suspend fun updateProfile() {
+    fun updateProfile() = CoroutineScope(Dispatchers.Main).launch {
         var user_id = PP.user_id.get()
 //            user_id = "KxUypfZKf2cKmJs4jOeU"
+        loading.value = true
         val profile = if (user_id.isNullOrBlank()) ProfileModel() else dataSource.getProfile(user_id)
         Log.w(profile)
         name.value = profile.name
         email.value = profile.email
         profile_url.value = profile.profile_url ?: DEFAULT_PROFILE_URL
+        loading.value = false
     }
 
     suspend fun saveProfile(name: String, email: String, profile_url: String?, bitmap: Bitmap?) {

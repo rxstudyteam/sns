@@ -7,6 +7,7 @@ import android.view.*
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -48,13 +49,19 @@ class Profile : AppFragment() {
 
         supportActionBar?.apply { title = vm.getTitle() }
 
+        vm.loading.observe(mActivity, Observer {
+            Log.e(it)
+            if (it)
+                showProgress()
+            else
+                dismissProgress()
+        })
+
         loadProfile()
     }
 
-    private fun loadProfile() = CoroutineScope(Dispatchers.Main).launch {
-        showProgress()
+    private fun loadProfile() {
         vm.updateProfile()
-        dismissProgress()
     }
 
     private fun saveProfile() = CoroutineScope(Dispatchers.Main).launch {
