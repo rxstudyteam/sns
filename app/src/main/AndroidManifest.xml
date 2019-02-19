@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <dist:module dist:instant="true"/>
+
     <application
             android:name=".base.AppApplication"
             android:allowBackup="true"
@@ -28,6 +29,11 @@
 
         <activity android:name=".editor.EditorActivity">
         </activity>
+        <activity android:name=".comment.CommentActivity"
+                  android:theme="@style/AppTheme.NoActionBar"
+                  android:windowSoftInputMode="stateHidden">
+        </activity>
+        <activity android:name=".detail.ModifyActivity"/>
     </application>
 
 </manifest>

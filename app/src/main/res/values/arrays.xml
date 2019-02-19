@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="post_option">
+        <item>@string/share</item>
+        <item>@string/copy_link</item>
+        <item>@string/save</item>
+        <item>@string/modify</item>
+        <item>@string/delete</item>
+        <item>@string/disable_reply_function</item>
+
+    </string-array>
+
+</resources>
