@@ -9,13 +9,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.firestore.FirebaseFirestore
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.BaseViewModel
 import com.teamrx.rxtargram.detail.DetailViewModel
 import com.teamrx.rxtargram.inject.Injection
 import com.teamrx.rxtargram.model.CommentDTO
 import com.teamrx.rxtargram.model.Post
+import com.teamrx.rxtargram.util.await
 import kotlinx.android.synthetic.main.activity_comment.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class CommentActivity : AppCompatActivity() {
 
@@ -39,6 +44,16 @@ class CommentActivity : AppCompatActivity() {
         setupRecyclerView()
         setupEvent()
         setupViewModel()
+
+        CoroutineScope(Dispatchers.Main).launch {
+            val result = FirebaseFirestore.getInstance()
+                .collection("post")
+                .await(CommentDTO::class.java)
+
+            for(commentDTO in result) {
+                println("${commentDTO.title} ${commentDTO.user_id}")
+            }
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
