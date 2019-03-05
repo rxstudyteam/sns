@@ -43,33 +43,48 @@ object RemoteAppDataSource : AppDataSource {
     override fun getPosts(callback: (List<Post>) -> Unit) {
 
         fireStore.collection("post").orderBy("created_at", Query.Direction.DESCENDING)
-            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                if(querySnapshot == null) return@addSnapshotListener
+                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                    if (querySnapshot == null) return@addSnapshotListener
 
-                val posts = mutableListOf<Post>()
-                for(snapshot in querySnapshot.documents) {
-                    try {
-                        val item = snapshot.toObject(Post::class.java)
-                        item?.post_id = snapshot.id
+                    val posts = mutableListOf<Post>()
+                    for (snapshot in querySnapshot.documents) {
+                        try {
+                            val item = snapshot.toObject(Post::class.java)
+                            item?.post_id = snapshot.id
 
-                        // 팔로우한 유저만 구분.
-                        if (item != null) {
-                            posts.add(item)
-                            cachedPosts[snapshot.id] = item
+                            // 팔로우한 유저만 구분.
+                            if (item != null) {
+                                posts.add(item)
+                                cachedPosts[snapshot.id] = item
+                            }
+                        } catch (e: Exception) {
+                            firebaseFirestoreException?.printStackTrace()
+                            e.printStackTrace()
                         }
-                    } catch (e: Exception) {
-                        firebaseFirestoreException?.printStackTrace()
-                        e.printStackTrace()
                     }
-                }
 
-                callback(posts)
-            }
+                    callback(posts)
+                }
     }
 
     override fun getPostImages(post_id: String?, callback: (List<PostImages>) -> Unit) {
-        val images = mutableListOf<PostImages>()
-        callback(images)
+        val post_id = "wL33VTH2vKNOHLrYsl0x"
+        val snapshot = fireStore.collection("post")
+                .document(post_id)
+                .collection("images")
+                .get()
+
+        snapshot.addOnSuccessListener { querySnapshot ->
+            Log.e("addOnSuccessListener")
+
+            for (document in querySnapshot.documents) {
+                Log.e(document.id, document["url"])
+            }
+            var images = querySnapshot.toObjects(PostImages::class.java)
+            callback(images)
+            Log.w("addOnSuccessListener")
+        }
+
     }
 
     override fun getPostById(post_id: String, callback: (Post) -> Unit) {
@@ -80,46 +95,46 @@ object RemoteAppDataSource : AppDataSource {
         }
 
         fireStore.collection("post").document(post_id).get()
-            .addOnCompleteListener { task ->
-                if(task.isSuccessful) {
-                    task.result?.let { documentSnapshot ->
-                        documentSnapshot.toObject(Post::class.java)?.let {
-                            callback(it)
-                            println("post from network")
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        task.result?.let { documentSnapshot ->
+                            documentSnapshot.toObject(Post::class.java)?.let {
+                                callback(it)
+                                println("post from network")
+                            }
                         }
                     }
                 }
-            }
     }
 
     override fun getComments(post_id: String, callback: (List<CommentDTO>) -> Unit) {
 
         fireStore.collection("post").whereEqualTo("parent_post_no", post_id)
-            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                if(querySnapshot == null) return@addSnapshotListener
+                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                    if (querySnapshot == null) return@addSnapshotListener
 
-                val commentDTOs = mutableListOf<CommentDTO>()
-                for(snapshot in querySnapshot.documents) {
-                    try {
-                        val item = snapshot.toObject(CommentDTO::class.java)
-                        if(item?.parent_post_no == post_id) {
-                            commentDTOs.add(item)
+                    val commentDTOs = mutableListOf<CommentDTO>()
+                    for (snapshot in querySnapshot.documents) {
+                        try {
+                            val item = snapshot.toObject(CommentDTO::class.java)
+                            if (item?.parent_post_no == post_id) {
+                                commentDTOs.add(item)
+                            }
+                        } catch (e: Exception) {
+                            firebaseFirestoreException?.printStackTrace()
+                            e.printStackTrace()
                         }
-                    } catch (e: Exception) {
-                        firebaseFirestoreException?.printStackTrace()
-                        e.printStackTrace()
                     }
-                }
 
-                callback(commentDTOs)
-            }
+                    callback(commentDTOs)
+                }
     }
 
     override fun addComment(parent_post_id: String, user_id: String, content: String, callback: (Boolean) -> Unit) {
-        fireStore.collection("post").document().set(CommentDTO(parent_post_id, content,user_id))
-            .addOnCompleteListener {
-                callback(it.isSuccessful)
-            }
+        fireStore.collection("post").document().set(CommentDTO(parent_post_id, content, user_id))
+                .addOnCompleteListener {
+                    callback(it.isSuccessful)
+                }
     }
 
     override fun modifyPost(post: Post, callback: (Boolean) -> Unit) {

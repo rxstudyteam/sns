@@ -43,9 +43,11 @@ class DetailViewFragment : Fragment(), OptionClickListener {
     }
 
     private fun setupRecyclerView() {
-        adapter = PostRecyclerViewAdapter(requireContext(), this)
+//        adapter = PostRecyclerViewAdapter(requireContext(), this)
+//        recyclerView.layoutManager = LinearLayoutManager(activity)
+//        recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(activity)
-        recyclerView.adapter = adapter
+        recyclerView.adapter = DetailViewAdapter()
     }
 
     private fun setupViewModel() {
@@ -59,7 +61,8 @@ class DetailViewFragment : Fragment(), OptionClickListener {
     }
 
     private fun updateUI(posts: List<Post>) {
-        adapter.setPostDatas(posts)
+//        adapter.setPostDatas(posts)
+        (recyclerView.adapter as DetailViewAdapter).setDatas(posts)
     }
 
     private inline fun <reified T : BaseViewModel> getViewModel(): T {
@@ -121,10 +124,10 @@ class DetailViewFragment : Fragment(), OptionClickListener {
             }
         }
 
-        fun setDatas(posts: MutableList<Post>) {
+        fun setDatas(posts: List<Post>) {
             println("${posts.size}")
-            posts.clear()
-            posts.addAll(posts)
+            this.posts.clear()
+            this.posts.addAll(posts)
             notifyDataSetChanged()
         }
 
