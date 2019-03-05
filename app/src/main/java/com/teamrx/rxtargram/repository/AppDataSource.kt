@@ -20,6 +20,12 @@ interface AppDataSource {
     // 댓글 추가하기
     suspend fun addComment(parent_post_id: String, user_id: String, content: String): Boolean
 
+    // 댓글 수정하기
+    suspend fun modifyComment(comment: CommentDTO): Boolean
+
+    // 댓글 삭제하기
+    suspend fun deleteComment(post_id: String): Boolean
+
     //프로필가져오기
     suspend fun getProfile(user_id: String): ProfileModel
 

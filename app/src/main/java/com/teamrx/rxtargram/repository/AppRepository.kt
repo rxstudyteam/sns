@@ -26,6 +26,14 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppD
         return remoteAppDataSource.addComment(parent_post_id, user_id, content)
     }
 
+    override suspend fun modifyComment(comment: CommentDTO): Boolean {
+        return remoteAppDataSource.modifyComment(comment)
+    }
+
+    override suspend fun deleteComment(post_id: String): Boolean {
+        return remoteAppDataSource.deleteComment(post_id)
+    }
+
     override suspend fun getProfile(user_id: String): ProfileModel {
         return remoteAppDataSource.getProfile(user_id)
     }

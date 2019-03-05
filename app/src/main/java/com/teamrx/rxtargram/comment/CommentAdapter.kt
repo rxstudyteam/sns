@@ -8,7 +8,7 @@ import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.model.CommentDTO
 import kotlinx.android.synthetic.main.comment_item.view.*
 
-class CommentAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class CommentAdapter(private val onLongClick: (CommentDTO) -> Unit) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     val comments = arrayListOf<CommentDTO>()
 
@@ -24,6 +24,14 @@ class CommentAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         item.tvReComment.setOnClickListener {
             // 답글 달기
+        }
+
+        item.setOnLongClickListener {
+            comments[position].snapshotId?.let {
+                onLongClick(comments[position])
+            }
+
+            true
         }
     }
 

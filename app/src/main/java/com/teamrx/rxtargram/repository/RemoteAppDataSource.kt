@@ -114,6 +114,7 @@ object RemoteAppDataSource : AppDataSource {
                 for(snapshot in querySnapshot.documents) {
                     val item = snapshot.toObject(CommentDTO::class.java)
                     if(item?.parent_post_no == post_id) {
+                        item.snapshotId = snapshot.id
                         commentDTOs.add(item)
                     }
                 }
@@ -128,6 +129,26 @@ object RemoteAppDataSource : AppDataSource {
     override suspend fun addComment(parent_post_id: String, user_id: String, content: String): Boolean {
         return suspendCoroutine { continuation ->
             fireStore.collection(POST_COLLECTION).document().set(CommentDTO(parent_post_id, content, user_id))
+                .addOnCompleteListener { task ->
+                    continuation.resume(task.isSuccessful)
+                }
+        }
+    }
+
+    override suspend fun modifyComment(comment: CommentDTO): Boolean {
+        return suspendCoroutine { continuation ->
+            comment.snapshotId?.let {  id ->
+                fireStore.collection(POST_COLLECTION).document(id).set(comment)
+                    .addOnCompleteListener { task ->
+                        continuation.resume(task.isSuccessful)
+                    }
+            }
+        }
+    }
+
+    override suspend fun deleteComment(post_id: String): Boolean {
+        return suspendCoroutine { continuation ->
+            fireStore.collection(POST_COLLECTION).document(post_id).delete()
                 .addOnCompleteListener { task ->
                     continuation.resume(task.isSuccessful)
                 }
