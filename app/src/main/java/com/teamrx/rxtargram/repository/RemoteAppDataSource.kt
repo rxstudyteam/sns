@@ -10,6 +10,7 @@ import android.content.Context
 import android.log.Log
 import com.google.android.gms.tasks.Task
 import com.google.firebase.storage.FirebaseStorage
+import com.teamrx.rxtargram.model.PostImages
 import com.teamrx.rxtargram.model.ProfileModel
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -64,6 +65,11 @@ object RemoteAppDataSource : AppDataSource {
 
                 callback(posts)
             }
+    }
+
+    override fun getPostImages(post_id: String?, callback: (List<PostImages>) -> Unit) {
+        val images = mutableListOf<PostImages>()
+        callback(images)
     }
 
     override fun getPostById(post_id: String, callback: (Post) -> Unit) {

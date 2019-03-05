@@ -4,12 +4,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.teamrx.rxtargram.base.BaseViewModel
 import com.teamrx.rxtargram.model.Post
+import com.teamrx.rxtargram.model.PostImages
 import com.teamrx.rxtargram.repository.AppDataSource
 
 class DetailViewModel(dataSource: AppDataSource) : BaseViewModel(dataSource) {
 
     private val postDTOs: MutableLiveData<List<Post>> by lazy { MutableLiveData<List<Post>>() }
     private val post: MutableLiveData<Post> by lazy { MutableLiveData<Post>() }
+    private val postImages: MutableLiveData<List<PostImages>> by lazy { MutableLiveData<List<PostImages>>() }
 
     fun getPosts(): LiveData<List<Post>> = postDTOs
     fun loadPosts() {
@@ -27,4 +29,7 @@ class DetailViewModel(dataSource: AppDataSource) : BaseViewModel(dataSource) {
 
 
     fun modifyPost(post: Post, callback : (Boolean) -> Unit) = dataSource.modifyPost(post, callback)
+    fun getPostImages(post_id: String?) {
+        dataSource.getPostImages(post_id) { postImages -> this.postImages.value = postImages }
+    }
 }

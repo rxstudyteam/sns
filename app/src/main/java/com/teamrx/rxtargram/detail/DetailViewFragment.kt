@@ -12,12 +12,15 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.BaseViewModel
 import com.teamrx.rxtargram.comment.CommentActivity
 import com.teamrx.rxtargram.inject.Injection
 import com.teamrx.rxtargram.model.Post
+import com.teamrx.rxtargram.util.GlideApp
 import com.teamrx.rxtargram.util.getStringArray
+import kotlinx.android.synthetic.main.detail_item.view.*
 import kotlinx.android.synthetic.main.fragment_detail_view.*
 
 class DetailViewFragment : Fragment(), OptionClickListener {
@@ -97,5 +100,34 @@ class DetailViewFragment : Fragment(), OptionClickListener {
         intent.putExtra("post", post)
 
         activity?.startActivity(intent)
+    }
+
+    inner class DetailViewAdapter : RecyclerView.Adapter<DetailViewAdapter.ViewHolder>() {
+        private val posts = arrayListOf<Post>()
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.detail_item, parent, false))
+
+        override fun getItemCount(): Int = posts.size
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val view = holder.itemView
+            posts[position].run {
+                view.tvUserId.text = user_id
+                view.tvTitle.text = title
+                view.tvContent.text = content
+                view.tvCreatedAt.text = created_at?.toDate().toString()
+                GlideApp.with(view).load(detailViewModel.getPostImages(post_id)).into(view.ivContentImage)
+                view.setOnClickListener { post_id }
+            }
+        }
+
+        fun setDatas(posts: MutableList<Post>) {
+            println("${posts.size}")
+            posts.clear()
+            posts.addAll(posts)
+            notifyDataSetChanged()
+        }
+
+        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view)
     }
 }

@@ -1,8 +1,9 @@
 package com.teamrx.rxtargram.repository
 
+import android.content.Context
 import com.teamrx.rxtargram.model.CommentDTO
 import com.teamrx.rxtargram.model.Post
-import android.content.Context
+import com.teamrx.rxtargram.model.PostImages
 import com.teamrx.rxtargram.model.ProfileModel
 import java.io.InputStream
 
@@ -47,6 +48,10 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppD
 
     override suspend fun join(name: CharSequence, email: CharSequence): String {
         return remoteAppDataSource.join(name, email)
+    }
+
+    override fun getPostImages(post_id: String?, callback: (List<PostImages>) -> Unit) {
+        remoteAppDataSource.getPostImages(post_id, callback)
     }
 
     companion object {

@@ -1,14 +1,18 @@
 package com.teamrx.rxtargram.repository
 
+import android.content.Context
 import com.teamrx.rxtargram.model.CommentDTO
 import com.teamrx.rxtargram.model.Post
-import android.content.Context
+import com.teamrx.rxtargram.model.PostImages
 import com.teamrx.rxtargram.model.ProfileModel
 import java.io.InputStream
 
 interface AppDataSource {
     // 글 목록 가져오기
     fun getPosts(callback: (List<Post>) -> Unit)
+
+    // 글이미지 목록 가져오기
+    fun getPostImages(post_id: String?, callback: (List<PostImages>) -> Unit)
 
     // 글 상세정보 가져오기
     fun getPostById(post_id: String, callback: (Post) -> Unit)
