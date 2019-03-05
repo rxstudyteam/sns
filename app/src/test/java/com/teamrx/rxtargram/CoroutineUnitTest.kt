@@ -515,4 +515,30 @@ class CoroutineUnitTest {
 
         one.await() + two.await()
     }
+
+    val channel = Channel<Int>()
+
+    @Test
+    fun `channel test`() = runBlocking {
+
+        test()
+
+        repeat(2) {
+            println(channel.receive())
+        }
+
+        //val value = test()
+        println("testr2")
+    }
+
+    suspend fun test()= GlobalScope.launch {
+        delay(1000)
+
+        launch {
+            channel.send(10)
+            channel.send(20)
+        }
+
+        println("test")
+    }
 }

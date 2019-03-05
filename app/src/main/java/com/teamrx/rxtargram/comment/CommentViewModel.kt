@@ -8,17 +8,21 @@ import com.teamrx.rxtargram.repository.AppDataSource
 
 class CommentViewModel(appDataSource: AppDataSource): BaseViewModel(appDataSource) {
 
-    private val commentDTOLiveData: MutableLiveData<List<CommentDTO>> by lazy { MutableLiveData<List<CommentDTO>>() }
+    private val commentDTOLiveData: MutableLiveData<List<CommentDTO>> = MutableLiveData()
+    private val addCommentResult: MutableLiveData<Boolean> = MutableLiveData()
 
     fun getComments(): LiveData<List<CommentDTO>> = commentDTOLiveData
-    fun loadComments(post_id: String) {
-        dataSource.getComments(post_id) { comments ->
-            commentDTOLiveData.value = comments
+    suspend fun loadComments(post_id: String) {
+        val channel = dataSource.getComments(post_id)
+        for(list in channel) {
+            println("current thread : [${Thread.currentThread().name}]")
+            commentDTOLiveData.value = list
         }
     }
 
-    fun addComment(parent_post_id: String, user_id: String, content: String, callback: (Boolean) -> Unit) {
-        dataSource.addComment(parent_post_id, user_id, content, callback)
+    suspend fun addComment(parent_post_id: String, user_id: String, content: String): LiveData<Boolean> {
+        addCommentResult.value = dataSource.addComment(parent_post_id, user_id, content)
+        return addCommentResult
     }
 
 }
