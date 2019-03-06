@@ -1,11 +1,13 @@
 package com.teamrx.rxtargram.detail
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.teamrx.rxtargram.R
+import com.teamrx.rxtargram.editor.EditorActivity
 import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.util.GlideApp
 import kotlinx.android.synthetic.main.detail_item.view.*
@@ -15,6 +17,8 @@ class PostRecyclerViewAdapter(private val mContext: Context, private val optionC
     RecyclerView.Adapter<PostRecyclerViewAdapter.ViewHolder>() {
 
     private val posts = ArrayList<Post>()
+
+    var goProfile : (userId: String)  -> Unit = {}
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.detail_item, parent, false))
@@ -34,6 +38,16 @@ class PostRecyclerViewAdapter(private val mContext: Context, private val optionC
         item.tvContent.text = posts[position].content
         item.tvCreatedAt.text = posts[position].created_at?.toDate().toString()
 
+        item.tvUserId.setOnClickListener {
+            posts[position].user_id?.let {
+                goProfile(it)
+            }
+        }
+
+        item.tvTitle.setOnClickListener {
+            posts[position].user_id?.let { goProfile(it) }
+        }
+
         item.tvComments.setOnClickListener {
             posts[position].post_id?.let { optionClickListener.onCommentClick(it) }
         }
@@ -46,6 +60,7 @@ class PostRecyclerViewAdapter(private val mContext: Context, private val optionC
 
         println("${this.posts.size}      ${posts.size}")
     }
+
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 

@@ -15,8 +15,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.BaseViewModel
 import com.teamrx.rxtargram.comment.CommentActivity
+import com.teamrx.rxtargram.editor.EditorActivity
 import com.teamrx.rxtargram.inject.Injection
 import com.teamrx.rxtargram.model.Post
+import com.teamrx.rxtargram.profile.ProfileActivity
 import com.teamrx.rxtargram.util.getStringArray
 import kotlinx.android.synthetic.main.fragment_detail_view.*
 
@@ -39,8 +41,17 @@ class DetailViewFragment : Fragment(), OptionClickListener {
         setupViewModel()
     }
 
+    private val goProfile : (userId: String) -> Unit = {
+        activity?.let {
+            it.startActivity(Intent(it, ProfileActivity::class.java))
+        }
+    }
+
     private fun setupRecyclerView() {
-        adapter = PostRecyclerViewAdapter(requireContext(), this)
+        adapter = PostRecyclerViewAdapter(requireContext(), this).apply {
+            goProfile = this@DetailViewFragment.goProfile
+        }
+
         recyclerView.layoutManager = LinearLayoutManager(activity)
         recyclerView.adapter = adapter
     }
