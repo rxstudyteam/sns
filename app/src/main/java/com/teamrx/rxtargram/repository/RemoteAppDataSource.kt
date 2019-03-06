@@ -2,15 +2,13 @@
 
 package com.teamrx.rxtargram.repository
 
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import com.teamrx.rxtargram.model.CommentDTO
-import com.teamrx.rxtargram.model.Post
 import android.content.Context
 import android.log.Log
 import com.google.android.gms.tasks.Task
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
-import com.teamrx.rxtargram.model.ProfileModel
+import com.teamrx.rxtargram.model.*
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
 import smart.util.GalleryLoader
@@ -25,6 +23,7 @@ object RemoteAppDataSource : AppDataSource {
 
     const val USER_COLLECTION = "user"
     const val POST_COLLECTION = "post"
+
 
     object USER_DOCUMENT {
         const val EMAIL = "email"
@@ -55,6 +54,7 @@ object RemoteAppDataSource : AppDataSource {
                         if (item != null) {
                             posts.add(item)
                             cachedPosts[snapshot.id] = item
+
                         }
                     } catch (e: Exception) {
                         firebaseFirestoreException?.printStackTrace()
@@ -133,10 +133,10 @@ object RemoteAppDataSource : AppDataSource {
         return suspendCancellableCoroutine { continuation ->
             try {
                 GalleryLoader.builder(context)
-                        .setCrop(true, 100.dp, 100.dp)
-                        .setOnGalleryLoadedListener { continuation.resume(it.toString()) }
-                        .setOnCancelListener { continuation.cancel() }
-                        .load()
+                    .setCrop(true, 100.dp, 100.dp)
+                    .setOnGalleryLoadedListener { continuation.resume(it.toString()) }
+                    .setOnCancelListener { continuation.cancel() }
+                    .load()
             } catch (e: Exception) {
                 continuation.resumeWithException(e)
             }
@@ -153,8 +153,8 @@ object RemoteAppDataSource : AppDataSource {
 
             val db = FirebaseFirestore.getInstance()
             val task = db.collection(USER_COLLECTION)
-                    .document(user_id)
-                    .get()
+                .document(user_id)
+                .get()
 
             task.addOnSuccessListener { document ->
                 Log.e("addOnSuccessListener")
@@ -169,7 +169,12 @@ object RemoteAppDataSource : AppDataSource {
         }
     }
 
-    override suspend fun setProfile(user_Id: String, name: CharSequence?, email: CharSequence?, profile_url: String?): Boolean {
+    override suspend fun setProfile(
+        user_Id: String,
+        name: CharSequence?,
+        email: CharSequence?,
+        profile_url: String?
+    ): Boolean {
         return suspendCancellableCoroutine { continuation ->
             val db = FirebaseFirestore.getInstance()
             val ref = db.collection(USER_COLLECTION).document(user_Id)
@@ -189,7 +194,24 @@ object RemoteAppDataSource : AppDataSource {
         return suspendCancellableCoroutine { continuation ->
             val db = FirebaseFirestore.getInstance()
             val ref = db.collection(USER_COLLECTION)
-            val task = ref.add(hashMapOf<String, Any>(USER_DOCUMENT.NAME to name.toString(), USER_DOCUMENT.EMAIL to email.toString()))
+            val task = ref.add(
+                hashMapOf<String, Any>(
+                    USER_DOCUMENT.NAME to name.toString(),
+                    USER_DOCUMENT.EMAIL to email.toString()
+                )
+            )
+            task.addOnSuccessListener { continuation.resume(it.id) }
+
+            suspendCancellableCoroutineTask(continuation, task)
+        }
+    }
+
+    override suspend fun createPost(postDTO: PostDTO): String{
+        return suspendCancellableCoroutine { continuation ->
+            val db = FirebaseFirestore.getInstance()
+            val ref = db.collection(PostConst.POST_COLLECTION)
+            val task = ref.add(postDTO)
+
             task.addOnSuccessListener { continuation.resume(it.id) }
 
             suspendCancellableCoroutineTask(continuation, task)
@@ -199,11 +221,26 @@ object RemoteAppDataSource : AppDataSource {
     override suspend fun uploadToFireStorage(user_id: String, stream: InputStream) {
         return suspendCancellableCoroutine { continuation ->
             val task = FirebaseStorage.getInstance()
-                    .reference
-                    .child("profile/${user_id}")
-                    .putStream(stream)
+                .reference
+                .child("profile/${user_id}")
+                .putStream(stream)
 
             task.addOnSuccessListener { continuation.resume(Unit) }
+            suspendCancellableCoroutineTask(continuation, task)
+        }
+    }
+
+    override suspend fun uploadToFireStoragePostImage(image_id: String, stream: InputStream) {
+        return suspendCancellableCoroutine { continuation ->
+            android.util.Log.i(RemoteAppDataSource::class.java.simpleName, "uploadToFireStoragePostImage")
+            val task = FirebaseStorage.getInstance()
+                .reference
+                .child("images/${image_id}")
+                .putStream(stream)
+
+            task.addOnSuccessListener {
+                continuation.resume(Unit)
+            }
             suspendCancellableCoroutineTask(continuation, task)
         }
     }
@@ -211,9 +248,9 @@ object RemoteAppDataSource : AppDataSource {
     override suspend fun getDownloadUrl(user_id: String): String? {
         return suspendCancellableCoroutine { continuation ->
             val task = FirebaseStorage.getInstance()
-                    .reference
-                    .child("profile/${user_id}")
-                    .downloadUrl
+                .reference
+                .child("profile/${user_id}")
+                .downloadUrl
 
             task.addOnSuccessListener { continuation.resume(it.toString()) }
             suspendCancellableCoroutineTask(continuation, task)
@@ -222,7 +259,15 @@ object RemoteAppDataSource : AppDataSource {
 
     private fun <T, R> suspendCancellableCoroutineTask(continuation: CancellableContinuation<T>, task: Task<R>) {
         //for log
-        Exception().stackTrace[2].run { task.addOnCompleteListener { Log.ps(if (it.isSuccessful) Log.INFO else Log.WARN, this, it.isComplete && it.isSuccessful) } }
+        Exception().stackTrace[2].run {
+            task.addOnCompleteListener {
+                Log.ps(
+                    if (it.isSuccessful) Log.INFO else Log.WARN,
+                    this,
+                    it.isComplete && it.isSuccessful
+                )
+            }
+        }
         task.addOnCanceledListener { continuation.cancel() }
         task.addOnFailureListener { continuation.cancel() }
         continuation.invokeOnCancellation { continuation.cancel() }

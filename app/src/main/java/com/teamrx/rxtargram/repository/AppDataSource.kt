@@ -2,6 +2,7 @@ package com.teamrx.rxtargram.repository
 
 import com.teamrx.rxtargram.model.CommentDTO
 import com.teamrx.rxtargram.model.Post
+import com.teamrx.rxtargram.model.PostDTO
 import android.content.Context
 import com.teamrx.rxtargram.model.ProfileModel
 import java.io.InputStream
@@ -28,6 +29,8 @@ interface AppDataSource {
     //가입
     suspend fun join(name: CharSequence, email: CharSequence): String
 
+    suspend fun createPost(postDTO: PostDTO): String
+
     //사진가져오기
     suspend fun loadGalleryLoad(context: Context): String?
 
@@ -36,6 +39,9 @@ interface AppDataSource {
 
     //사진업로드하기
     suspend fun uploadToFireStorage(user_id: String, stream: InputStream)
+
+    //images
+    suspend fun uploadToFireStoragePostImage(image_id: String, stream: InputStream)
 
     suspend fun getDownloadUrl(user_id: String): String?
 
