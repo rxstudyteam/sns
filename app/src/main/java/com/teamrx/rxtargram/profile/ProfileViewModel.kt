@@ -62,11 +62,13 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
     private suspend fun update(user_id: String, name: String?, email: String?, profile_url: String?, bitmap: Bitmap?) {
         Log.e(0, sano(), "update", user_id, name, email, profile_url, bitmap)
         var profileUrl: String? = profile_url
-        //url이 변경됐을때만등록
-        if (this.profile_url.value != profileUrl) {
-            dataSource.uploadToFireStorage(user_id, bitmap?.toStream()!!)//이미지등록
-            //TODO : 카메라 , CROP 에서 가져온경우 원본을 삭제하는 기능이 있어야 한다. FileProviderHelper.deleteResults(Context)를 사용해서
-            profileUrl = dataSource.getDownloadUrl(user_id)//이미지등록한주소가져오기
+
+        if (this@ProfileViewModel.profile_url.value != profileUrl) {
+//            Log.w(3, nano(), user_id)
+            dataSource.uploadToFireStorage(user_id, bitmap?.toStream()!!)
+//            Log.w(4, nano())
+            profileUrl = dataSource.getDownloadUrl("profile/${user_id}")
+//            Log.w(5, nano())
         }
 
         //달라진항목만 setProfile 등록
@@ -98,7 +100,7 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
     }
 }
 
-private fun Bitmap.toStream(): InputStream {
+fun Bitmap.toStream(): InputStream {
     val bos = ByteArrayOutputStream()
     compress(Bitmap.CompressFormat.JPEG, 100, bos)
     val bytes = bos.toByteArray()
