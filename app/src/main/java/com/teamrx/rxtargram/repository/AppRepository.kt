@@ -2,6 +2,7 @@ package com.teamrx.rxtargram.repository
 
 import com.teamrx.rxtargram.model.CommentDTO
 import com.teamrx.rxtargram.model.Post
+import com.teamrx.rxtargram.model.PostDTO
 import android.content.Context
 import com.teamrx.rxtargram.model.ProfileModel
 import java.io.InputStream
@@ -37,16 +38,30 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppD
         remoteAppDataSource.uploadToFireStorage(user_id, stream)
     }
 
+    override suspend fun uploadToFireStoragePostImage(image_id: String, stream: InputStream) {
+        remoteAppDataSource.uploadToFireStoragePostImage(image_id, stream)
+    }
+
     override suspend fun getDownloadUrl(user_id: String): String? {
         return remoteAppDataSource.getDownloadUrl(user_id)
     }
 
-    override suspend fun setProfile(user_id: String, name: CharSequence?, email: CharSequence?, profile_url: String?): Boolean {
+    override suspend fun setProfile(
+        user_id: String,
+        name: CharSequence?,
+        email: CharSequence?,
+        profile_url: String?
+    ): Boolean {
         return remoteAppDataSource.setProfile(user_id, name, email, profile_url)
     }
 
     override suspend fun join(name: CharSequence, email: CharSequence): String {
         return remoteAppDataSource.join(name, email)
+    }
+
+
+    override suspend fun createPost(postDTO: PostDTO): String {
+        return remoteAppDataSource.createPost(postDTO)
     }
 
     companion object {

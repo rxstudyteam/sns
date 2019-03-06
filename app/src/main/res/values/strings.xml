@@ -3,6 +3,24 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+    <string-array name="user_names">
+        <item>정동진</item>
+        <item>김정우</item>
+        <item>이주영</item>
+        <item>갓보</item>
+        <item>김지훈</item>
+    </string-array>
+
+    <string-array name="user_keys">
+        <item>KxUypfZKf2cKmJs4jOeU</item>
+        <item>2nE</item>
+        <item>KxUypfZKf2cKmJs4jOeU</item>
+        <item>GlhMMR2zYVVNLKyuVObL</item>
+        <item>KxUypfZKf2cKmJs4jOeU</item>
+    </string-array>
+
     <string name="done">완료</string>
     <string name="share">공유</string>
     <string name="copy_link">링크 복사</string>
