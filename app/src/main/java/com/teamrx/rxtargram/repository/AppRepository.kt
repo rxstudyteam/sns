@@ -8,6 +8,10 @@ import com.teamrx.rxtargram.model.ProfileModel
 import java.io.InputStream
 
 class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppDataSource {
+    override fun getPostImageUrl(post_image_id: String,callback: (String) -> Unit) {
+         remoteAppDataSource.getPostImageUrl(post_image_id , callback)
+    }
+
     override fun modifyPost(post: Post, callback: (Boolean) -> Unit) = remoteAppDataSource.modifyPost(post, callback)
 
     override fun getPosts(callback: (List<Post>) -> Unit) {

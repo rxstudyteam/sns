@@ -1,3 +1,3 @@
 package com.teamrx.rxtargram.model
 
-data class PostImages(val url: String? = null)
+data class PostImages(val post_image_id: String = "", val url: String? = null)

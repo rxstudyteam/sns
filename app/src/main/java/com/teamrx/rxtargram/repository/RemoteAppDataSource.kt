@@ -2,14 +2,14 @@
 
 package com.teamrx.rxtargram.repository
 
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import com.teamrx.rxtargram.model.CommentDTO
-import com.teamrx.rxtargram.model.Post
 import android.content.Context
 import android.log.Log
 import com.google.android.gms.tasks.Task
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
+import com.teamrx.rxtargram.model.CommentDTO
+import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.model.PostImages
 import com.teamrx.rxtargram.model.ProfileModel
 import kotlinx.coroutines.CancellableContinuation
@@ -67,6 +67,17 @@ object RemoteAppDataSource : AppDataSource {
                 }
     }
 
+    override fun getPostImageUrl(post_image_id: String, callback: (String) -> Unit) {
+
+        val task = FirebaseStorage.getInstance()
+                .reference
+                .child("images/${post_image_id}")
+                .downloadUrl
+
+        task.addOnSuccessListener { callback(it.toString()) }
+        task.addOnFailureListener { throw it }
+    }
+
     override fun getPostImages(post_id: String?, callback: (List<PostImages>) -> Unit) {
         val post_id = "wL33VTH2vKNOHLrYsl0x"
         val snapshot = fireStore.collection("post")
@@ -75,14 +86,14 @@ object RemoteAppDataSource : AppDataSource {
                 .get()
 
         snapshot.addOnSuccessListener { querySnapshot ->
-            Log.e("addOnSuccessListener")
+            //            Log.e("addOnSuccessListener")
 
             for (document in querySnapshot.documents) {
                 Log.e(document.id, document["url"])
             }
             var images = querySnapshot.toObjects(PostImages::class.java)
             callback(images)
-            Log.w("addOnSuccessListener")
+//            Log.w("addOnSuccessListener")
         }
 
     }

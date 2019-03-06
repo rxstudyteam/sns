@@ -43,4 +43,7 @@ interface AppDataSource {
 
     suspend fun getDownloadUrl(user_id: String): String?
 
+    fun getPostImageUrl(post_image_id: String,callback: (String) -> Unit)
+
+
 }

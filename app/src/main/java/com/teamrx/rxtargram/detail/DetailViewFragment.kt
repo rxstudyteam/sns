@@ -30,10 +30,12 @@ class DetailViewFragment : Fragment(), OptionClickListener {
     private val REQUEST_MODYFY = 1001
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_detail_view, container, false)
+            inflater.inflate(R.layout.fragment_detail_view, container, false)
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        swipe.setOnRefreshListener { setupViewModel() }
 
         // 컴포넌트 리스너
         setupRecyclerView()
@@ -43,10 +45,6 @@ class DetailViewFragment : Fragment(), OptionClickListener {
     }
 
     private fun setupRecyclerView() {
-//        adapter = PostRecyclerViewAdapter(requireContext(), this)
-//        recyclerView.layoutManager = LinearLayoutManager(activity)
-//        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(activity)
         recyclerView.adapter = DetailViewAdapter()
     }
 
@@ -61,8 +59,8 @@ class DetailViewFragment : Fragment(), OptionClickListener {
     }
 
     private fun updateUI(posts: List<Post>) {
-//        adapter.setPostDatas(posts)
         (recyclerView.adapter as DetailViewAdapter).setDatas(posts)
+        swipe.isRefreshing = false
     }
 
     private inline fun <reified T : BaseViewModel> getViewModel(): T {

@@ -1,5 +1,6 @@
 package com.teamrx.rxtargram.detail
 
+import android.log.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.teamrx.rxtargram.base.BaseViewModel
@@ -27,9 +28,16 @@ class DetailViewModel(dataSource: AppDataSource) : BaseViewModel(dataSource) {
         }
     }
 
+    fun modifyPost(post: Post, callback: (Boolean) -> Unit) = dataSource.modifyPost(post, callback)
 
-    fun modifyPost(post: Post, callback : (Boolean) -> Unit) = dataSource.modifyPost(post, callback)
     fun getPostImages(post_id: String?) {
-        dataSource.getPostImages(post_id) { postImages -> this.postImages.value = postImages }
+        dataSource.getPostImages(post_id) { postImages ->
+            postImages.forEachIndexed { index, postImages ->
+                dataSource.getPostImageUrl(postImages.post_image_id ){
+                    Log.e(it);
+                }
+            }
+            this.postImages.value = postImages
+        }
     }
 }
