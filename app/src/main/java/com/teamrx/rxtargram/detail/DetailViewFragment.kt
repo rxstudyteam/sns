@@ -3,9 +3,7 @@ package com.teamrx.rxtargram.detail
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -15,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.BaseViewModel
 import com.teamrx.rxtargram.comment.CommentActivity
+import com.teamrx.rxtargram.editor.EditorActivity
 import com.teamrx.rxtargram.inject.Injection
 import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.util.getStringArray
@@ -26,8 +25,25 @@ class DetailViewFragment : Fragment(), OptionClickListener {
     private lateinit var adapter: PostRecyclerViewAdapter
     private val REQUEST_MODYFY = 1001
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        inflater?.inflate(R.menu.detail_view, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        return when (item?.itemId) {
+            R.id.write -> startActivity(Intent(requireContext(), EditorActivity::class.java)).run { true }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_detail_view, container, false)
+            inflater.inflate(R.layout.fragment_detail_view, container, false)
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
