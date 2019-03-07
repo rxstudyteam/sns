@@ -5,6 +5,7 @@ package com.teamrx.rxtargram.profile
 import android.graphics.Bitmap
 import android.log.Log
 import android.log.sano
+import android.util.toStream
 import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -92,17 +93,11 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
 
     fun getTitle() = if (PP.user_id.get().isNullOrBlank()) "회원가입" else "프로필"
 
+    var mainScope = CoroutineScope(Dispatchers.Main)
     //!!DO NOT HOF
     fun getUserImage(view: View) {
-        CoroutineScope(Dispatchers.Main).launch {
+        mainScope.launch {
             profile_url.value = dataSource.loadGalleryLoad(view.context) ?: DEFAULT_PROFILE_URL
         }
     }
-}
-
-fun Bitmap.toStream(): InputStream {
-    val bos = ByteArrayOutputStream()
-    compress(Bitmap.CompressFormat.JPEG, 100, bos)
-    val bytes = bos.toByteArray()
-    return ByteArrayInputStream(bytes)
 }

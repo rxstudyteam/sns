@@ -1,16 +1,17 @@
 package com.teamrx.rxtargram.editor
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import com.teamrx.rxtargram.R
+import com.teamrx.rxtargram.base.AppActivity
 
-class EditorActivity : AppCompatActivity() {
+class EditorActivity : AppActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.editor_activity)
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction().replace(R.id.container, EditorFragment.newInstance()).commitNow()
+//            supportFragmentManager.transaction(now = true) { replace(R.id.container, EditorFragment.newInstance()) } //import androidx.fragment.app.transaction
         }
     }
 
