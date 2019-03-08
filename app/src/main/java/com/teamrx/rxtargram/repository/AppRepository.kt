@@ -1,10 +1,11 @@
 package com.teamrx.rxtargram.repository
 
+import android.content.Context
 import com.teamrx.rxtargram.model.CommentDTO
 import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.model.PostDTO
-import android.content.Context
 import com.teamrx.rxtargram.model.ProfileModel
+import kotlinx.coroutines.channels.ReceiveChannel
 import java.io.InputStream
 
 class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppDataSource {
@@ -18,12 +19,20 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppD
         remoteAppDataSource.getPostById(post_id, callback)
     }
 
-    override fun getComments(post_id: String, callback: (List<CommentDTO>) -> Unit) {
-        remoteAppDataSource.getComments(post_id, callback)
+    override suspend fun getComments(post_id: String): ReceiveChannel<List<CommentDTO>> {
+        return remoteAppDataSource.getComments(post_id)
     }
 
-    override fun addComment(parent_post_id: String, user_id: String, content: String, callback: (Boolean) -> Unit) {
-        remoteAppDataSource.addComment(parent_post_id, user_id, content, callback)
+    override suspend fun addComment(parent_post_id: String, user_id: String, content: String): Boolean {
+        return remoteAppDataSource.addComment(parent_post_id, user_id, content)
+    }
+
+    override suspend fun modifyComment(comment: CommentDTO): Boolean {
+        return remoteAppDataSource.modifyComment(comment)
+    }
+
+    override suspend fun deleteComment(post_id: String): Boolean {
+        return remoteAppDataSource.deleteComment(post_id)
     }
 
     override suspend fun getProfile(user_id: String): ProfileModel {

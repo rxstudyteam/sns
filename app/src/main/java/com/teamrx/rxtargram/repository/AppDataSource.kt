@@ -1,10 +1,11 @@
 package com.teamrx.rxtargram.repository
 
+import android.content.Context
 import com.teamrx.rxtargram.model.CommentDTO
 import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.model.PostDTO
-import android.content.Context
 import com.teamrx.rxtargram.model.ProfileModel
+import kotlinx.coroutines.channels.ReceiveChannel
 import java.io.InputStream
 
 interface AppDataSource {
@@ -15,10 +16,16 @@ interface AppDataSource {
     fun getPostById(post_id: String, callback: (Post) -> Unit)
 
     // 댓글 목록 가져오기
-    fun getComments(post_id: String, callback: (List<CommentDTO>) -> Unit)
+    suspend fun getComments(post_id: String): ReceiveChannel<List<CommentDTO>>
 
     // 댓글 추가하기
-    fun addComment(parent_post_id: String, user_id: String, content: String, callback: (Boolean) -> Unit)
+    suspend fun addComment(parent_post_id: String, user_id: String, content: String): Boolean
+
+    // 댓글 수정하기
+    suspend fun modifyComment(comment: CommentDTO): Boolean
+
+    // 댓글 삭제하기
+    suspend fun deleteComment(post_id: String): Boolean
 
     //프로필가져오기
     suspend fun getProfile(user_id: String): ProfileModel

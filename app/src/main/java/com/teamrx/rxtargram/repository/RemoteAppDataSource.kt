@@ -6,10 +6,14 @@ import android.content.Context
 import android.log.Log
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import kotlinx.coroutines.channels.ReceiveChannel
 import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
 import com.teamrx.rxtargram.model.*
 import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.sendBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import smart.util.GalleryLoader
 import smart.util.dp
@@ -17,6 +21,7 @@ import java.io.InputStream
 import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 @Suppress("ClassName")
 object RemoteAppDataSource : AppDataSource {
@@ -32,11 +37,13 @@ object RemoteAppDataSource : AppDataSource {
     }
 
     object POST_DOCUMENT {
+        const val PARENT_POST_NO = "parent_post_no"
         const val CREATED_AT = "created_at"
     }
 
     private val fireStore: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
     private val cachedPosts: HashMap<String, Post> by lazy { HashMap<String, Post>() }
+    private var listener: ListenerRegistration? = null
 
     override fun getPosts(callback: (List<Post>) -> Unit) {
 
@@ -86,34 +93,66 @@ object RemoteAppDataSource : AppDataSource {
             }
     }
 
-    override fun getComments(post_id: String, callback: (List<CommentDTO>) -> Unit) {
+    override suspend fun getComments(post_id: String): ReceiveChannel<List<CommentDTO>> {
+        listener?.remove() // addSnapshotListener를 onDestory에 remove() 해주거나 삭제가 안되었다면 수동삭제
 
-        fireStore.collection("post").whereEqualTo("parent_post_no", post_id)
-            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                if(querySnapshot == null) return@addSnapshotListener
+        val channel = Channel<List<CommentDTO>>()
 
-                val commentDTOs = mutableListOf<CommentDTO>()
+        listener = fireStore.collection(POST_COLLECTION).whereEqualTo(POST_DOCUMENT.PARENT_POST_NO, post_id).
+            addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+
+                if (querySnapshot == null) {
+                    channel.close()
+                    return@addSnapshotListener
+                }
+                firebaseFirestoreException?.let {
+                    channel.close(it)
+                    return@addSnapshotListener
+                }
+
+                val commentDTOs = arrayListOf<CommentDTO>()
                 for(snapshot in querySnapshot.documents) {
-                    try {
-                        val item = snapshot.toObject(CommentDTO::class.java)
-                        if(item?.parent_post_no == post_id) {
-                            commentDTOs.add(item)
-                        }
-                    } catch (e: Exception) {
-                        firebaseFirestoreException?.printStackTrace()
-                        e.printStackTrace()
+                    val item = snapshot.toObject(CommentDTO::class.java)
+                    if(item?.parent_post_no == post_id) {
+                        item.snapshotId = snapshot.id
+                        commentDTOs.add(item)
                     }
                 }
 
-                callback(commentDTOs)
+                //https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.channels/send-blocking.html
+                channel.sendBlocking(commentDTOs)
             }
+
+        return channel
     }
 
-    override fun addComment(parent_post_id: String, user_id: String, content: String, callback: (Boolean) -> Unit) {
-        fireStore.collection("post").document().set(CommentDTO(parent_post_id, content,user_id))
-            .addOnCompleteListener {
-                callback(it.isSuccessful)
+    override suspend fun addComment(parent_post_id: String, user_id: String, content: String): Boolean {
+        return suspendCoroutine { continuation ->
+            fireStore.collection(POST_COLLECTION).document().set(CommentDTO(parent_post_id, content, user_id))
+                .addOnCompleteListener { task ->
+                    continuation.resume(task.isSuccessful)
+                }
+        }
+    }
+
+    override suspend fun modifyComment(comment: CommentDTO): Boolean {
+        return suspendCoroutine { continuation ->
+            comment.snapshotId?.let {  id ->
+                fireStore.collection(POST_COLLECTION).document(id).set(comment)
+                    .addOnCompleteListener { task ->
+                        continuation.resume(task.isSuccessful)
+                    }
             }
+        }
+    }
+
+    override suspend fun deleteComment(post_id: String): Boolean {
+        return suspendCoroutine { continuation ->
+            fireStore.collection(POST_COLLECTION).document(post_id).delete()
+                .addOnCompleteListener { task ->
+                    continuation.resume(task.isSuccessful)
+                }
+        }
     }
 
     override fun modifyPost(post: Post, callback: (Boolean) -> Unit) {
@@ -179,8 +218,8 @@ object RemoteAppDataSource : AppDataSource {
             val db = FirebaseFirestore.getInstance()
             val ref = db.collection(USER_COLLECTION).document(user_Id)
             val map = hashMapOf<String, Any>()
-            name?.let { map[USER_DOCUMENT.NAME] = name }
-            email?.let { map[USER_DOCUMENT.EMAIL] = email }
+            name?.let { map[RemoteAppDataSource.USER_DOCUMENT.NAME] = name }
+            email?.let { map[RemoteAppDataSource.USER_DOCUMENT.EMAIL] = email }
             profile_url?.let { map[USER_DOCUMENT.PROFILE_URL] = profile_url }
             val task = ref.update(map as Map<String, Any>)
             task.addOnSuccessListener {
