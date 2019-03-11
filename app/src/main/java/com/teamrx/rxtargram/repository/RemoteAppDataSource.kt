@@ -6,10 +6,8 @@ import android.content.Context
 import android.log.Log
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
 import com.teamrx.rxtargram.model.CommentDTO
-import com.teamrx.rxtargram.model.PostConst
 import com.teamrx.rxtargram.model.PostDTO
 import com.teamrx.rxtargram.model.ProfileModel
 import kotlinx.coroutines.CancellableContinuation
@@ -243,7 +241,7 @@ object RemoteAppDataSource : AppDataSource {
     override suspend fun createPost(postDTO: PostDTO): String {
         return suspendCancellableCoroutine { continuation ->
             val db = FirebaseFirestore.getInstance()
-            val ref = db.collection(PostConst.POST_COLLECTION)
+            val ref = db.collection(POST_COLLECTION)
             val task = ref.add(postDTO)
 
             task.addOnSuccessListener { continuation.resume(it.id) }
