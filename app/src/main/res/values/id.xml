@@ -1,0 +1,4 @@
+<resources>
+    <item name="uri" type="id" />
+    <item name="bitmap" type="id" />
+</resources>

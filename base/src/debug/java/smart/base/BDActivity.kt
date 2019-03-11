@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.pm.PackageInfoCompat
 
 open class BDActivity : CActivity() {
     override fun onStart() {
@@ -25,9 +26,13 @@ open class BDActivity : CActivity() {
         val parent = activity.findViewById<ViewGroup>(android.R.id.content)
         if (parent.findViewWithTag<View>(VERSION_TAG) != null)
             return
+
+
         val info = activity.packageManager.getPackageInfo(activity.packageName, 0)
         val ver = TextView(activity)
-        ver.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) "[v${info.longVersionCode}] $ETC_INFO" else "[v${info.versionCode}] $ETC_INFO"
+
+        val versionCode = PackageInfoCompat.getLongVersionCode(info)
+        ver.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) "[v$versionCode] $ETC_INFO" else "[v$versionCode}] $ETC_INFO"
         ver.tag = VERSION_TAG
         ver.setTextColor(0x55ff0000)
         ver.setBackgroundColor(0x5500ff00)

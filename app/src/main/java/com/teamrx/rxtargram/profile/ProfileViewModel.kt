@@ -4,7 +4,9 @@ package com.teamrx.rxtargram.profile
 
 import android.graphics.Bitmap
 import android.log.Log
-import android.log.sano
+import android.util.jpegstream
+//import android.log.sano
+import android.util.toStream
 import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -37,21 +39,21 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
         profile_url.value = profile.profile_url ?: DEFAULT_PROFILE_URL
     }
 
-    suspend fun saveProfile(name: String, email: String, profile_url: String?, bitmap: Bitmap?) {
+    suspend fun saveProfile(name: String, email: String, profile: Pair<String, Bitmap>?) {
 //        return join(name, email, bitmap)
         val userId = PP.user_id.get()
         if (userId.isNullOrBlank()) {
-            join(name, email, bitmap)
+            join(name, email, profile?.second)
         } else {
-            update(userId, name, email, profile_url, bitmap)
+            update(userId, name, email, profile)
         }
     }
 
     private suspend fun join(name: String, email: String, bitmap: Bitmap?) {
         Log.e(0, "join", name, email, bitmap)
         val user_id = dataSource.join(name, email)
-        dataSource.uploadToFireStorage(user_id, bitmap?.toStream()!!)
-        var image_url = dataSource.getDownloadUrl(user_id)
+        dataSource.uploadToFireStorage(user_id, bitmap?.jpegstream!!)
+        val image_url = dataSource.getDownloadUrl(user_id)
         dataSource.setProfile(user_id, null, null, image_url)
         this.name.value = name
         this.email.value = email
@@ -59,48 +61,31 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
         PP.user_id.set(user_id)
     }
 
-    private suspend fun update(user_id: String, name: String?, email: String?, profile_url: String?, bitmap: Bitmap?) {
-        Log.e(0, sano(), "update", user_id, name, email, profile_url, bitmap)
-        var profileUrl: String? = profile_url
-        //url이 변경됐을때만등록
-        if (this.profile_url.value != profileUrl) {
-            dataSource.uploadToFireStorage(user_id, bitmap?.toStream()!!)//이미지등록
-            //TODO : 카메라 , CROP 에서 가져온경우 원본을 삭제하는 기능이 있어야 한다. FileProviderHelper.deleteResults(Context)를 사용해서
-            profileUrl = dataSource.getDownloadUrl(user_id)//이미지등록한주소가져오기
+    //    private suspend fun update(user_id: String, name: String?, email: String?, profile : Pair<> profile_url: String?, bitmap: Bitmap?) {
+    private suspend fun update(user_id: String, name: String?, email: String?, profile: Pair<String, Bitmap>?) {
+        Log.e(0, /*sano(),*/ "update", user_id, name, email, profile)
+
+        profile?.run {
+            if (profile_url.value != first) {
+                dataSource.uploadToFireStorage(user_id, second.jpegstream)
+                profile_url.value = dataSource.getDownloadUrl("profile/${user_id}")
+            }
         }
 
-        //달라진항목만 setProfile 등록
-        dataSource.setProfile(user_id
-                , name?.takeUnless { this.name.value == name }
-                , email?.takeUnless { this.email.value == email }
-                , profileUrl?.takeUnless { this.profile_url.value == profileUrl }
-        )
+        dataSource.setProfile(user_id, name, email, profile_url.value)
 
         //UI Update
-        name?.takeUnless { this.name.value == name }?.let {
-            this.name.value = name
-        }
-        email?.takeUnless { this.email.value == email }?.let {
-            this.email.value = email
-        }
-        profileUrl?.takeUnless { this.profile_url.value == profileUrl }?.let {
-            this.profile_url.value = profileUrl
-        }
+        this.name.value = name
+        this.email.value = email
     }
 
     fun getTitle() = if (PP.user_id.get().isNullOrBlank()) "회원가입" else "프로필"
 
+    var mainScope = CoroutineScope(Dispatchers.Main)
     //!!DO NOT HOF
     fun getUserImage(view: View) {
-        CoroutineScope(Dispatchers.Main).launch {
+        mainScope.launch {
             profile_url.value = dataSource.loadGalleryLoad(view.context) ?: DEFAULT_PROFILE_URL
         }
     }
-}
-
-private fun Bitmap.toStream(): InputStream {
-    val bos = ByteArrayOutputStream()
-    compress(Bitmap.CompressFormat.JPEG, 100, bos)
-    val bytes = bos.toByteArray()
-    return ByteArrayInputStream(bytes)
 }

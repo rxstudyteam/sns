@@ -1,7 +1,7 @@
 package com.teamrx.rxtargram.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.teamrx.rxtargram.model.Post
+import com.teamrx.rxtargram.model.PostDTO
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.junit.Test
@@ -32,7 +32,7 @@ class RemoteAppDataSourceTest {
 
 
         docRef.addOnSuccessListener {
-            val post = it.toObject(Post::class.java)
+            val post = it.toObject(PostDTO::class.java)
 
             println("modifyPost : $post")
         }

@@ -1,7 +1,5 @@
 package com.teamrx.rxtargram.comment
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Toast
@@ -14,7 +12,7 @@ import com.teamrx.rxtargram.base.BaseViewModel
 import com.teamrx.rxtargram.detail.DetailViewModel
 import com.teamrx.rxtargram.inject.Injection
 import com.teamrx.rxtargram.model.CommentDTO
-import com.teamrx.rxtargram.model.Post
+import com.teamrx.rxtargram.model.PostDTO
 import kotlinx.android.synthetic.main.activity_comment.*
 
 class CommentActivity : AppCompatActivity() {
@@ -42,7 +40,7 @@ class CommentActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return when(item?.itemId) {
+        return when (item?.itemId) {
             android.R.id.home -> {
                 finish()
                 true
@@ -63,7 +61,7 @@ class CommentActivity : AppCompatActivity() {
             // 로그인상태가 아니므로 임의의 사용자
             val user_id = "MrTiDrASkFH9hby1x9VD"
             commentViewModel.addComment(postId.toString(), user_id, edtContent.text.toString()) { isSuccess ->
-                if(isSuccess) {
+                if (isSuccess) {
                     edtContent.setText("")
                     Toast.makeText(this, getString(R.string.comment_add_success), Toast.LENGTH_LONG).show()
                 } else {
@@ -89,10 +87,10 @@ class CommentActivity : AppCompatActivity() {
         commentViewModel.loadComments(postId.toString())
     }
 
-    private fun updatePost(post: Post) {
+    private fun updatePost(post: PostDTO) {
         tvUserId.text = post.user_id
         tvContent.text = post.content
-        tvCreatedAt.text = post.created_at?.toDate().toString()
+        tvCreatedAt.text = post.created_at.toString()
     }
 
     private fun updateComments(comments: List<CommentDTO>) {
@@ -102,18 +100,5 @@ class CommentActivity : AppCompatActivity() {
     private inline fun <reified T : BaseViewModel> getViewModel(): T {
         val viewModelFactory = Injection.provideViewModelFactory()
         return ViewModelProviders.of(this, viewModelFactory).get(T::class.java)
-    }
-
-    companion object {
-        fun startActivity(activity: Activity, post_id: String) {
-            val intent = Intent(activity, CommentActivity::class.java)
-            val bundle = Bundle()
-            bundle.putString("post_id", post_id)
-
-            intent.putExtras(bundle)
-
-            activity.startActivity(intent)
-        }
-
     }
 }

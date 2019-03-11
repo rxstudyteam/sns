@@ -2,20 +2,16 @@ package com.teamrx.rxtargram.repository
 
 import android.content.Context
 import com.teamrx.rxtargram.model.CommentDTO
-import com.teamrx.rxtargram.model.Post
-import com.teamrx.rxtargram.model.PostImages
+import com.teamrx.rxtargram.model.PostDTO
 import com.teamrx.rxtargram.model.ProfileModel
 import java.io.InputStream
 
 interface AppDataSource {
     // 글 목록 가져오기
-    fun getPosts(callback: (List<Post>) -> Unit)
-
-    // 글이미지 목록 가져오기
-    fun getPostImages(post_id: String?, callback: (List<PostImages>) -> Unit)
+    fun getPosts(callback: (List<PostDTO>) -> Unit)
 
     // 글 상세정보 가져오기
-    fun getPostById(post_id: String, callback: (Post) -> Unit)
+    fun getPostById(post_id: String, callback: (PostDTO) -> Unit)
 
     // 댓글 목록 가져오기
     fun getComments(post_id: String, callback: (List<CommentDTO>) -> Unit)
@@ -32,18 +28,22 @@ interface AppDataSource {
     //가입
     suspend fun join(name: CharSequence, email: CharSequence): String
 
+    suspend fun createPost(postDTO: PostDTO): String
+
     //사진가져오기
     suspend fun loadGalleryLoad(context: Context): String?
 
     // 글 수정
-    fun modifyPost(post: Post, callback: (Boolean) -> Unit)
+    fun modifyPost(post: PostDTO, callback: (Boolean) -> Unit)
 
     //사진업로드하기
     suspend fun uploadToFireStorage(user_id: String, stream: InputStream)
 
+    //images
+    suspend fun uploadToFireStoragePostImage(stream: InputStream): String
+
     suspend fun getDownloadUrl(user_id: String): String?
 
-    fun getPostImageUrl(post_image_id: String,callback: (String) -> Unit)
-
+    fun getPostImageUrl(post_image_id: String, callback: (String) -> Unit)
 
 }

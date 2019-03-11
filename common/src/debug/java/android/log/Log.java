@@ -21,7 +21,9 @@ import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.Nullable;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -33,11 +35,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 
-
 @SuppressWarnings("ALL")
 public class Log {
-
-
 
     public static final int VERBOSE = android.util.Log.VERBOSE;
     public static final int DEBUG = android.util.Log.DEBUG;

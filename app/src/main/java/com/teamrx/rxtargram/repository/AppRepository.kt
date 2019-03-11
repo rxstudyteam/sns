@@ -2,23 +2,22 @@ package com.teamrx.rxtargram.repository
 
 import android.content.Context
 import com.teamrx.rxtargram.model.CommentDTO
-import com.teamrx.rxtargram.model.Post
-import com.teamrx.rxtargram.model.PostImages
+import com.teamrx.rxtargram.model.PostDTO
 import com.teamrx.rxtargram.model.ProfileModel
 import java.io.InputStream
 
 class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppDataSource {
-    override fun getPostImageUrl(post_image_id: String,callback: (String) -> Unit) {
-         remoteAppDataSource.getPostImageUrl(post_image_id , callback)
+    override fun getPostImageUrl(post_image_id: String, callback: (String) -> Unit) {
+        remoteAppDataSource.getPostImageUrl(post_image_id, callback)
     }
 
-    override fun modifyPost(post: Post, callback: (Boolean) -> Unit) = remoteAppDataSource.modifyPost(post, callback)
+    override fun modifyPost(post: PostDTO, callback: (Boolean) -> Unit) = remoteAppDataSource.modifyPost(post, callback)
 
-    override fun getPosts(callback: (List<Post>) -> Unit) {
+    override fun getPosts(callback: (List<PostDTO>) -> Unit) {
         remoteAppDataSource.getPosts(callback)
     }
 
-    override fun getPostById(post_id: String, callback: (Post) -> Unit) {
+    override fun getPostById(post_id: String, callback: (PostDTO) -> Unit) {
         remoteAppDataSource.getPostById(post_id, callback)
     }
 
@@ -42,11 +41,20 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppD
         remoteAppDataSource.uploadToFireStorage(user_id, stream)
     }
 
+    override suspend fun uploadToFireStoragePostImage(stream: InputStream): String {
+        return remoteAppDataSource.uploadToFireStoragePostImage(stream)
+    }
+
     override suspend fun getDownloadUrl(user_id: String): String? {
         return remoteAppDataSource.getDownloadUrl(user_id)
     }
 
-    override suspend fun setProfile(user_id: String, name: CharSequence?, email: CharSequence?, profile_url: String?): Boolean {
+    override suspend fun setProfile(
+            user_id: String,
+            name: CharSequence?,
+            email: CharSequence?,
+            profile_url: String?
+    ): Boolean {
         return remoteAppDataSource.setProfile(user_id, name, email, profile_url)
     }
 
@@ -54,14 +62,15 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppD
         return remoteAppDataSource.join(name, email)
     }
 
-    override fun getPostImages(post_id: String?, callback: (List<PostImages>) -> Unit) {
-        remoteAppDataSource.getPostImages(post_id, callback)
+    override suspend fun createPost(postDTO: PostDTO): String {
+        return remoteAppDataSource.createPost(postDTO)
     }
 
     companion object {
         private var INSTANCE: AppRepository? = null
-        fun getInstance(remoteDataSource: RemoteAppDataSource) = INSTANCE ?: synchronized(AppRepository::class.java) {
-            INSTANCE ?: AppRepository(remoteDataSource).also { INSTANCE = it }
-        }
+        fun getInstance(remoteDataSource: RemoteAppDataSource) = INSTANCE
+                ?: synchronized(AppRepository::class.java) {
+                    INSTANCE ?: AppRepository(remoteDataSource).also { INSTANCE = it }
+                }
     }
 }

@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.teamrx.rxtargram.R
-import com.teamrx.rxtargram.model.Post
+import com.teamrx.rxtargram.model.PostDTO
 import com.teamrx.rxtargram.util.GlideApp
 import kotlinx.android.synthetic.main.detail_item.view.*
 import java.util.*
@@ -14,7 +14,7 @@ import java.util.*
 class PostRecyclerViewAdapter(private val mContext: Context, private val optionClickListener: OptionClickListener) :
     RecyclerView.Adapter<PostRecyclerViewAdapter.ViewHolder>() {
 
-    private val posts = ArrayList<Post>()
+    private val posts = ArrayList<PostDTO>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.detail_item, parent, false))
@@ -32,14 +32,14 @@ class PostRecyclerViewAdapter(private val mContext: Context, private val optionC
         item.tvUserId.text = posts[position].user_id
         item.tvTitle.text = posts[position].title
         item.tvContent.text = posts[position].content
-        item.tvCreatedAt.text = posts[position].created_at?.toDate().toString()
+        item.tvCreatedAt.text = posts[position].created_at.toString()
 
         item.tvComments.setOnClickListener {
             posts[position].post_id?.let { optionClickListener.onCommentClick(it) }
         }
     }
 
-    fun setPostDatas(posts: List<Post>) {
+    fun setPostDatas(posts: List<PostDTO>) {
         this.posts.clear()
         this.posts.addAll(posts)
         notifyDataSetChanged()
@@ -49,7 +49,7 @@ class PostRecyclerViewAdapter(private val mContext: Context, private val optionC
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
-        var post: Post? = null
+        var post: PostDTO? = null
 
         init {
             itemView.option.setOnClickListener {
