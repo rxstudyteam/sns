@@ -1,4 +1,4 @@
-@file:Suppress("LocalVariableName")
+@file:Suppress("LocalVariableName", "PropertyName")
 
 package com.teamrx.rxtargram.editor
 
@@ -17,11 +17,7 @@ import smart.base.PP
 
 class EditorViewModel(private var dataSource: AppDataSource) : ViewModel() {
 
-    val TAG = EditorViewModel::class.java.simpleName
-
-//    private val fireStore: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
-
-    val userid: String by lazy { PP.user_id.get(PP.deviceid)!! }
+    val user_id: String by lazy { PP.user_id.get(PP.deviceid)!! }
     val postImageUrl: MutableLiveData<String> = MutableLiveData()
 
     fun getPostImage(context: Context) = CoroutineScope(Dispatchers.Main).launch {
@@ -29,11 +25,11 @@ class EditorViewModel(private var dataSource: AppDataSource) : ViewModel() {
     }
 
     suspend fun createPost(title: String, content: String, bitmap: Bitmap?) {
-        Log.e(title , content , bitmap )
+        Log.e(title, content, bitmap)
         val image_id: String? = bitmap?.run { dataSource.uploadToFireStoragePostImage(jpegstream) }
         val url = image_id?.let { dataSource.getDownloadUrl(it) }
-        val post = PostDTO(userid, title, content, url?.let { listOf(it) })
+        val post = PostDTO(user_id, title, content, url?.let { listOf(it) })
         val id = dataSource.createPost(post)
-        Log.i(TAG, "createPost: $id")
+        Log.i("createPost: $id")
     }
 }

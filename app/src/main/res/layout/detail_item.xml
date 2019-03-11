@@ -5,7 +5,8 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        tools:background="#5f00">
 
         <ImageView
             android:id="@+id/ivProfileImage"
@@ -29,72 +30,96 @@
             app:layout_constraintTop_toTopOf="@+id/ivProfileImage"
             tools:text="강민경" />
 
-        <ImageView
-            android:id="@+id/ivContentImage"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/content_container"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:layout_marginTop="8dp"
-            android:background="#3B5998"
-            android:contentDescription="@string/app_name"
-            app:layout_constraintTop_toBottomOf="@+id/ivProfileImage" />
-
-        <TextView
-            android:id="@+id/tvTitle"
-            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:textColor="@android:color/black"
-            android:textStyle="bold"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ivContentImage"
-            tools:text="Hello Rx Team!" />
+            app:layout_constraintTop_toBottomOf="@+id/ivProfileImage"
+            tools:background="#5f00"
+            tools:layout_height="100dp">
 
-        <TextView
-            android:id="@+id/tvContent"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:textColor="@android:color/black"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvTitle"
-            tools:text="This is Rxteam's SNS Sample App!! Welcome~" />
+            <ImageView
+                android:id="@+id/ivContentImage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
 
-        <Button
-            android:id="@+id/tvComments"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:text="댓글"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvContent" />
+                android:contentDescription="@string/app_name"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:layout_height="100dp" />
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:textStyle="bold"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Hello Rx Team!" />
+
+            <TextView
+                android:id="@+id/tvContent"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/tvTitle"
+                app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+                tools:text="This is Rxteam's SNS Sample App!! Welcome~" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView
             android:id="@+id/tvCreatedAt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
             android:textSize="12sp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvComments"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/content_container"
             tools:text="15시간전" />
 
+        <Button
+            android:id="@+id/comments"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="댓글"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/tvContent"
+            app:layout_constraintTop_toBottomOf="@+id/tvCreatedAt" />
+
+        <Button
+            android:id="@+id/edit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="수정"
+            app:layout_constraintBottom_toBottomOf="@+id/comments"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/comments"
+            app:layout_constraintTop_toTopOf="@+id/comments" />
+
         <ImageButton
-            android:id="@+id/option"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="@null"
-            android:src="@drawable/outline_settings_black_36"
-            app:layout_constraintBottom_toTopOf="@+id/ivContentImage"
-            app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:id="@+id/menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:contentDescription="메뉴"
+            android:minWidth="50dp"
+            android:minHeight="50dp"
+            android:padding="10dp"
+            android:src="@drawable/ic_menu"
+            app:layout_constraintEnd_toEndOf="@+id/tvCreatedAt"
+            app:layout_constraintTop_toTopOf="@+id/comments" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

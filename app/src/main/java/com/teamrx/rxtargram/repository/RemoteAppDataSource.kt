@@ -21,7 +21,7 @@ import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-@Suppress("ClassName")
+@Suppress("ClassName", "unused")
 object RemoteAppDataSource : AppDataSource {
 
     const val USER_COLLECTION = "user"
@@ -42,29 +42,26 @@ object RemoteAppDataSource : AppDataSource {
 
     override fun getPosts(callback: (List<PostDTO>) -> Unit) {
         FirebaseFirestore.getInstance()
-                .collection("post")
-                .orderBy("created_at", Query.Direction.DESCENDING)
+                .collection(POST_COLLECTION)
+//                .orderBy("created_at", Query.Direction.DESCENDING)
                 .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                     if (querySnapshot == null)
                         return@addSnapshotListener
 
-                    val posts = mutableListOf<PostDTO>()
-                    for (snapshot in querySnapshot.documents) {
-                        try {
-                            val post = snapshot.toObject(PostDTO::class.java)
-                            post?.post_id = snapshot.id
+                    Log.e(querySnapshot.documents.size)
 
-                            // 팔로우한 유저만 구분.
-                            if (post != null) {
-                                posts.add(post)
-                                cachedPosts[snapshot.id] = post
-                            }
-                        } catch (e: Exception) {
-                            firebaseFirestoreException?.printStackTrace()
-                            e.printStackTrace()
+                    val posts = mutableListOf<PostDTO>()
+
+                    for (snapshot in querySnapshot.documents) {
+                        val post = snapshot.toObject(PostDTO::class.java)
+                        post?.post_id = snapshot.id
+
+                        // 팔로우한 유저만 구분.
+                        if (post != null) {
+                            posts.add(post)
+                            cachedPosts[snapshot.id] = post
                         }
                     }
-
                     callback(posts)
                 }
     }

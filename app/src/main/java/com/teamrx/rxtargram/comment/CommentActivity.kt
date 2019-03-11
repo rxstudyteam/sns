@@ -1,27 +1,36 @@
+@file:Suppress("PrivatePropertyName")
+
 package com.teamrx.rxtargram.comment
 
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.teamrx.rxtargram.R
-import com.teamrx.rxtargram.base.BaseViewModel
+import com.teamrx.rxtargram.base.AppActivity
 import com.teamrx.rxtargram.detail.DetailViewModel
-import com.teamrx.rxtargram.inject.Injection
 import com.teamrx.rxtargram.model.CommentDTO
 import com.teamrx.rxtargram.model.PostDTO
 import kotlinx.android.synthetic.main.activity_comment.*
+import smart.base.PP
 
-class CommentActivity : AppCompatActivity() {
+class CommentActivity : AppActivity() {
 
-    private lateinit var commentViewModel: CommentViewModel
-    private lateinit var detailViewModel: DetailViewModel
+    object EXTRA {
+        const val post_id = "post_id"
+    }
+//    interface EXTRA {
+//        companion object {
+//            const val post_id = "post_id"
+//        }
+//    }
+
+    private val commentViewModel by lazy { getViewModel<CommentViewModel>() }
+    private val detailViewModel by lazy { getViewModel<DetailViewModel>() }
     private lateinit var adapter: CommentAdapter
 
-    private var postId: String? = null
+    private var post_id: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,8 +40,7 @@ class CommentActivity : AppCompatActivity() {
         supportActionBar?.title = getString(R.string.comment)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        val arguments = intent.extras
-        postId = arguments?.getString("post_id")
+        post_id = intent.extras?.getString(EXTRA.post_id)
 
         setupRecyclerView()
         setupEvent()
@@ -59,8 +67,9 @@ class CommentActivity : AppCompatActivity() {
     private fun setupEvent() {
         tvSummit.setOnClickListener {
             // 로그인상태가 아니므로 임의의 사용자
-            val user_id = "MrTiDrASkFH9hby1x9VD"
-            commentViewModel.addComment(postId.toString(), user_id, edtContent.text.toString()) { isSuccess ->
+//            val user_id = "MrTiDrASkFH9hby1x9VD"
+            val user_id = PP.user_id.get(PP.deviceid)!!
+            commentViewModel.addComment(post_id.toString(), user_id, edtContent.text.toString()) { isSuccess ->
                 if (isSuccess) {
                     edtContent.setText("")
                     Toast.makeText(this, getString(R.string.comment_add_success), Toast.LENGTH_LONG).show()
@@ -72,8 +81,8 @@ class CommentActivity : AppCompatActivity() {
     }
 
     private fun setupViewModel() {
-        detailViewModel = getViewModel()
-        commentViewModel = getViewModel()
+//        detailViewModel = getViewModel()
+//        commentViewModel = getViewModel()
 
         detailViewModel.getPostById().observe(this, Observer { post ->
             updatePost(post)
@@ -83,8 +92,8 @@ class CommentActivity : AppCompatActivity() {
             updateComments(comments)
         })
 
-        detailViewModel.loadPostById(postId.toString())
-        commentViewModel.loadComments(postId.toString())
+        detailViewModel.loadPostById(post_id.toString())
+        commentViewModel.loadComments(post_id.toString())
     }
 
     private fun updatePost(post: PostDTO) {
@@ -97,8 +106,4 @@ class CommentActivity : AppCompatActivity() {
         adapter.setComments(comments)
     }
 
-    private inline fun <reified T : BaseViewModel> getViewModel(): T {
-        val viewModelFactory = Injection.provideViewModelFactory()
-        return ViewModelProviders.of(this, viewModelFactory).get(T::class.java)
-    }
 }

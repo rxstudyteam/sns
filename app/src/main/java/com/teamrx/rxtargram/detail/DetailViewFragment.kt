@@ -4,8 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.toast
 import android.view.*
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import com.teamrx.rxtargram.R
@@ -15,14 +15,15 @@ import com.teamrx.rxtargram.databinding.DetailItemBinding
 import com.teamrx.rxtargram.editor.EditorActivity
 import com.teamrx.rxtargram.model.PostDTO
 import com.teamrx.rxtargram.util.GlideApp
-import kotlinx.android.synthetic.main.fragment_detail_view.*
+import kotlinx.android.synthetic.main.detail_fragment.*
+import androidx.recyclerview.widget.DividerItemDecoration
 
 class DetailViewFragment : AppFragment() {
     companion object {
         fun newInstance() = DetailViewFragment()
     }
 
-    private lateinit var detailViewModel: DetailViewModel
+    private val viewModel by lazy { getViewModel<DetailViewModel>() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,50 +42,24 @@ class DetailViewFragment : AppFragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_detail_view, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.detail_fragment, container, false)
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
-        detailViewModel = getViewModel()
-
-        swipe.setOnRefreshListener { setupViewModel() }
-
-        // 컴포넌트 리스너
-        setupRecyclerView()
-
-        // 활성화 되었을 때 데이터를 다시 로드 하기 위해 뷰모델 observe
-        setupViewModel()
+        loadOnce()
     }
 
-    private fun setupRecyclerView() {
+    private fun loadOnce() {
         recyclerView.adapter = DetailViewAdapter()
-    }
+        recyclerView.addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
 
-    private fun setupViewModel() {
-        detailViewModel.getPosts().observe(this, Observer { posts ->
-            updateUI(posts)
+        viewModel.posts.observe(this, Observer { posts ->
+            (recyclerView.adapter as DetailViewAdapter).setDatas(posts)
         })
-
-        detailViewModel.loadPosts()
+        viewModel.postsListen()
     }
 
-    private fun updateUI(posts: List<PostDTO>) {
-        (recyclerView.adapter as DetailViewAdapter).setDatas(posts)
-        swipe.isRefreshing = false
-    }
-
-    @Suppress("EnumEntryName", "UNUSED_PARAMETER", "SpellCheckingInspection", "ClassName")
-    enum class ePOPUP(@StringRes resid: kotlin.Int) {
-        done(R.string.done),
-        share(R.string.share),
-        copy_link(R.string.copy_link),
-        save(R.string.save),
-        modify(R.string.modify),
-        delete(R.string.delete);
-    }
-
-    fun onOptionClick(post_id: String) {
+    fun onMenuClick(post_id: String) {
         val context = requireContext()
         AlertDialog.Builder(context).setItems(R.array.post_option) { dlg, which ->
             context.toast("selected ${(dlg as AlertDialog).listView.getItemAtPosition(which)}")
@@ -95,32 +70,37 @@ class DetailViewFragment : AppFragment() {
     }
 
     fun onCommentClick(post_id: String) {
-        startActivity(Intent(requireContext(), CommentActivity::class.java).putExtra("post_id", post_id))
+        startActivity(Intent(requireContext(), CommentActivity::class.java).putExtra(CommentActivity.EXTRA.post_id, post_id))
     }
 
-    fun onDetailClicked(post_id: String) {
-        startActivity(Intent(requireContext(), CommentActivity::class.java).putExtra("post_id", post_id))
+    fun onEditClicked(post_id: String) {
+        startActivity(Intent(requireContext(), ModifyActivity::class.java).putExtra("post_id", post_id))
     }
 
     inner class DetailViewAdapter : RecyclerView.Adapter<DetailViewAdapter.ViewHolder>() {
         private val posts = arrayListOf<PostDTO>()
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(DetailItemBinding.inflate(LayoutInflater.from(parent.context)).let { it.root.apply { tag = it } })
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val binder: DetailItemBinding = DataBindingUtil.inflate(LayoutInflater.from(parent.context), R.layout.detail_item, parent, false)
+            binder.root.tag = binder
+            return ViewHolder(binder.root)
+        }
 
         override fun getItemCount(): Int = posts.size
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val view = holder.itemView.tag as DetailItemBinding
-            posts[position].run {
-                view.tvUserId.text = user_id
-                view.tvTitle.text = title
-                view.tvContent.text = content
-                view.tvCreatedAt.text = created_at.toString()
-                GlideApp.with(requireContext()).load(images?.firstOrNull()).into(view.ivContentImage)
-                post_id?.let { post_id ->
-                    view.root.setOnClickListener { onDetailClicked(post_id) }
-                    view.option.setOnClickListener { onOptionClick(post_id) }
-                    view.tvComments.setOnClickListener { onCommentClick(post_id) }
+            val d = posts[position]
+            view.apply {
+                tvUserId.text = d.user_id
+                tvTitle.text = d.title
+                tvContent.text = d.content
+                tvCreatedAt.text = d.created_at.toString()
+                GlideApp.with(requireContext()).load(d.images?.firstOrNull()).into(view.ivContentImage)
+                d.post_id?.let { post_id ->
+                    edit.setOnClickListener { onEditClicked(post_id) }
+                    menu.setOnClickListener { onMenuClick(post_id) }
+                    comments.setOnClickListener { onCommentClick(post_id) }
                 }
             }
         }
