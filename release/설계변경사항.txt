@@ -1,0 +1,4 @@
+1. 이미지 파일의 이름은 단말에서 생성후 저장 -> 이후 게시물 생성 순으로 한다.
+2. user id 의 기본값은 device id 를 사용한다.  PP.user_id.get(PP.deviceid)!!
+3. 엡에서만 사용하는 확장 함수 위치 변경 app/com/teamrx/rxtargram/util/AppKtx.kt
+4. 공통 확장 함수 위치 변경 common/android/util/Ktx.kt

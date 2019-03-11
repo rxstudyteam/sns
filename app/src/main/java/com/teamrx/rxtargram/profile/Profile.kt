@@ -48,10 +48,10 @@ class Profile : AppFragment() {
     private fun saveProfile() = CoroutineScope(Dispatchers.Main).launch {
         if (check()) {
             showProgress()
+
             vm.saveProfile(bb.name.text.toString()
                     , bb.email.text.toString()
-                    , bb.profileUrl.getTag(R.id.text) as String?
-                    , bb.profileUrl.getTag(R.id.icon) as Bitmap?)
+                    , bb.profileUrl.getTag(R.id.uri) as String to bb.profileUrl.getTag(R.id.bitmap) as Bitmap)
 
             supportActionBar?.apply { title = vm.getTitle() }
 

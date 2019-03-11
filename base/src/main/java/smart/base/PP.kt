@@ -1,10 +1,12 @@
+@file:Suppress("unused", "SpellCheckingInspection", "MemberVisibilityCanBePrivate", "FunctionName")
+
 package smart.base
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import androidx.core.content.edit
-import java.util.UUID.randomUUID
+import java.util.*
 
 /**
  * <pre>
@@ -31,20 +33,17 @@ enum class PP {
     IS_READ_PUSH,
     ACCESS_TOKEN,
     REFRESH_TOKEN,
-    UUID,
     user_id,
     ;
 
     companion object {
         private lateinit var PREFERENCES: SharedPreferences
 
-        private val DEFVALUE_STRING = ""
-        private val DEFVALUE_FLOAT = -1f
-        private val DEFVALUE_INT = -1
-        private val DEFVALUE_LONG = -1L
-        private val DEFVALUE_BOOLEAN = false
-
-        val uuid get() = UUID.get(randomUUID().toString())
+        private const val DEFAULT_STRING = ""
+        private const val DEFAULT_FLOAT = -1f
+        private const val DEFAULT_INT = -1
+        private const val DEFAULT_LONG = -1L
+        private const val DEFAULT_BOOLEAN = false
 
         fun CREATE(context: Context) {
             PREFERENCES = PreferenceManager.getDefaultSharedPreferences(context)
@@ -60,15 +59,19 @@ enum class PP {
         }
 
         fun clear() = PREFERENCES.edit().clear().commit()
+
+        val deviceid : String get() = PREFERENCES.run { getString("deviceid", null) ?: java.util.UUID.randomUUID().toString().also { edit().putString("deviceid", it).apply() } }
     }
 
     //@formatter:off
-    fun getBoolean   (defValues: Boolean      = DEFVALUE_BOOLEAN ) =  PREFERENCES.getBoolean  (name, defValues)
-    fun getInt       (defValues: Int          = DEFVALUE_INT     ) =  PREFERENCES.getInt      (name, defValues)
-    fun getLong      (defValues: Long         = DEFVALUE_LONG    ) =  PREFERENCES.getLong     (name, defValues)
-    fun getFloat     (defValues: Float        = DEFVALUE_FLOAT   ) =  PREFERENCES.getFloat    (name, defValues)
-    fun getString    (defValues: String       = DEFVALUE_STRING  ) =  PREFERENCES.getString   (name, defValues)
-    fun getStringSet (defValues: Set<String>? = null             ) =  PREFERENCES.getStringSet(name, defValues)
+    fun getBoolean   (DEFAULTs: Boolean      = DEFAULT_BOOLEAN )                =  PREFERENCES.getBoolean  (name, DEFAULTs)
+    fun isit         (DEFAULT : Boolean      = DEFAULT_BOOLEAN )                = getBoolean(DEFAULT)
+    fun getInt       (DEFAULTs: Int          = DEFAULT_INT     )                =  PREFERENCES.getInt      (name, DEFAULTs)
+    fun getLong      (DEFAULTs: Long         = DEFAULT_LONG    )                =  PREFERENCES.getLong     (name, DEFAULTs)
+    fun getFloat     (DEFAULTs: Float        = DEFAULT_FLOAT   )                =  PREFERENCES.getFloat    (name, DEFAULTs)
+    fun getString    (DEFAULTs: String?      = DEFAULT_STRING  ) : String?      =  PREFERENCES.getString   (name, DEFAULTs)
+    fun get          (DEFAULT : String?      = DEFAULT_STRING  ) : String?      = getString(DEFAULT)
+    fun getStringSet (DEFAULTs: Set<String>? = null            ) : Set<String>? = PREFERENCES.getStringSet(name, DEFAULTs)
 
     fun set(v: Boolean     ) = PREFERENCES.edit { putBoolean  (name, v) }
     fun set(v: Int         ) = PREFERENCES.edit { putInt      (name, v) }
@@ -78,15 +81,8 @@ enum class PP {
     fun set(v: Set<String>?) = PREFERENCES.edit { putStringSet(name, v) }
 
     fun toggle() = set(!getBoolean())
-    fun get(defValue: String = DEFVALUE_STRING) = getString(defValue)
-    fun isit(defValue: Boolean = DEFVALUE_BOOLEAN) = getBoolean(defValue)
-
     fun contain() = PREFERENCES.contains(name)
     fun remove() = PREFERENCES.edit().remove(name).commit()
 
-    fun first(): Boolean {
-        val result = getBoolean(false)
-        set(true)
-        return result
-    }
+    fun first(): Boolean  = getBoolean().apply { set(true) }
 }

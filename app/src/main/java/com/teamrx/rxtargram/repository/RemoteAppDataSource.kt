@@ -24,7 +24,6 @@ object RemoteAppDataSource : AppDataSource {
     const val USER_COLLECTION = "user"
     const val POST_COLLECTION = "post"
 
-
     object USER_DOCUMENT {
         const val EMAIL = "email"
         const val NAME = "name"
@@ -41,29 +40,29 @@ object RemoteAppDataSource : AppDataSource {
     override fun getPosts(callback: (List<Post>) -> Unit) {
 
         fireStore.collection("post").orderBy("created_at", Query.Direction.DESCENDING)
-            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                if(querySnapshot == null) return@addSnapshotListener
+                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                    if (querySnapshot == null) return@addSnapshotListener
 
-                val posts = mutableListOf<Post>()
-                for(snapshot in querySnapshot.documents) {
-                    try {
-                        val item = snapshot.toObject(Post::class.java)
-                        item?.post_id = snapshot.id
+                    val posts = mutableListOf<Post>()
+                    for (snapshot in querySnapshot.documents) {
+                        try {
+                            val item = snapshot.toObject(Post::class.java)
+                            item?.post_id = snapshot.id
 
-                        // 팔로우한 유저만 구분.
-                        if (item != null) {
-                            posts.add(item)
-                            cachedPosts[snapshot.id] = item
+                            // 팔로우한 유저만 구분.
+                            if (item != null) {
+                                posts.add(item)
+                                cachedPosts[snapshot.id] = item
 
+                            }
+                        } catch (e: Exception) {
+                            firebaseFirestoreException?.printStackTrace()
+                            e.printStackTrace()
                         }
-                    } catch (e: Exception) {
-                        firebaseFirestoreException?.printStackTrace()
-                        e.printStackTrace()
                     }
-                }
 
-                callback(posts)
-            }
+                    callback(posts)
+                }
     }
 
     override fun getPostById(post_id: String, callback: (Post) -> Unit) {
@@ -74,46 +73,46 @@ object RemoteAppDataSource : AppDataSource {
         }
 
         fireStore.collection("post").document(post_id).get()
-            .addOnCompleteListener { task ->
-                if(task.isSuccessful) {
-                    task.result?.let { documentSnapshot ->
-                        documentSnapshot.toObject(Post::class.java)?.let {
-                            callback(it)
-                            println("post from network")
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        task.result?.let { documentSnapshot ->
+                            documentSnapshot.toObject(Post::class.java)?.let {
+                                callback(it)
+                                println("post from network")
+                            }
                         }
                     }
                 }
-            }
     }
 
     override fun getComments(post_id: String, callback: (List<CommentDTO>) -> Unit) {
 
         fireStore.collection("post").whereEqualTo("parent_post_no", post_id)
-            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                if(querySnapshot == null) return@addSnapshotListener
+                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                    if (querySnapshot == null) return@addSnapshotListener
 
-                val commentDTOs = mutableListOf<CommentDTO>()
-                for(snapshot in querySnapshot.documents) {
-                    try {
-                        val item = snapshot.toObject(CommentDTO::class.java)
-                        if(item?.parent_post_no == post_id) {
-                            commentDTOs.add(item)
+                    val commentDTOs = mutableListOf<CommentDTO>()
+                    for (snapshot in querySnapshot.documents) {
+                        try {
+                            val item = snapshot.toObject(CommentDTO::class.java)
+                            if (item?.parent_post_no == post_id) {
+                                commentDTOs.add(item)
+                            }
+                        } catch (e: Exception) {
+                            firebaseFirestoreException?.printStackTrace()
+                            e.printStackTrace()
                         }
-                    } catch (e: Exception) {
-                        firebaseFirestoreException?.printStackTrace()
-                        e.printStackTrace()
                     }
-                }
 
-                callback(commentDTOs)
-            }
+                    callback(commentDTOs)
+                }
     }
 
     override fun addComment(parent_post_id: String, user_id: String, content: String, callback: (Boolean) -> Unit) {
-        fireStore.collection("post").document().set(CommentDTO(parent_post_id, content,user_id))
-            .addOnCompleteListener {
-                callback(it.isSuccessful)
-            }
+        fireStore.collection("post").document().set(CommentDTO(parent_post_id, content, user_id))
+                .addOnCompleteListener {
+                    callback(it.isSuccessful)
+                }
     }
 
     override fun modifyPost(post: Post, callback: (Boolean) -> Unit) {
@@ -133,10 +132,10 @@ object RemoteAppDataSource : AppDataSource {
         return suspendCancellableCoroutine { continuation ->
             try {
                 GalleryLoader.builder(context)
-                    .setCrop(true, 100.dp, 100.dp)
-                    .setOnGalleryLoadedListener { continuation.resume(it.toString()) }
-                    .setOnCancelListener { continuation.cancel() }
-                    .load()
+                        .setCrop(true, 100.dp, 100.dp)
+                        .setOnGalleryLoadedListener { continuation.resume(it.toString()) }
+                        .setOnCancelListener { continuation.cancel() }
+                        .load()
             } catch (e: Exception) {
                 continuation.resumeWithException(e)
             }
@@ -153,8 +152,8 @@ object RemoteAppDataSource : AppDataSource {
 
             val db = FirebaseFirestore.getInstance()
             val task = db.collection(USER_COLLECTION)
-                .document(user_id)
-                .get()
+                    .document(user_id)
+                    .get()
 
             task.addOnSuccessListener { document ->
                 Log.e("addOnSuccessListener")
@@ -170,10 +169,10 @@ object RemoteAppDataSource : AppDataSource {
     }
 
     override suspend fun setProfile(
-        user_Id: String,
-        name: CharSequence?,
-        email: CharSequence?,
-        profile_url: String?
+            user_Id: String,
+            name: CharSequence?,
+            email: CharSequence?,
+            profile_url: String?
     ): Boolean {
         return suspendCancellableCoroutine { continuation ->
             val db = FirebaseFirestore.getInstance()
@@ -195,10 +194,10 @@ object RemoteAppDataSource : AppDataSource {
             val db = FirebaseFirestore.getInstance()
             val ref = db.collection(USER_COLLECTION)
             val task = ref.add(
-                hashMapOf<String, Any>(
-                    USER_DOCUMENT.NAME to name.toString(),
-                    USER_DOCUMENT.EMAIL to email.toString()
-                )
+                    hashMapOf<String, Any>(
+                            USER_DOCUMENT.NAME to name.toString(),
+                            USER_DOCUMENT.EMAIL to email.toString()
+                    )
             )
             task.addOnSuccessListener { continuation.resume(it.id) }
 
@@ -206,7 +205,7 @@ object RemoteAppDataSource : AppDataSource {
         }
     }
 
-    override suspend fun createPost(postDTO: PostDTO): String{
+    override suspend fun createPost(postDTO: PostDTO): String {
         return suspendCancellableCoroutine { continuation ->
             val db = FirebaseFirestore.getInstance()
             val ref = db.collection(PostConst.POST_COLLECTION)
@@ -221,36 +220,49 @@ object RemoteAppDataSource : AppDataSource {
     override suspend fun uploadToFireStorage(user_id: String, stream: InputStream) {
         return suspendCancellableCoroutine { continuation ->
             val task = FirebaseStorage.getInstance()
-                .reference
-                .child("profile/${user_id}")
-                .putStream(stream)
+                    .reference
+                    .child("profile/${user_id}")
+                    .putStream(stream)
 
             task.addOnSuccessListener { continuation.resume(Unit) }
             suspendCancellableCoroutineTask(continuation, task)
         }
     }
 
-    override suspend fun uploadToFireStoragePostImage(image_id: String, stream: InputStream) {
+    @Suppress("LocalVariableName")
+    override suspend fun uploadToFireStoragePostImage(stream: InputStream): String {
         return suspendCancellableCoroutine { continuation ->
-            android.util.Log.i(RemoteAppDataSource::class.java.simpleName, "uploadToFireStoragePostImage")
-            val task = FirebaseStorage.getInstance()
-                .reference
-                .child("images/${image_id}")
-                .putStream(stream)
+            val uuid = UUID.randomUUID().toString()
+            val image_id = "images/$uuid"
+            Log.i("uploadToFireStoragePostImage", image_id)
 
-            task.addOnSuccessListener {
-                continuation.resume(Unit)
-            }
+            val task = FirebaseStorage.getInstance()
+                    .reference
+                    .child(image_id)
+                    .putStream(stream)
+
+            task.addOnSuccessListener { continuation.resume(image_id) }
             suspendCancellableCoroutineTask(continuation, task)
         }
     }
 
-    override suspend fun getDownloadUrl(user_id: String): String? {
+    //    override suspend fun getDownloadUrl(user_id: String): String? {
+//        return suspendCancellableCoroutine { continuation ->
+//            val task = FirebaseStorage.getInstance()
+//                .reference
+//                .child("profile/${user_id}")
+//                .downloadUrl
+//
+//            task.addOnSuccessListener { continuation.resume(it.toString()) }
+//            suspendCancellableCoroutineTask(continuation, task)
+//        }
+//    }
+    override suspend fun getDownloadUrl(image_id: String): String? {
         return suspendCancellableCoroutine { continuation ->
             val task = FirebaseStorage.getInstance()
-                .reference
-                .child("profile/${user_id}")
-                .downloadUrl
+                    .reference
+                    .child(image_id)
+                    .downloadUrl
 
             task.addOnSuccessListener { continuation.resume(it.toString()) }
             suspendCancellableCoroutineTask(continuation, task)
@@ -262,9 +274,9 @@ object RemoteAppDataSource : AppDataSource {
         Exception().stackTrace[2].run {
             task.addOnCompleteListener {
                 Log.ps(
-                    if (it.isSuccessful) Log.INFO else Log.WARN,
-                    this,
-                    it.isComplete && it.isSuccessful
+                        if (it.isSuccessful) Log.INFO else Log.WARN,
+                        this,
+                        it.isComplete && it.isSuccessful
                 )
             }
         }

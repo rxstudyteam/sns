@@ -38,8 +38,8 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppD
         remoteAppDataSource.uploadToFireStorage(user_id, stream)
     }
 
-    override suspend fun uploadToFireStoragePostImage(image_id: String, stream: InputStream) {
-        remoteAppDataSource.uploadToFireStoragePostImage(image_id, stream)
+    override suspend fun uploadToFireStoragePostImage( stream: InputStream)  :String{
+        return remoteAppDataSource.uploadToFireStoragePostImage( stream)
     }
 
     override suspend fun getDownloadUrl(user_id: String): String? {

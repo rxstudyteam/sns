@@ -41,7 +41,7 @@ interface AppDataSource {
     suspend fun uploadToFireStorage(user_id: String, stream: InputStream)
 
     //images
-    suspend fun uploadToFireStoragePostImage(image_id: String, stream: InputStream)
+    suspend fun uploadToFireStoragePostImage(stream: InputStream): String
 
     suspend fun getDownloadUrl(user_id: String): String?
 
