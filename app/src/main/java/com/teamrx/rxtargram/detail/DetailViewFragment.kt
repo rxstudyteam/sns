@@ -74,7 +74,7 @@ class DetailViewFragment : AppFragment() {
     }
 
     fun onEditClicked(post_id: String) {
-        startActivity(Intent(requireContext(), ModifyActivity::class.java).putExtra("post_id", post_id))
+        startActivity(Intent(requireContext(), ModifyActivity::class.java).putExtra(ModifyActivity.EXTRA.post_id, post_id))
     }
 
     inner class DetailViewAdapter : RecyclerView.Adapter<DetailViewAdapter.ViewHolder>() {

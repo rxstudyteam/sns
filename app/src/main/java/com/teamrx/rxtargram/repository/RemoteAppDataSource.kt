@@ -100,7 +100,7 @@ object RemoteAppDataSource : AppDataSource {
 //    }
 //}
 
-    override fun getPostById(post_id: String, callback: (PostDTO) -> Unit) {
+    override fun getPost(post_id: String, callback: (PostDTO) -> Unit) {
         cachedPosts[post_id]?.let {
             callback(it)
             println("get cached post")
@@ -150,7 +150,7 @@ object RemoteAppDataSource : AppDataSource {
                 }
     }
 
-    override fun modifyPost(post: PostDTO, callback: (Boolean) -> Unit) {
+    override fun setPost(post: PostDTO, callback: (Boolean) -> Unit) {
         println("post : $post")
         post.post_id?.let { postid ->
             FirebaseFirestore.getInstance()

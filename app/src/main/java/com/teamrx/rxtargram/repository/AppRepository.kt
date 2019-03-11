@@ -11,14 +11,14 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppD
         remoteAppDataSource.getPostImageUrl(post_image_id, callback)
     }
 
-    override fun modifyPost(post: PostDTO, callback: (Boolean) -> Unit) = remoteAppDataSource.modifyPost(post, callback)
+    override fun setPost(post: PostDTO, callback: (Boolean) -> Unit) = remoteAppDataSource.setPost(post, callback)
 
     override fun getPosts(callback: (List<PostDTO>) -> Unit) {
         remoteAppDataSource.getPosts(callback)
     }
 
-    override fun getPostById(post_id: String, callback: (PostDTO) -> Unit) {
-        remoteAppDataSource.getPostById(post_id, callback)
+    override fun getPost(post_id: String, callback: (PostDTO) -> Unit) {
+        remoteAppDataSource.getPost(post_id, callback)
     }
 
     override fun getComments(post_id: String, callback: (List<CommentDTO>) -> Unit) {

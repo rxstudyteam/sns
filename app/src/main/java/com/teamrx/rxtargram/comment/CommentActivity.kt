@@ -10,11 +10,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.AppActivity
 import com.teamrx.rxtargram.detail.DetailViewModel
+import com.teamrx.rxtargram.detail.ModifyViewModel
 import com.teamrx.rxtargram.model.CommentDTO
 import com.teamrx.rxtargram.model.PostDTO
 import kotlinx.android.synthetic.main.activity_comment.*
 import smart.base.PP
 
+@Suppress("LocalVariableName")
 class CommentActivity : AppActivity() {
 
     object EXTRA {
@@ -27,10 +29,10 @@ class CommentActivity : AppActivity() {
 //    }
 
     private val commentViewModel by lazy { getViewModel<CommentViewModel>() }
-    private val detailViewModel by lazy { getViewModel<DetailViewModel>() }
+    private val detailViewModel by lazy { getViewModel<ModifyViewModel>() }
     private lateinit var adapter: CommentAdapter
 
-    private var post_id: String? = null
+    private lateinit var post_id: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,8 +42,13 @@ class CommentActivity : AppActivity() {
         supportActionBar?.title = getString(R.string.comment)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        post_id = intent.extras?.getString(EXTRA.post_id)
+        val post_id = intent.extras?.getString(EXTRA.post_id)
+        if (post_id.isNullOrBlank()) {
+            runOnUiThread { finish() }
+            return
+        }
 
+        this.post_id = post_id
         setupRecyclerView()
         setupEvent()
         setupViewModel()
@@ -84,7 +91,7 @@ class CommentActivity : AppActivity() {
 //        detailViewModel = getViewModel()
 //        commentViewModel = getViewModel()
 
-        detailViewModel.getPostById().observe(this, Observer { post ->
+        detailViewModel.getPost(post_id).observe(this, Observer { post ->
             updatePost(post)
         })
 
@@ -92,7 +99,7 @@ class CommentActivity : AppActivity() {
             updateComments(comments)
         })
 
-        detailViewModel.loadPostById(post_id.toString())
+//        detailViewModel.loadPostById(post_id.toString())
         commentViewModel.loadComments(post_id.toString())
     }
 

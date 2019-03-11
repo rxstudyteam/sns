@@ -11,7 +11,7 @@ interface AppDataSource {
     fun getPosts(callback: (List<PostDTO>) -> Unit)
 
     // 글 상세정보 가져오기
-    fun getPostById(post_id: String, callback: (PostDTO) -> Unit)
+    fun getPost(post_id: String, callback: (PostDTO) -> Unit)
 
     // 댓글 목록 가져오기
     fun getComments(post_id: String, callback: (List<CommentDTO>) -> Unit)
@@ -34,7 +34,7 @@ interface AppDataSource {
     suspend fun loadGalleryLoad(context: Context): String?
 
     // 글 수정
-    fun modifyPost(post: PostDTO, callback: (Boolean) -> Unit)
+    fun setPost(post: PostDTO, callback: (Boolean) -> Unit)
 
     //사진업로드하기
     suspend fun uploadToFireStorage(user_id: String, stream: InputStream)

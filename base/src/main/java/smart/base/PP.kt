@@ -27,6 +27,7 @@ import java.util.*
  *
 </pre> *
  */
+@Suppress("EnumEntryName")
 enum class PP {
     IS_FIRST_RUN, // 앱 최초 실행 여부
     PUSH_TOKEN,
@@ -60,18 +61,20 @@ enum class PP {
 
         fun clear() = PREFERENCES.edit().clear().commit()
 
-        val deviceid : String get() = PREFERENCES.run { getString("deviceid", null) ?: java.util.UUID.randomUUID().toString().also { edit().putString("deviceid", it).apply() } }
+        val deviceid: String get() = PREFERENCES.run { getString("deviceid", null) ?: java.util.UUID.randomUUID().toString().also { edit().putString("deviceid", it).apply() } }
+        fun getUserID(): String = user_id.get(deviceid)!!
+
     }
 
     //@formatter:off
-    fun getBoolean   (DEFAULTs: Boolean      = DEFAULT_BOOLEAN )                =  PREFERENCES.getBoolean  (name, DEFAULTs)
-    fun isit         (DEFAULT : Boolean      = DEFAULT_BOOLEAN )                = getBoolean(DEFAULT)
-    fun getInt       (DEFAULTs: Int          = DEFAULT_INT     )                =  PREFERENCES.getInt      (name, DEFAULTs)
-    fun getLong      (DEFAULTs: Long         = DEFAULT_LONG    )                =  PREFERENCES.getLong     (name, DEFAULTs)
-    fun getFloat     (DEFAULTs: Float        = DEFAULT_FLOAT   )                =  PREFERENCES.getFloat    (name, DEFAULTs)
-    fun getString    (DEFAULTs: String?      = DEFAULT_STRING  ) : String?      =  PREFERENCES.getString   (name, DEFAULTs)
-    fun get          (DEFAULT : String?      = DEFAULT_STRING  ) : String?      = getString(DEFAULT)
-    fun getStringSet (DEFAULTs: Set<String>? = null            ) : Set<String>? = PREFERENCES.getStringSet(name, DEFAULTs)
+    fun getBoolean   (DEFAULT : Boolean      = DEFAULT_BOOLEAN )                =  PREFERENCES.getBoolean  (name, DEFAULT)
+    fun isit         (DEFAULT : Boolean      = DEFAULT_BOOLEAN )                =              getBoolean  (      DEFAULT)
+    fun getInt       (DEFAULT : Int          = DEFAULT_INT     )                =  PREFERENCES.getInt      (name, DEFAULT)
+    fun getLong      (DEFAULT : Long         = DEFAULT_LONG    )                =  PREFERENCES.getLong     (name, DEFAULT)
+    fun getFloat     (DEFAULT : Float        = DEFAULT_FLOAT   )                =  PREFERENCES.getFloat    (name, DEFAULT)
+    fun getString    (DEFAULT : String?      = DEFAULT_STRING  ) : String?      =  PREFERENCES.getString   (name, DEFAULT)
+    fun get          (DEFAULT : String?      = DEFAULT_STRING  ) : String?      =              getString   (      DEFAULT)
+    fun getStringSet (DEFAULT : Set<String>? = null            ) : Set<String>? = PREFERENCES.getStringSet(name, DEFAULT)
 
     fun set(v: Boolean     ) = PREFERENCES.edit { putBoolean  (name, v) }
     fun set(v: Int         ) = PREFERENCES.edit { putInt      (name, v) }
