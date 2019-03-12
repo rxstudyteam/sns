@@ -1,7 +1,6 @@
 package com.teamrx.rxtargram.profile
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.AppActivity
 
@@ -10,9 +9,17 @@ class ProfileActivity : AppActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.editor_activity)
+
+        var userId : String? = null
+        intent?.extras?.run {
+            if(containsKey("userId")){
+                userId = getString("userId")
+            }
+        }
+
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.container, Fragment.instantiate(this@ProfileActivity, Profile::class.java.name))
+                .replace(R.id.container, Profile.newInstance(userId))
                 .commitNow()
         }
     }

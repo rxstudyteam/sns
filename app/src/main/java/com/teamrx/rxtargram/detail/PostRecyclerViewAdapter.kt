@@ -44,7 +44,7 @@ class PostRecyclerViewAdapter(private val mContext: Context, private val optionC
             }
         }
 
-        item.tvTitle.setOnClickListener {
+        item.ivProfileImage.setOnClickListener {
             posts[position].user_id?.let { goProfile(it) }
         }
 

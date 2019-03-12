@@ -41,9 +41,11 @@ class DetailViewFragment : Fragment(), OptionClickListener {
         setupViewModel()
     }
 
-    private val goProfile : (userId: String) -> Unit = {
+    private val goProfile: (userId: String) -> Unit = { userId ->
         activity?.let {
-            it.startActivity(Intent(it, ProfileActivity::class.java))
+            it.startActivity(Intent(it, ProfileActivity::class.java).apply {
+                putExtra("userId", userId)
+            })
         }
     }
 

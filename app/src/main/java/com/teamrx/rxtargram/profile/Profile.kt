@@ -24,6 +24,16 @@ class Profile : AppFragment() {
     private lateinit var bb: ProfileWriteBinding
     private lateinit var vm: ProfileViewModel
 
+    companion object {
+        fun newInstance(userId: String? = null) = Profile().apply {
+            val arg = Bundle()
+            arg.putString("userID", userId)
+            arguments = arg
+        }
+    }
+
+    var userId: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
@@ -31,10 +41,11 @@ class Profile : AppFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return DataBindingUtil.inflate<ProfileWriteBinding>(inflater, R.layout.profile_write, container, false).let { binding ->
-            bb = binding
-            binding.root
-        }
+        return DataBindingUtil.inflate<ProfileWriteBinding>(inflater, R.layout.profile_write, container, false)
+            .let { binding ->
+                bb = binding
+                binding.root
+            }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -46,27 +57,36 @@ class Profile : AppFragment() {
             lifecycleOwner = mActivity
         }
 
+        arguments?.run {
+            if (containsKey("userID")) {
+                userId = getString("userID")
+            }
+        }
+
         supportActionBar?.apply { title = vm.getTitle() }
 
-        loadProfile()
+        loadProfile(userId)
     }
 
-    private fun loadProfile() = CoroutineScope(Dispatchers.Main).launch {
+
+    private fun loadProfile(userId: String?) = CoroutineScope(Dispatchers.Main).launch {
         showProgress()
-        vm.updateProfile()
+        vm.updateProfile(userId)
         dismissProgress()
     }
 
     private fun saveProfile() = CoroutineScope(Dispatchers.Main).launch {
         if (check()) {
             showProgress()
-            vm.saveProfile(bb.name.text.toString()
-                    , bb.email.text.toString()
-                    , bb.profileUrl.getTag(R.id.text) as String?
-                    , bb.profileUrl.getTag(R.id.icon) as Bitmap?)
+            vm.saveProfile(
+                bb.name.text.toString()
+                , bb.email.text.toString()
+                , bb.profileUrl.getTag(R.id.text) as String?
+                , bb.profileUrl.getTag(R.id.icon) as Bitmap?
+            )
 
             supportActionBar?.apply { title = vm.getTitle() }
-            
+
             dismissProgress()
         }
     }
@@ -90,22 +110,22 @@ class Profile : AppFragment() {
 fun ImageView.load(imageUrl: String?) {
     Log.e(imageUrl)
     Glide.with(this)
-            .setDefaultRequestOptions(RequestOptions().apply {
-                placeholder(R.drawable.ic_face_black_24dp)
-                error(R.drawable.ic_face_black_24dp)
-            })
-            .asBitmap()
-            .load(imageUrl)
-            .apply(RequestOptions.circleCropTransform())
-            .into(object : BitmapImageViewTarget(this) {
-                override fun setResource(resource: Bitmap?) {
-                    resource?.let { bitmap ->
-                        setTag(R.id.text, imageUrl)
-                        setTag(R.id.icon, bitmap)
+        .setDefaultRequestOptions(RequestOptions().apply {
+            placeholder(R.drawable.ic_face_black_24dp)
+            error(R.drawable.ic_face_black_24dp)
+        })
+        .asBitmap()
+        .load(imageUrl)
+        .apply(RequestOptions.circleCropTransform())
+        .into(object : BitmapImageViewTarget(this) {
+            override fun setResource(resource: Bitmap?) {
+                resource?.let { bitmap ->
+                    setTag(R.id.text, imageUrl)
+                    setTag(R.id.icon, bitmap)
 //                        Log.e(getTag(R.id.text))
 //                        Log.e(getTag(R.id.icon))
-                    }
-                    super.setResource(resource)
                 }
-            })
+                super.setResource(resource)
+            }
+        })
 }

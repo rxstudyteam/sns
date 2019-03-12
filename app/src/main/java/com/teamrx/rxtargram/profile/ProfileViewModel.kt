@@ -24,11 +24,12 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
     val profile_url: MutableLiveData<String> = MutableLiveData()
 
     companion object {
-        private const val DEFAULT_PROFILE_URL = "https://firebasestorage.googleapis.com/v0/b/rxteam-sns.appspot.com/o/profile%2Funnamed.png?alt=media&token=bd08fa0e-84b4-438c-8f25-c7014075bf6e"
+        private const val DEFAULT_PROFILE_URL =
+            "https://firebasestorage.googleapis.com/v0/b/rxteam-sns.appspot.com/o/profile%2Funnamed.png?alt=media&token=bd08fa0e-84b4-438c-8f25-c7014075bf6e"
     }
 
-    suspend fun updateProfile() {
-        var user_id = PP.user_id.get()
+    suspend fun updateProfile(userId: String? = null) {
+        var user_id = userId ?: PP.user_id.get()
 //            user_id = "KxUypfZKf2cKmJs4jOeU"
         val profile = if (user_id.isNullOrBlank()) ProfileModel() else dataSource.getProfile(user_id)
         Log.w(profile)
@@ -73,9 +74,9 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
 
         //달라진항목만 setProfile 등록
         dataSource.setProfile(user_id
-                , name?.takeUnless { this.name.value == name }
-                , email?.takeUnless { this.email.value == email }
-                , profileUrl?.takeUnless { this.profile_url.value == profileUrl }
+            , name?.takeUnless { this.name.value == name }
+            , email?.takeUnless { this.email.value == email }
+            , profileUrl?.takeUnless { this.profile_url.value == profileUrl }
         )
 
         //UI Update
