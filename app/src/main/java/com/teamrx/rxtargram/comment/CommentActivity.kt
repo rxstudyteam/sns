@@ -75,7 +75,7 @@ class CommentActivity : AppActivity() {
         tvSummit.setOnClickListener {
             // 로그인상태가 아니므로 임의의 사용자
 //            val user_id = "MrTiDrASkFH9hby1x9VD"
-            val user_id = PP.user_id.get(PP.deviceid)!!
+            val user_id = PP.user_id
             commentViewModel.addComment(post_id.toString(), user_id, edtContent.text.toString()) { isSuccess ->
                 if (isSuccess) {
                     edtContent.setText("")

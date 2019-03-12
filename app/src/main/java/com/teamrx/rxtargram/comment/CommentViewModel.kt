@@ -12,7 +12,7 @@ class CommentViewModel(appDataSource: AppDataSource): BaseViewModel(appDataSourc
 
     fun getComments(): LiveData<List<CommentDTO>> = commentDTOLiveData
     fun loadComments(post_id: String) {
-        dataSource.getComments(post_id) { comments ->
+        dataSource.setCommentSnapshotListener(post_id) { comments ->
             commentDTOLiveData.value = comments
         }
     }

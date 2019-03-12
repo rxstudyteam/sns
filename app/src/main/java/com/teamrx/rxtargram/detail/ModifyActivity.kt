@@ -10,7 +10,6 @@ import com.teamrx.rxtargram.base.AppActivity
 import com.teamrx.rxtargram.model.PostDTO
 import com.teamrx.rxtargram.util.GlideApp
 import kotlinx.android.synthetic.main.activity_modify.*
-import smart.base.PP
 
 /**
  *
@@ -74,12 +73,8 @@ class ModifyActivity : AppActivity() {
     }
 
     private fun updateUI(post: PostDTO) {
-
-        GlideApp.with(mContext)
-                .load("http://cdnweb01.wikitree.co.kr/webdata/editor/201411/28/img_20141128161209_521102e2.jpg")
-                .into(ivContentImage)
-
-        tvUserId.text = viewModel.post.value?.user_id
-        tvContent.setText(viewModel.post.value?.content)
+        GlideApp.with(mContext).load(post.images?.firstOrNull()).into(ivContentImage)
+        tvUserId.text = post.user_id
+        tvContent.setText(post.content)
     }
 }

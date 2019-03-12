@@ -194,7 +194,7 @@ class EastarEgg(val activity: Activity) {
     }
 
     public fun USER_CHANGE() {
-        AlertDialog.Builder(activity).setItems(R.array.user_names) { _, which -> PP.user_id.set(activity.resources.getStringArray(R.array.user_keys)[which]) }.show()
+        AlertDialog.Builder(activity).setItems(R.array.user_names) { _, which -> PP.user_id = activity.resources.getStringArray(R.array.user_keys)[which] }.show()
     }
 
 }

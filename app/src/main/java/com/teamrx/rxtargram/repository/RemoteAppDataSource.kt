@@ -26,18 +26,33 @@ object RemoteAppDataSource : AppDataSource {
     const val POST_COLLECTION = "post"
 
     object USER_DOCUMENT {
-        const val EMAIL = "email"
         const val NAME = "name"
+        const val EMAIL = "email"
         const val PROFILE_URL = "profile_url"
+        const val FOLLOWS = "follows"
+        const val FOLLOWERS = "followers"
     }
 
     object POST_DOCUMENT {
+        const val USER_ID = "user_id"
+        const val TITLE = "title"
+        const val CONTENT = "content"
+        const val IMAGES = "images"
+        const val PARENT_POST_NO = "parent_post_no"
+        const val LIKES = "likes"
         const val CREATED_AT = "created_at"
+
     }
 
-    private val fireStore: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
-    private val cachedPosts: HashMap<String, PostDTO> by lazy { HashMap<String, PostDTO>() }
+    object STORAGE {
+        const val POST = "images/"
+        const val USER = "profile/"
+    }
 
+//    private val fireStore: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
+//    private val cachedPosts: HashMap<String, PostDTO> by lazy { HashMap<String, PostDTO>() }
+
+    @Suppress("UNUSED_ANONYMOUS_PARAMETER", "SpellCheckingInspection")
     override fun getPosts(callback: (List<PostDTO>) -> Unit) {
         FirebaseFirestore.getInstance()
                 .collection(POST_COLLECTION)
@@ -57,55 +72,45 @@ object RemoteAppDataSource : AppDataSource {
                         // 팔로우한 유저만 구분.
                         if (post != null) {
                             posts.add(post)
-                            cachedPosts[snapshot.id] = post
+//                            cachedPosts[snapshot.id] = post
                         }
                     }
                     callback(posts)
                 }
     }
 
-    override fun getPostImageUrl(post_image_id: String, callback: (String) -> Unit) {
+    suspend fun getPosts(): List<PostDTO> = suspendCancellableCoroutine { continuation ->
+        val task = FirebaseFirestore.getInstance()
+                .collection(POST_COLLECTION)
+//                .orderBy("created_at", Query.Direction.DESCENDING)
+                .get()
 
-        val task = FirebaseStorage.getInstance()
-                .reference
-                .child("images/${post_image_id}")
-                .downloadUrl
-
-        task.addOnSuccessListener { callback(it.toString()) }
-        task.addOnFailureListener { throw it }
+        task.addOnSuccessListener { querySnapshot ->
+            continuation.resume(querySnapshot.toObjects(PostDTO::class.java))
+        }
+        suspendCancellableCoroutineTask(continuation, task)
     }
 
-//    override fun getPostImages(post_id: String?, callback: (List<PostImages>) -> Unit) {
-//        val post_id = "wL33VTH2vKNOHLrYsl0x"
-//        val snapshot = fireStore.collection("post")
-//                .document(post_id)
-//                .collection("images")
-//                .get()
-//
-//        snapshot.addOnSuccessListener { querySnapshot ->
-//            //            Log.e("addOnSuccessListener")
-//
-//            for (document in querySnapshot.documents) {
-//                Log.e(document.id, document["url"])
-//            }
-//            var images = querySnapshot.toObjects(PostImages::class.java)
-//            callback(images)
-////            Log.w("addOnSuccessListener")
-//        }
-//
-//
-//        callback(posts)
-//    }
-//}
+    override fun setPostSnapshotListener(callback: (List<PostDTO>) -> Unit) {
+        FirebaseFirestore.getInstance()
+                .collection(POST_COLLECTION)
+//                .orderBy("created_at", Query.Direction.DESCENDING)
+                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                    firebaseFirestoreException?.printStackTrace()
+                    val result = querySnapshot?.toObjects(PostDTO::class.java) ?: emptyList()
+                    Log.i(result.size, result)
+                    callback(result)
+                }
+    }
 
     override fun getPost(post_id: String, callback: (PostDTO) -> Unit) {
-        cachedPosts[post_id]?.let {
-            callback(it)
-            println("get cached post")
-            return
-        }
+//        cachedPosts[post_id]?.let {
+//            callback(it)
+//            println("get cached post")
+//            return
+//        }
 
-        fireStore.collection("post").document(post_id).get()
+        FirebaseFirestore.getInstance().collection(POST_COLLECTION).document(post_id).get()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         task.result?.let { documentSnapshot ->
@@ -118,38 +123,29 @@ object RemoteAppDataSource : AppDataSource {
                 }
     }
 
-    override fun getComments(post_id: String, callback: (List<CommentDTO>) -> Unit) {
-
-        fireStore.collection("post").whereEqualTo("parent_post_no", post_id)
+    override fun setCommentSnapshotListener(post_id: String, callback: (List<CommentDTO>) -> Unit) {
+        FirebaseFirestore.getInstance().collection(POST_COLLECTION)
+                .whereEqualTo(POST_DOCUMENT.PARENT_POST_NO, post_id)
                 .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                    if (querySnapshot == null) return@addSnapshotListener
+                    firebaseFirestoreException?.printStackTrace()
+                    querySnapshot ?: return@addSnapshotListener
 
-                    val commentDTOs = mutableListOf<CommentDTO>()
-                    for (snapshot in querySnapshot.documents) {
-                        try {
-                            val item = snapshot.toObject(CommentDTO::class.java)
-                            if (item?.parent_post_no == post_id) {
-                                commentDTOs.add(item)
-                            }
-                        } catch (e: Exception) {
-                            firebaseFirestoreException?.printStackTrace()
-                            e.printStackTrace()
-                        }
-                    }
+                    val result = querySnapshot.toObjects(CommentDTO::class.java)
+                    Log.i(result.size, result)
 
-                    callback(commentDTOs)
+                    callback(result)
                 }
     }
 
     override fun addComment(parent_post_id: String, user_id: String, content: String, callback: (Boolean) -> Unit) {
-        fireStore.collection("post").document().set(CommentDTO(parent_post_id, content, user_id))
+        FirebaseFirestore.getInstance().collection(POST_COLLECTION).document().set(CommentDTO(parent_post_id, content, user_id))
                 .addOnCompleteListener {
                     callback(it.isSuccessful)
                 }
     }
 
     override fun setPost(post: PostDTO, callback: (Boolean) -> Unit) {
-        println("post : $post")
+        Log.e("$POST_COLLECTION : $post")
         post.post_id?.let { postid ->
             FirebaseFirestore.getInstance()
                     .collection(POST_COLLECTION)
@@ -161,52 +157,42 @@ object RemoteAppDataSource : AppDataSource {
         }
     }
 
-    override suspend fun loadGalleryLoad(context: Context): String? {
+    override suspend fun createPost(postDTO: PostDTO): String {
         return suspendCancellableCoroutine { continuation ->
-            try {
-                GalleryLoader.builder(context)
-                        .setCrop(true, 100.dp, 100.dp)
-                        .setOnGalleryLoadedListener { continuation.resume(it.toString()) }
-                        .setOnCancelListener { continuation.cancel() }
-                        .load()
-            } catch (e: Exception) {
-                continuation.resumeWithException(e)
-            }
-            continuation.invokeOnCancellation { continuation.resumeWithException(EmptyStackException()) }
-        }
-    }
+            val task = FirebaseFirestore.getInstance()
+                    .collection(POST_COLLECTION)
+                    .add(postDTO)
 
-    override suspend fun getProfile(user_id: String): ProfileModel {
-        return suspendCancellableCoroutine { continuation ->
-            if (user_id.isNullOrBlank()) {
-                continuation.resume(ProfileModel())
-                return@suspendCancellableCoroutine
-            }
+            task.addOnSuccessListener { continuation.resume(it.id) }
 
-            val db = FirebaseFirestore.getInstance()
-            val task = db.collection(USER_COLLECTION)
-                    .document(user_id)
-                    .get()
-
-            task.addOnSuccessListener { document ->
-                Log.e("addOnSuccessListener")
-                var profileModel: ProfileModel? = null
-                if (document.exists())
-                    profileModel = document.toObject(ProfileModel::class.java)
-
-                continuation.resume(profileModel ?: ProfileModel())
-                Log.w("addOnSuccessListener")
-            }
             suspendCancellableCoroutineTask(continuation, task)
         }
     }
 
-    override suspend fun setProfile(
-            user_Id: String,
-            name: CharSequence?,
-            email: CharSequence?,
-            profile_url: String?
-    ): Boolean {
+    override suspend fun getProfile(user_id: String): ProfileModel = suspendCancellableCoroutine { continuation ->
+        if (user_id.isNullOrBlank()) {
+            continuation.resume(ProfileModel())
+            return@suspendCancellableCoroutine
+        }
+
+        val db = FirebaseFirestore.getInstance()
+        val task = db.collection(USER_COLLECTION)
+                .document(user_id)
+                .get()
+
+        task.addOnSuccessListener { document ->
+            Log.e("addOnSuccessListener")
+            var profileModel: ProfileModel? = null
+            if (document.exists())
+                profileModel = document.toObject(ProfileModel::class.java)
+
+            continuation.resume(profileModel ?: ProfileModel())
+            Log.w("addOnSuccessListener")
+        }
+        suspendCancellableCoroutineTask(continuation, task)
+    }
+
+    override suspend fun setProfile(user_Id: String, name: CharSequence?, email: CharSequence?, profile_url: String?): Boolean {
         return suspendCancellableCoroutine { continuation ->
             val db = FirebaseFirestore.getInstance()
             val ref = db.collection(USER_COLLECTION).document(user_Id)
@@ -222,7 +208,7 @@ object RemoteAppDataSource : AppDataSource {
         }
     }
 
-    override suspend fun join(name: CharSequence, email: CharSequence): String {
+    override suspend fun join(name: CharSequence, email: CharSequence, user_image_url: CharSequence?): String {
         return suspendCancellableCoroutine { continuation ->
             val db = FirebaseFirestore.getInstance()
             val ref = db.collection(USER_COLLECTION)
@@ -238,83 +224,82 @@ object RemoteAppDataSource : AppDataSource {
         }
     }
 
-    override suspend fun createPost(postDTO: PostDTO): String {
+    override suspend fun uploadToFireStorageUserImage(stream: InputStream): String {
         return suspendCancellableCoroutine { continuation ->
-            val db = FirebaseFirestore.getInstance()
-            val ref = db.collection(POST_COLLECTION)
-            val task = ref.add(postDTO)
+            val uuid = UUID.randomUUID().toString()
+            val id = "images/$uuid"
+            Log.e("upload profile image : $id")
 
-            task.addOnSuccessListener { continuation.resume(it.id) }
-
+            val task = FirebaseStorage.getInstance().reference.child(id).putStream(stream)
+            task.addOnSuccessListener { continuation.resume(id) }
             suspendCancellableCoroutineTask(continuation, task)
         }
     }
 
-    override suspend fun uploadToFireStorage(user_id: String, stream: InputStream) {
-        return suspendCancellableCoroutine { continuation ->
-            val task = FirebaseStorage.getInstance()
-                    .reference
-                    .child("profile/${user_id}")
-                    .putStream(stream)
-
-            task.addOnSuccessListener { continuation.resume(Unit) }
-            suspendCancellableCoroutineTask(continuation, task)
-        }
-    }
-
-    @Suppress("LocalVariableName")
     override suspend fun uploadToFireStoragePostImage(stream: InputStream): String {
         return suspendCancellableCoroutine { continuation ->
             val uuid = UUID.randomUUID().toString()
-            val image_id = "images/$uuid"
-            Log.i("uploadToFireStoragePostImage", image_id)
+            val id = "images/$uuid"
+            Log.e("upload post image : $id")
 
-            val task = FirebaseStorage.getInstance()
-                    .reference
-                    .child(image_id)
-                    .putStream(stream)
-
-            task.addOnSuccessListener { continuation.resume(image_id) }
+            val task = FirebaseStorage.getInstance().reference.child(id).putStream(stream)
+            task.addOnSuccessListener { continuation.resume(id) }
             suspendCancellableCoroutineTask(continuation, task)
         }
     }
 
-    //    override suspend fun getDownloadUrl(user_id: String): String? {
-//        return suspendCancellableCoroutine { continuation ->
-//            val task = FirebaseStorage.getInstance()
-//                .reference
-//                .child("profile/${user_id}")
-//                .downloadUrl
-//
-//            task.addOnSuccessListener { continuation.resume(it.toString()) }
-//            suspendCancellableCoroutineTask(continuation, task)
-//        }
-//    }
-    override suspend fun getDownloadUrl(image_id: String): String? {
-        return suspendCancellableCoroutine { continuation ->
-            val task = FirebaseStorage.getInstance()
-                    .reference
-                    .child(image_id)
-                    .downloadUrl
+    override fun uploadToFireStorage(id: String, stream: InputStream, callback: (String) -> Unit) {
+        val task = FirebaseStorage.getInstance()
+                .reference
+                .child(id)
+                .putStream(stream)
 
-            task.addOnSuccessListener { continuation.resume(it.toString()) }
-            suspendCancellableCoroutineTask(continuation, task)
-        }
+        task.addOnSuccessListener { callback(it.toString()) }
+        task.addOnFailureListener { throw  it }
+    }
+
+    override fun getDownloadUrl(post_image_id: String, callback: (String) -> Unit) {
+        val task = FirebaseStorage.getInstance()
+                .reference
+                .child(post_image_id)
+                .downloadUrl
+
+        task.addOnSuccessListener { callback(it.toString()) }
+        task.addOnFailureListener { throw it }
+    }
+
+    override suspend fun getDownloadUrl(image_id: String): String = suspendCancellableCoroutine { continuation ->
+        val task = FirebaseStorage.getInstance()
+                .reference
+                .child(image_id)
+                .downloadUrl
+
+        task.addOnSuccessListener { continuation.resume(it.toString()) }
+        suspendCancellableCoroutineTask(continuation, task)
     }
 
     private fun <T, R> suspendCancellableCoroutineTask(continuation: CancellableContinuation<T>, task: Task<R>) {
         //for log
         Exception().stackTrace[2].run {
             task.addOnCompleteListener {
-                Log.ps(
-                        if (it.isSuccessful) Log.INFO else Log.WARN,
-                        this,
-                        it.isComplete && it.isSuccessful
-                )
+                Log.ps(if (it.isSuccessful) Log.INFO else Log.WARN, this, it.isComplete && it.isSuccessful)
             }
         }
         task.addOnCanceledListener { continuation.cancel() }
         task.addOnFailureListener { continuation.cancel() }
         continuation.invokeOnCancellation { continuation.cancel() }
+    }
+
+    override suspend fun loadGalleryLoad(context: Context): String? = suspendCancellableCoroutine { continuation ->
+        try {
+            GalleryLoader.builder(context)
+                    .setCrop(true, 100.dp, 100.dp)
+                    .setOnGalleryLoadedListener { continuation.resume(it.toString()) }
+                    .setOnCancelListener { continuation.cancel() }
+                    .load()
+        } catch (e: Exception) {
+            continuation.resumeWithException(e)
+        }
+        continuation.invokeOnCancellation { continuation.resumeWithException(EmptyStackException()) }
     }
 }

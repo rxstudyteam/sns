@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import androidx.core.content.edit
-import java.util.*
 
 /**
  * <pre>
@@ -34,7 +33,7 @@ enum class PP {
     IS_READ_PUSH,
     ACCESS_TOKEN,
     REFRESH_TOKEN,
-    user_id,
+//    user_id,
     ;
 
     companion object {
@@ -62,8 +61,9 @@ enum class PP {
         fun clear() = PREFERENCES.edit().clear().commit()
 
         val deviceid: String get() = PREFERENCES.run { getString("deviceid", null) ?: java.util.UUID.randomUUID().toString().also { edit().putString("deviceid", it).apply() } }
-        fun getUserID(): String = user_id.get(deviceid)!!
-
+        var user_id: String
+            get() = PREFERENCES.run { getString("user_id", null) ?: deviceid }
+            set(user_id) = PREFERENCES.edit().putString("user_id", user_id).apply()
     }
 
     //@formatter:off

@@ -17,7 +17,7 @@ import smart.base.PP
 
 class EditorViewModel(private var dataSource: AppDataSource) : ViewModel() {
 
-    val user_id: String by lazy { PP.user_id.get(PP.deviceid)!! }
+
     val postImageUrl: MutableLiveData<String> = MutableLiveData()
 
     fun getPostImage(context: Context) = CoroutineScope(Dispatchers.Main).launch {
@@ -26,9 +26,9 @@ class EditorViewModel(private var dataSource: AppDataSource) : ViewModel() {
 
     suspend fun createPost(title: String, content: String, bitmap: Bitmap?) {
         Log.e(title, content, bitmap)
-        val image_id: String? = bitmap?.run { dataSource.uploadToFireStoragePostImage(jpegstream) }
+        val image_id: String? = bitmap?.let { dataSource.uploadToFireStoragePostImage(it.jpegstream) }
         val url = image_id?.let { dataSource.getDownloadUrl(it) }
-        val post = PostDTO(user_id, title, content, url?.let { listOf(it) })
+        val post = PostDTO(PP.user_id, title, content, url?.let { listOf(it) })
         val id = dataSource.createPost(post)
         Log.i("createPost: $id")
     }

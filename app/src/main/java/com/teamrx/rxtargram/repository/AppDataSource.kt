@@ -14,7 +14,7 @@ interface AppDataSource {
     fun getPost(post_id: String, callback: (PostDTO) -> Unit)
 
     // 댓글 목록 가져오기
-    fun getComments(post_id: String, callback: (List<CommentDTO>) -> Unit)
+    fun setCommentSnapshotListener(post_id: String, callback: (List<CommentDTO>) -> Unit)
 
     // 댓글 추가하기
     fun addComment(parent_post_id: String, user_id: String, content: String, callback: (Boolean) -> Unit)
@@ -26,7 +26,7 @@ interface AppDataSource {
     suspend fun setProfile(user_id: String, name: CharSequence?, email: CharSequence?, profile_url: String?): Boolean
 
     //가입
-    suspend fun join(name: CharSequence, email: CharSequence): String
+    suspend fun join(name: CharSequence, email: CharSequence, user_image_url: CharSequence?): String
 
     suspend fun createPost(postDTO: PostDTO): String
 
@@ -37,13 +37,13 @@ interface AppDataSource {
     fun setPost(post: PostDTO, callback: (Boolean) -> Unit)
 
     //사진업로드하기
-    suspend fun uploadToFireStorage(user_id: String, stream: InputStream)
-
-    //images
+    suspend fun uploadToFireStorageUserImage(stream: InputStream): String
+    //postimageupload
     suspend fun uploadToFireStoragePostImage(stream: InputStream): String
 
-    suspend fun getDownloadUrl(user_id: String): String?
+    fun getDownloadUrl(post_image_id: String, callback: (String) -> Unit)
 
-    fun getPostImageUrl(post_image_id: String, callback: (String) -> Unit)
-
+    suspend fun getDownloadUrl(post_image_id: String): String
+    fun setPostSnapshotListener(callback: (List<PostDTO>) -> Unit)
+    fun uploadToFireStorage(id: String, stream: InputStream, callback: (String) -> Unit)
 }
