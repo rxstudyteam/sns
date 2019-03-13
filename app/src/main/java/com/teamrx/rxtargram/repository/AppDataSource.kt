@@ -36,6 +36,8 @@ interface AppDataSource {
     //가입
     suspend fun join(name: CharSequence, email: CharSequence): String
 
+    suspend fun join(phoneNumber: CharSequence, email: CharSequence, password: CharSequence): String
+
     // 폰으로 가입하기
     suspend fun joinableFromPhone(phoneNumber: CharSequence): Boolean
 

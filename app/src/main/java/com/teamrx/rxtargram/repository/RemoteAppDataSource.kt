@@ -32,6 +32,8 @@ object RemoteAppDataSource : AppDataSource {
     object USER_DOCUMENT {
         const val EMAIL = "email"
         const val NAME = "name"
+        const val PHONE = "phone"
+        const val PASSWORD = "password"
         const val PROFILE_URL = "profile_url"
     }
 
@@ -239,6 +241,23 @@ object RemoteAppDataSource : AppDataSource {
             )
             task.addOnSuccessListener { continuation.resume(it.id) }
 
+            suspendCancellableCoroutineTask(continuation, task)
+        }
+    }
+
+    override suspend fun join(phoneNumber: CharSequence, name: CharSequence, password: CharSequence): String {
+        return suspendCancellableCoroutine {continuation ->
+            val db = FirebaseFirestore.getInstance()
+            val ref = db.collection(USER_COLLECTION)
+            val task = ref.add(
+                    hashMapOf<String, Any>(
+                            USER_DOCUMENT.PHONE to phoneNumber.toString(),
+                            USER_DOCUMENT.NAME to name.toString(),
+                            USER_DOCUMENT.PASSWORD to password.toString()
+
+                    )
+            )
+            task.addOnSuccessListener { continuation.resume(it.id) }
             suspendCancellableCoroutineTask(continuation, task)
         }
     }

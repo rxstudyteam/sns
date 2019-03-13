@@ -4,6 +4,7 @@ import android.log.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.teamrx.rxtargram.model.ProfileModel
 import com.teamrx.rxtargram.repository.RemoteAppDataSource
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,7 +17,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class RemoteAppDataSource {
     @Test
-    suspend fun getProfile() {
+    fun getProfile() = runBlocking {
         Log.MODE = Log.eMODE.SYSTEMOUT
         var user_id = "KxUypfZKf2cKmJs4jOeU"
         val pm = RemoteAppDataSource.getProfile(user_id)
@@ -29,9 +30,15 @@ class RemoteAppDataSource {
 
 
     @Test
-    suspend fun joinableFromPhone(phoneNumber: CharSequence){
+    fun joinableFromPhone() = runBlocking {
         // 해당 전화 번호로 가입이 가능한지 체크한다
         val result = RemoteAppDataSource.joinableFromPhone("01074950523")
         Assert.assertTrue(result)
+    }
+
+    @Test
+    fun join() = runBlocking {
+        val result = RemoteAppDataSource.join("이주영", "비밀번호4885")
+        Assert.assertTrue(result.isNotEmpty())
     }
 }
