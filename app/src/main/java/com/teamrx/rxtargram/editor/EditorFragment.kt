@@ -45,6 +45,15 @@ class EditorFragment : AppFragment() {
         super.onActivityCreated(savedInstanceState)
         viewModel.postImageUrl.observe(this, Observer { url -> bb.postImage.setGlide(url) })
         bb.editorImagePostButton.setOnClickListener { viewModel.getPostImage(requireContext()) }
+
+//        Intent().apply {
+//
+////            action = ""
+////            extras.putChar("sdfsdf") = "sdfsfds"
+//        }.also {
+//            startActivity( it)
+//        }
+
     }
 
     private fun postWrite() {
@@ -55,9 +64,12 @@ class EditorFragment : AppFragment() {
 
     private fun postWrite(title: String, context: String, image: Bitmap?) = CoroutineScope(Dispatchers.Main).launch {
         showProgress()
-        viewModel.createPost(title, context, image)
-        dismissProgress()
-        requireActivity().finish()
+        try {
+            viewModel.createPost(title, context, image)
+            requireActivity().finish()
+        } finally {
+            dismissProgress()
+        }
     }
 
     private fun check() = bb.titleEditText.check() && bb.contextEditText.check()

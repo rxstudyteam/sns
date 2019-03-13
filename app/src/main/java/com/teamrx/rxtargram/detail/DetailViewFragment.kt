@@ -89,14 +89,14 @@ class DetailViewFragment : AppFragment() {
         override fun getItemCount(): Int = posts.size
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val view = holder.itemView.tag as DetailItemBinding
+            val binding = holder.itemView.tag as DetailItemBinding
             val d = posts[position]
-            view.apply {
+            binding.apply {
                 tvUserId.text = d.user_id
                 tvTitle.text = d.title
                 tvContent.text = d.content
                 tvCreatedAt.text = d.created_at.toString()
-                GlideApp.with(requireContext()).load(d.images?.firstOrNull()).into(view.ivContentImage)
+                GlideApp.with(requireContext()).load(d.images?.firstOrNull()).into(binding.ivContentImage)
                 d.post_id?.let { post_id ->
                     edit.setOnClickListener { onEditClicked(post_id) }
                     menu.setOnClickListener { onMenuClick(post_id) }
