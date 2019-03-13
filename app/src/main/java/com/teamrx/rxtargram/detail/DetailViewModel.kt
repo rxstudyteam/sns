@@ -10,7 +10,7 @@ class DetailViewModel(dataSource: AppDataSource) : BaseViewModel(dataSource) {
     val posts: MutableLiveData<List<PostDTO>> = MutableLiveData()
 
     fun postsListen() {
-        dataSource.getPosts {
+        dataSource.setPostSnapshotListener {
             posts.value = it
         }
     }

@@ -29,7 +29,7 @@ class EditorViewModel(private var dataSource: AppDataSource) : ViewModel() {
         val image_id: String? = bitmap?.let { dataSource.uploadToFireStoragePostImage(it.jpegstream) }
         val url = image_id?.let { dataSource.getDownloadUrl(it) }
         val post = PostDTO(PP.user_id, title, content, url?.let { listOf(it) })
-        val id = dataSource.createPost(post)
-        Log.i("createPost: $id")
+        val id = dataSource.addPost(post)
+        Log.i("addPost: $id")
     }
 }
