@@ -36,6 +36,9 @@ interface AppDataSource {
     //가입
     suspend fun join(name: CharSequence, email: CharSequence): String
 
+    // 폰으로 가입하기
+    suspend fun joinableFromPhone(phoneNumber: CharSequence): Boolean
+
     suspend fun createPost(postDTO: PostDTO): String
 
     //사진가져오기

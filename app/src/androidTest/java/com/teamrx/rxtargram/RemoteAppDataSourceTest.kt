@@ -26,4 +26,12 @@ class RemoteAppDataSource {
         Assert.assertTrue(pm is ProfileModel)
         Assert.assertTrue(pm == ProfileModel("eastar Jeong", "eastarj@gmail.com", "https://firebasestorage.googleapis.com/v0/b/rxteam-sns.appspot.com/o/profile%2Favatar.png?alt=media&token=5d68ae9e-34e4-4b7c-a32d-32577ce944af"))
     }
+
+
+    @Test
+    suspend fun joinableFromPhone(phoneNumber: CharSequence){
+        // 해당 전화 번호로 가입이 가능한지 체크한다
+        val result = RemoteAppDataSource.joinableFromPhone("01074950523")
+        Assert.assertTrue(result)
+    }
 }

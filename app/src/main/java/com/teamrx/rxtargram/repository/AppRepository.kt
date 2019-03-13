@@ -9,6 +9,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import java.io.InputStream
 
 class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppDataSource {
+
     override fun modifyPost(post: Post, callback: (Boolean) -> Unit) = remoteAppDataSource.modifyPost(post, callback)
 
     override fun getPosts(callback: (List<Post>) -> Unit) {
@@ -66,6 +67,10 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppD
 
     override suspend fun join(name: CharSequence, email: CharSequence): String {
         return remoteAppDataSource.join(name, email)
+    }
+
+    override suspend fun joinableFromPhone(phoneNumber: CharSequence): Boolean {
+        return remoteAppDataSource.joinableFromPhone(phoneNumber)
     }
 
 
