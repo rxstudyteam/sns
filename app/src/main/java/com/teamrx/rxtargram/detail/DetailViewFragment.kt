@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.toast
 import android.view.*
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
@@ -96,7 +97,10 @@ class DetailViewFragment : AppFragment() {
                 tvTitle.text = d.title
                 tvContent.text = d.content
                 tvCreatedAt.text = d.created_at.toString()
-                GlideApp.with(requireContext()).load(d.images?.firstOrNull()).into(binding.ivContentImage)
+
+                ivContentImage.setBackgroundColor(if(d.images.isNullOrEmpty()) 0x55ffffff else ContextCompat.getColor(requireContext(), R.color.primary_dark_material_light))
+
+                GlideApp.with(requireContext()).load(d.images?.firstOrNull()).into(ivContentImage)
                 d.post_id?.let { post_id ->
                     edit.setOnClickListener { onEditClicked(post_id) }
                     menu.setOnClickListener { onMenuClick(post_id) }
