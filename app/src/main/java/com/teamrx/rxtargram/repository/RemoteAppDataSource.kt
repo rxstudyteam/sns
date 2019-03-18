@@ -5,6 +5,7 @@ package com.teamrx.rxtargram.repository
 import android.content.Context
 import android.log.Log
 import com.google.android.gms.tasks.Task
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.teamrx.rxtargram.model.CommentDTO
@@ -91,8 +92,19 @@ object RemoteAppDataSource : AppDataSource {
 //                .orderBy("created_at", Query.Direction.DESCENDING)
                 .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                     firebaseFirestoreException?.printStackTrace()
-                    val result = querySnapshot?.toObjects(PostDTO::class.java) ?: emptyList()
-                    Log.i(result.size, result)
+
+                    val result = ArrayList<PostDTO>()
+                    querySnapshot?.run {
+                        val it = iterator()
+                        while (it.hasNext()) {
+                            val d = it.next() as DocumentSnapshot
+                            val post = d.toObject(PostDTO::class.java)
+                            post?.post_id = d.id
+                            result.add(post!!)
+                        }
+                    }
+//                    val result = querySnapshot?.toObjects(PostDTO::class.java) ?: emptyList()
+//                    Log.i(result.size, result)
                     callback(result)
                 }
     }
@@ -137,7 +149,6 @@ object RemoteAppDataSource : AppDataSource {
                     callback(result)
                 }
     }
-
 
     override suspend fun join(name: CharSequence, email: CharSequence, user_image_url: CharSequence?): String {
         return suspendCancellableCoroutine { continuation ->
@@ -193,7 +204,6 @@ object RemoteAppDataSource : AppDataSource {
             suspendCancellableCoroutineTask(continuation, task)
         }
     }
-
 
     override suspend fun uploadToFireStorageUserImage(stream: InputStream): String {
         return suspendCancellableCoroutine { continuation ->

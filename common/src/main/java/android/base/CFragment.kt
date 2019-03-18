@@ -17,7 +17,7 @@ open class CFragment : Fragment() {
         supportActionBar = mActivity.supportActionBar
     }
 
-    fun showProgress() = mActivity.showProgress()
+    fun showProgress() = (requireActivity() as CActivity).showProgress()
     fun dismissProgress() = mActivity.dismissProgress()
     fun dismissProgressForce() = mActivity.dismissProgressForce()
 }

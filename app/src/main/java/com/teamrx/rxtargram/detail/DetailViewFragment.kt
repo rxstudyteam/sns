@@ -5,9 +5,9 @@ import android.os.Bundle
 import android.util.toast
 import android.view.*
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.AppFragment
@@ -15,9 +15,9 @@ import com.teamrx.rxtargram.comment.CommentActivity
 import com.teamrx.rxtargram.databinding.DetailItemBinding
 import com.teamrx.rxtargram.editor.EditorActivity
 import com.teamrx.rxtargram.model.PostDTO
+import com.teamrx.rxtargram.profile.ProfileViewModel
 import com.teamrx.rxtargram.util.GlideApp
 import kotlinx.android.synthetic.main.detail_fragment.*
-import androidx.recyclerview.widget.DividerItemDecoration
 
 class DetailViewFragment : AppFragment() {
     companion object {
@@ -82,25 +82,34 @@ class DetailViewFragment : AppFragment() {
         private val posts = arrayListOf<PostDTO>()
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val binder: DetailItemBinding = DataBindingUtil.inflate(LayoutInflater.from(parent.context), R.layout.detail_item, parent, false)
-            binder.root.tag = binder
-            return ViewHolder(binder.root)
+            return ViewHolder(DataBindingUtil.inflate<DetailItemBinding>(LayoutInflater.from(parent.context), R.layout.detail_item, parent, false).root)
         }
 
         override fun getItemCount(): Int = posts.size
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val binding = holder.itemView.tag as DetailItemBinding
+            val binding = DataBindingUtil.getBinding<DetailItemBinding>(holder.itemView)
             val d = posts[position]
-            binding.apply {
+//            Log.e(d)
+            binding?.apply {
                 tvUserId.text = d.user_id
                 tvTitle.text = d.title
                 tvContent.text = d.content
                 tvCreatedAt.text = d.created_at.toString()
 
-                ivContentImage.setBackgroundColor(if(d.images.isNullOrEmpty()) 0x55ffffff else ContextCompat.getColor(requireContext(), R.color.primary_dark_material_light))
 
-                GlideApp.with(requireContext()).load(d.images?.firstOrNull()).into(ivContentImage)
+                if (d.images.isNullOrEmpty())
+                    ivContentImage.setImageResource(R.drawable.ic_face_black_24dp)
+                else
+                    GlideApp.with(requireContext()).load(d.images.firstOrNull()).into(ivContentImage)
+
+                var modelprofile =  getViewModel<ProfileViewModel>()
+                modelprofile.
+                d.user_id
+
+                binding.ivProfileImage
+                binding.tvUserId
+
                 d.post_id?.let { post_id ->
                     edit.setOnClickListener { onEditClicked(post_id) }
                     menu.setOnClickListener { onMenuClick(post_id) }

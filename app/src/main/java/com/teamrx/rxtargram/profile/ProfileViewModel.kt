@@ -25,6 +25,10 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
         private const val DEFAULT_PROFILE_URL = "https://firebasestorage.googleapis.com/v0/b/rxteam-sns.appspot.com/o/profile%2Funnamed.png?alt=media&token=bd08fa0e-84b4-438c-8f25-c7014075bf6e"
     }
 
+    suspend fun getProfile(user_id: String) {
+        val profile = dataSource.getProfile(PP.user_id)
+    }
+
     suspend fun updateProfile() {
         val profile = if (PP.user_id == PP.deviceid) ProfileModel() else dataSource.getProfile(PP.user_id)
         Log.w(profile)
