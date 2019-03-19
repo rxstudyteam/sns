@@ -25,14 +25,14 @@ class Profile : AppFragment() {
     private lateinit var vm: ProfileViewModel
 
     companion object {
-        fun newInstance(userId: String? = null) = Profile().apply {
+        fun newInstance(user_id: String? = null) = Profile().apply {
             val arg = Bundle()
-            arg.putString("userID", userId)
+            arg.putString("userID", user_id)
             arguments = arg
         }
     }
 
-    var userId: String? = null
+    private var user_id: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,13 +59,13 @@ class Profile : AppFragment() {
 
         arguments?.run {
             if (containsKey("userID")) {
-                userId = getString("userID")
+                user_id = getString("userID")
             }
         }
 
         supportActionBar?.apply { title = vm.getTitle() }
 
-        loadProfile(userId)
+        loadProfile(user_id)
     }
 
 

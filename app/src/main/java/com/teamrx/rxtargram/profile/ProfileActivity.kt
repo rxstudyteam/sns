@@ -10,16 +10,16 @@ class ProfileActivity : AppActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.editor_activity)
 
-        var userId : String? = null
+        var user_id : String? = null
         intent?.extras?.run {
-            if(containsKey("userId")){
-                userId = getString("userId")
+            if(containsKey("userID")){
+                user_id = getString("userID")
             }
         }
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.container, Profile.newInstance(userId))
+                .replace(R.id.container, Profile.newInstance(user_id))
                 .commitNow()
         }
     }
