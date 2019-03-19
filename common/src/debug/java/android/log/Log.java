@@ -7,8 +7,12 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.*;
+import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -22,20 +26,35 @@ import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 @SuppressWarnings("ALL")
+/**
+ * @author r
+ */
 public class Log {
 
     public static final int VERBOSE = android.util.Log.VERBOSE;
@@ -99,10 +118,11 @@ public class Log {
             }
         }
         if (MODE == eMODE.STUDIO) {
-            StringBuilder sb = new StringBuilder(".....................................................................");
-
-            sb.replace(0, tag.length(), tag);
-            sb.replace(sb.length() - locator.length(), sb.length(), locator);
+            String DOTS = ".....................................................................";
+            StringBuilder sb = new StringBuilder();
+            sb.append(tag).append(DOTS);
+            sb.setLength(DOTS.length() - locator.length());
+            sb.append(locator);
             String adj_tag = sb.toString();
 
             int N = sa.size();
@@ -1466,7 +1486,7 @@ public class Log {
         startActivityForResult(clz, intent, -1);
     }
 
-    public static void startActivity(Class<?> clz, Intent intent, @Nullable Bundle options) {
+    public static void startActivity(Class<?> clz, Intent intent, Bundle options) {
         startActivityForResult(clz, intent, -1, options);
     }
 

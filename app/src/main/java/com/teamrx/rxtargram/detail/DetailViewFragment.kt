@@ -18,6 +18,9 @@ import com.teamrx.rxtargram.model.PostDTO
 import com.teamrx.rxtargram.profile.ProfileViewModel
 import com.teamrx.rxtargram.util.GlideApp
 import kotlinx.android.synthetic.main.detail_fragment.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class DetailViewFragment : AppFragment() {
     companion object {
@@ -92,7 +95,7 @@ class DetailViewFragment : AppFragment() {
             val d = posts[position]
 //            Log.e(d)
             binding?.apply {
-                tvUserId.text = d.user_id
+                tvUserId.tag = d.user_id
                 tvTitle.text = d.title
                 tvContent.text = d.content
                 tvCreatedAt.text = d.created_at.toString()
@@ -103,9 +106,14 @@ class DetailViewFragment : AppFragment() {
                 else
                     GlideApp.with(requireContext()).load(d.images.firstOrNull()).into(ivContentImage)
 
-                var modelprofile =  getViewModel<ProfileViewModel>()
-                modelprofile.
-                d.user_id
+                CoroutineScope(Dispatchers.Main).launch {
+                    val vm =  getViewModel<ProfileViewModel>()
+                    val user = vm.getProfile(d.user_id)
+                    if(tvUserId.tag == user.user_id){
+                        tvUserId.text = user.name
+                        GlideApp.with(requireContext()).load(user.profile_url).into(ivProfileImage)
+                    }
+                }
 
                 binding.ivProfileImage
                 binding.tvUserId

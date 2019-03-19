@@ -5,7 +5,9 @@ data class ProfileModel(
         var email: String = "",
         var profile_url: String? = null,
         val follows: List<String>? = emptyList(),
-        val followers: List<String>? = emptyList()
+        val followers: List<String>? = emptyList(),
+        var user_id : String =""
+
 )
 
 
