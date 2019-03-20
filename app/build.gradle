@@ -26,6 +26,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    repositories {
+        maven { url 'http://devrepo.kakao.com:8088/nexus/content/groups/public/' }
+    }
 }
 
 dependencies {
@@ -65,6 +68,9 @@ dependencies {
     //image
     implementation 'com.github.bumptech.glide:glide:4.8.0'
     kapt 'com.github.bumptech.glide:compiler:4.8.0'
+
+    //kakao
+    implementation "com.kakao.sdk:auth:1.16.0"
 }
 
 apply plugin: 'com.google.gms.google-services'

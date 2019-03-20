@@ -9,6 +9,7 @@ import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.AppActivity
 import com.teamrx.rxtargram.editor.EditorActivity
 import com.teamrx.rxtargram.detail.DetailViewFragment
+import com.teamrx.rxtargram.login.LoginActivity
 import com.teamrx.rxtargram.profile.Profile
 import kotlinx.android.synthetic.main.app_main.*
 
@@ -34,6 +35,10 @@ class AppMain : AppActivity() {
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
         main_go_editor_button.setOnClickListener {
             startActivity(Intent(this@AppMain, EditorActivity::class.java))
+        }
+
+        login_button.setOnClickListener {
+            startActivity(Intent(this@AppMain, LoginActivity::class.java))
         }
         navigation.selectedItemId = R.id.navigation_home
     }
