@@ -36,6 +36,10 @@ interface AppDataSource {
     //가입
     suspend fun join(name: CharSequence, email: CharSequence): String
 
+    //이메일 가입
+    suspend fun joinByEmail(email: CharSequence, password: CharSequence): Boolean
+
+
     suspend fun createPost(postDTO: PostDTO): String
 
     //사진가져오기

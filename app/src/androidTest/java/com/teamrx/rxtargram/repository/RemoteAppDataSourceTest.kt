@@ -1,5 +1,6 @@
 package com.teamrx.rxtargram.repository
 
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.teamrx.rxtargram.model.Post
 import io.reactivex.Single
@@ -12,6 +13,7 @@ import org.junit.Test
 class RemoteAppDataSourceTest {
 
     private val firestore = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
 
     @Test
     fun modifyPost() {
@@ -64,6 +66,21 @@ class RemoteAppDataSourceTest {
 //                }
 
 //        Thread.sleep(2000)
+    }
+
+
+    @Test
+    fun SignUpWithEmailAndPassword() {
+        auth.createUserWithEmailAndPassword("rlawlgns077@naver.com", "test1234")
+            .addOnCompleteListener { task ->
+                if(task.isSuccessful) {
+                    println("current User : ${FirebaseAuth.getInstance().currentUser}")
+                } else {
+                    println("실패")
+                }
+            }
+
+        Thread.sleep(10000)
     }
 
 }

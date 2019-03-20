@@ -5,6 +5,7 @@ package com.teamrx.rxtargram.repository
 import android.content.Context
 import android.log.Log
 import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -42,6 +43,7 @@ object RemoteAppDataSource : AppDataSource {
     }
 
     private val fireStore: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
+    private val fireAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
     private val cachedPosts: HashMap<String, Post> by lazy { HashMap<String, Post>() }
     private var listener: ListenerRegistration? = null
 
@@ -244,6 +246,16 @@ object RemoteAppDataSource : AppDataSource {
             suspendCancellableCoroutineTask(continuation, task)
         }
     }
+
+    override suspend fun joinByEmail(email: CharSequence, password: CharSequence): Boolean {
+        return suspendCoroutine { continuation ->
+            fireAuth.createUserWithEmailAndPassword(email.toString(), password.toString())
+                .addOnCompleteListener { task ->
+                    continuation.resume(task.isSuccessful)
+                }
+        }
+    }
+
 
     override suspend fun createPost(postDTO: PostDTO): String{
         return suspendCancellableCoroutine { continuation ->

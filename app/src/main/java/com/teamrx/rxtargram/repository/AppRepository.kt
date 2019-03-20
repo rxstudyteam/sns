@@ -68,6 +68,9 @@ class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppD
         return remoteAppDataSource.join(name, email)
     }
 
+    override suspend fun joinByEmail(email: CharSequence, password: CharSequence): Boolean {
+        return remoteAppDataSource.joinByEmail(email, password)
+    }
 
     override suspend fun createPost(postDTO: PostDTO): String {
         return remoteAppDataSource.createPost(postDTO)

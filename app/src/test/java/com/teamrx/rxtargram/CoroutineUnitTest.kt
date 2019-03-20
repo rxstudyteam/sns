@@ -2,9 +2,12 @@ package com.teamrx.rxtargram
 
 import android.log.nano
 import android.log.sano
+import io.reactivex.Observable
+import io.reactivex.functions.BiFunction
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import org.junit.Test
+import java.util.concurrent.TimeUnit
 import kotlin.system.measureTimeMillis
 
 /**
@@ -541,4 +544,25 @@ class CoroutineUnitTest {
 
         println("test")
     }
+
+    @Test
+    fun `Observable zip Test`() {
+
+        val observe1 = Observable.zip(
+            Observable.just(1, 2),
+            Observable.just(1, 2),
+            BiFunction<Int,Int,String> { s , n -> "$s $n" }
+        )
+
+        val observe2 = Observable.interval(1000, TimeUnit.MILLISECONDS)
+            .zipWith(observe1, BiFunction<Long, String, String> { t1, t2 -> t2 })
+            .subscribe { s ->
+                println(s)
+            }
+
+
+
+        Thread.sleep(5000)
+    }
+
 }
