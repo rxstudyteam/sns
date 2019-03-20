@@ -1,6 +1,7 @@
 package com.teamrx.rxtargram.base
 
 import android.content.Context
+import com.kakao.auth.KakaoSDK
 import com.teamrx.rxtargram.login.KakaoSDKAdapter
 import smart.base.BApplication
 
@@ -11,7 +12,7 @@ class AppApplication : BApplication() {
 
     override fun onCreate() {
         super.onCreate()
-        context = baseContext
-        KakaoSDKAdapter()
+        context = applicationContext
+        KakaoSDK.init(KakaoSDKAdapter())
     }
 }
