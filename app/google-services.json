@@ -23,6 +23,30 @@
           }
         },
         {
+          "client_id": "869837540388-o9mnbfi7tks7iqq4oov8g7ev7jem98g9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.teamrx.rxtargram",
+            "certificate_hash": "a3075686b7a57704042a4e71065b2a3d12a3250d"
+          }
+        },
+        {
+          "client_id": "869837540388-1ahpkst46i3177ji13lh7o7ha0ftvh7g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.teamrx.rxtargram",
+            "certificate_hash": "502ec90d430d3606ba30549f0b7c207daa023da8"
+          }
+        },
+        {
+          "client_id": "869837540388-qk8kt94rqp4u4qlv5o0d8d7hv5oifvdf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.teamrx.rxtargram",
+            "certificate_hash": "e6067dc1158eed9fde7903d6a2dfcb94418ddf13"
+          }
+        },
+        {
           "client_id": "869837540388-mdqqoflp3eh1i6c8siekjiefni2qtjog.apps.googleusercontent.com",
           "client_type": 3
         }

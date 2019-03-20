@@ -9,6 +9,7 @@ import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.AppActivity
 import com.teamrx.rxtargram.editor.EditorActivity
 import com.teamrx.rxtargram.detail.DetailViewFragment
+import com.teamrx.rxtargram.join.JoinActivity
 import com.teamrx.rxtargram.profile.Profile
 import kotlinx.android.synthetic.main.app_main.*
 
@@ -32,9 +33,17 @@ class AppMain : AppActivity() {
         setContentView(R.layout.app_main)
 
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+        setupButtonEvents()
+        navigation.selectedItemId = R.id.navigation_home
+    }
+
+    private fun setupButtonEvents() {
         main_go_editor_button.setOnClickListener {
             startActivity(Intent(this@AppMain, EditorActivity::class.java))
         }
-        navigation.selectedItemId = R.id.navigation_home
+
+        buttonJoinWithPhoneNumber.setOnClickListener {
+            startActivity(Intent(this@AppMain, JoinActivity::class.java))
+        }
     }
 }
