@@ -7,6 +7,9 @@ import androidx.collection.LruCache
 import com.teamrx.rxtargram.model.CommentDTO
 import com.teamrx.rxtargram.model.PostDTO
 import com.teamrx.rxtargram.model.ProfileModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
 import java.io.InputStream
 
 @Suppress("ClassName", "unused")
@@ -59,30 +62,15 @@ object CachedAppDataSource : AppDataSource {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    const val USER_COLLECTION = "user"
-    const val POST_COLLECTION = "post"
-
-    object USER_DOCUMENT {
-        const val NAME = "name"
-        const val EMAIL = "email"
-        const val PROFILE_URL = "profile_url"
-        const val FOLLOWS = "follows"
-        const val FOLLOWERS = "followers"
+    object UserCache : LruCache<String, ProfileModel>(10000) {
+        override fun create(key: String): ProfileModel? {
+            var result: ProfileModel? = null
+            runBlocking(Dispatchers.IO) {
+                result = RemoteAppDataSource.getProfile(user_id = key)
+            }
+            return result
+        }
     }
-
-    object POST_DOCUMENT {
-        const val USER_ID = "user_id"
-        const val TITLE = "title"
-        const val CONTENT = "content"
-        const val IMAGES = "images"
-        const val PARENT_POST_NO = "parent_post_no"
-        const val LIKES = "likes"
-        const val CREATED_AT = "created_at"
-    }
-
-    class UserCache : LruCache<String, ProfileModel>(10000)
-
-    val users: UserCache = UserCache()
 
     object STORAGE {
         const val POST = "images/"
@@ -94,6 +82,6 @@ object CachedAppDataSource : AppDataSource {
             return ProfileModel()
         }
 
-        return users.get(user_id) ?: RemoteAppDataSource.getProfile(user_id).also { users.put(user_id,it) }
+        return UserCache.get(user_id)!!
     }
 }
