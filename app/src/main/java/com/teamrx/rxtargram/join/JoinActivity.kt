@@ -1,8 +1,10 @@
 package com.teamrx.rxtargram.join
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.Observer
+import com.teamrx.rxtargram.BuildConfig
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.AppActivity
 import kotlinx.android.synthetic.main.activity_join.*
@@ -24,6 +26,14 @@ class JoinActivity : AppActivity() {
 
         setupViewModel()
         setupButtonsEvents()
+        setupDebug()
+    }
+
+    private fun setupDebug() {
+        if (BuildConfig.DEBUG) {
+            editInsertPhone.setText("+821012341234")
+            editInsertSmsCode.setText("123456")
+        }
     }
 
     private fun setupViewModel() {
@@ -37,12 +47,31 @@ class JoinActivity : AppActivity() {
 
             }
         })
+
+        viewModel.observeJoinStatus().observe(this, Observer { status ->
+            when (status) {
+                JoinStatus.ENABLE_SMS_INPUT_CODE -> showInputSmsLayout()
+            }
+        })
+
+        viewModel.observeToast().observe(this, Observer { msg ->
+            toast(msg)
+        })
+    }
+
+    private fun showInputSmsLayout() {
+        layoutInputSms.visibility = View.VISIBLE
     }
 
     private fun setupButtonsEvents() {
         buttonJoin.setOnClickListener {
             val phoneNumber = editInsertPhone.text.toString()
             viewModel.joinWithPhone(this@JoinActivity, phoneNumber)
+        }
+
+        sumitSmsCode.setOnClickListener {
+            val smsNumber = editInsertSmsCode.text.toString()
+            viewModel.inputSmsCode(smsNumber)
         }
     }
 
