@@ -1,6 +1,7 @@
 package com.teamrx.rxtargram.detail
 
 import android.content.Intent
+import android.log.Log
 import android.os.Bundle
 import android.util.toast
 import android.view.*
@@ -15,7 +16,6 @@ import com.teamrx.rxtargram.comment.CommentActivity
 import com.teamrx.rxtargram.databinding.DetailItemBinding
 import com.teamrx.rxtargram.editor.EditorActivity
 import com.teamrx.rxtargram.model.PostDTO
-import com.teamrx.rxtargram.profile.ProfileViewModel
 import com.teamrx.rxtargram.util.GlideApp
 import kotlinx.android.synthetic.main.detail_fragment.*
 import kotlinx.coroutines.CoroutineScope
@@ -85,7 +85,7 @@ class DetailViewFragment : AppFragment() {
         private val posts = arrayListOf<PostDTO>()
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            return ViewHolder(DataBindingUtil.inflate<DetailItemBinding>(LayoutInflater.from(parent.context), R.layout.detail_item, parent, false).root)
+            return ViewHolder(DataBindingUtil.inflate<DetailItemBinding>(LayoutInflater.from(parent.context), R.layout.detail_item, parent, false).also { Log.e(it) }.root)
         }
 
         override fun getItemCount(): Int = posts.size
@@ -93,7 +93,7 @@ class DetailViewFragment : AppFragment() {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val binding = DataBindingUtil.getBinding<DetailItemBinding>(holder.itemView)
             val d = posts[position]
-//            Log.e(d)
+            Log.w(binding)
             binding?.apply {
                 tvUserId.tag = d.user_id
                 tvTitle.text = d.title
@@ -107,16 +107,13 @@ class DetailViewFragment : AppFragment() {
                     GlideApp.with(requireContext()).load(d.images.firstOrNull()).into(ivContentImage)
 
                 CoroutineScope(Dispatchers.Main).launch {
-                    val vm =  getViewModel<ProfileViewModel>()
+                    val vm = getViewModel<DetailViewModel>()
                     val user = vm.getProfile(d.user_id)
-                    if(tvUserId.tag == user.user_id){
+                    if (tvUserId.tag == user.user_id) {
                         tvUserId.text = user.name
                         GlideApp.with(requireContext()).load(user.profile_url).into(ivProfileImage)
                     }
                 }
-
-                binding.ivProfileImage
-                binding.tvUserId
 
                 d.post_id?.let { post_id ->
                     edit.setOnClickListener { onEditClicked(post_id) }

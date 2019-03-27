@@ -178,16 +178,19 @@ object RemoteAppDataSource : AppDataSource {
                 .get()
 
         task.addOnSuccessListener { document ->
-            Log.e("addOnSuccessListener")
+//            Log.e("addOnSuccessListener")
             if (!document.exists()) {
                 continuation.resume(ProfileModel())
                 return@addOnSuccessListener
             }
-
-            val profileModel = document.toObject(ProfileModel::class.java)
-            profileModel?.user_id = user_id
-            continuation.resume(profileModel ?: ProfileModel())
-            Log.w("addOnSuccessListener")
+            try {
+                val profileModel = document.toObject(ProfileModel::class.java)
+                profileModel?.user_id = user_id
+                continuation.resume(profileModel ?: ProfileModel())
+            } catch (e: Exception) {
+                Log.w("parse fail $user_id")
+            }
+//            Log.w("addOnSuccessListener")
         }
         suspendCancellableCoroutineTask(continuation, task)
     }

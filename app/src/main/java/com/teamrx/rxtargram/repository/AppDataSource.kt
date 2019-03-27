@@ -30,6 +30,7 @@ interface AppDataSource {
     //내프로필변경
     suspend fun setProfile(user_id: String, name: CharSequence?, email: CharSequence?, profile_url: String?): Boolean
 
+
     //user사진업로드하기
     suspend fun uploadToFireStorageUserImage(stream: InputStream): String
     //post사진업로드하기
@@ -38,6 +39,14 @@ interface AppDataSource {
     suspend fun loadGalleryLoad(context: Context): String?
     //사진URL가져오기
     suspend fun getDownloadUrl(image_id: String): String
+
+
+
+
+
+
+
+
 
 //    fun getDownloadUrl(post_image_id: String, callback: (String) -> Unit)
     //사진업로드하기

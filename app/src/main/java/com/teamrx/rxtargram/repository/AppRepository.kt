@@ -7,6 +7,7 @@ import com.teamrx.rxtargram.model.ProfileModel
 import java.io.InputStream
 
 class AppRepository(private val remoteAppDataSource: RemoteAppDataSource) : AppDataSource {
+
     companion object {
         private var INSTANCE: AppRepository? = null
         fun getInstance(remoteDataSource: RemoteAppDataSource) = INSTANCE ?: synchronized(AppRepository::class.java) { INSTANCE ?: AppRepository(remoteDataSource).also { INSTANCE = it } }

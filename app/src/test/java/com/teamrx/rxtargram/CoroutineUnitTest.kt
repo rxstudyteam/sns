@@ -217,4 +217,25 @@ class CoroutineUnitTest {
         Thread.sleep(3000)
         println("--wait--")
     }
+
+//    @Test
+//    fun `runBlocking in launch job delay and run`() {
+//        runBlocking {
+//            val job = launch(coroutineContext) {
+//                println("--Launch-- start : ${Thread.currentThread().name} ${nano()}")
+//                delay(1000)
+//                println("--Launch-- ended : ${Thread.currentThread().name} ${nano()}")
+//            }
+//
+//            run {
+//                println("--Run----- start : ${Thread.currentThread().name} ${nano()}")
+//                delay(200)
+//                job.cancel()
+//                println("--Run----- ended : ${Thread.currentThread().name} ${nano()}")
+//            }
+//        }
+//        println("--end--")
+//        Thread.sleep(3000)
+//        println("--wait--")
+//    }
 }
