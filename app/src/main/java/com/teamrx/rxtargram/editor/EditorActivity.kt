@@ -13,5 +13,4 @@ class EditorActivity : AppActivity() {
             supportFragmentManager.beginTransaction().replace(R.id.container, EditorFragment.newInstance()).commitNow()
         }
     }
-
 }

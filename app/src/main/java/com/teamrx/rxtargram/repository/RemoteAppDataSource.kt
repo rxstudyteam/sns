@@ -19,6 +19,7 @@ import java.io.InputStream
 import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 @Suppress("ClassName", "unused")
 object RemoteAppDataSource : AppDataSource {
@@ -61,31 +62,6 @@ object RemoteAppDataSource : AppDataSource {
         }
     }
 
-    suspend fun getPosts(): List<PostDTO> = suspendCancellableCoroutine { continuation ->
-        val task = FirebaseFirestore.getInstance()
-                .collection(POST_COLLECTION)
-//                .orderBy("created_at", Query.Direction.DESCENDING)
-                .get()
-
-        task.addOnSuccessListener { querySnapshot ->
-            continuation.resume(querySnapshot.toObjects(PostDTO::class.java))
-        }
-        suspendCancellableCoroutineTask(continuation, task)
-    }
-
-    override fun setPost(post: PostDTO, callback: (Boolean) -> Unit) {
-        Log.e("$POST_COLLECTION : $post")
-        post.post_id?.let { postid ->
-            FirebaseFirestore.getInstance()
-                    .collection(POST_COLLECTION)
-                    .document(postid)
-                    .set(post)
-                    .addOnCompleteListener {
-                        callback(it.isSuccessful)
-                    }
-        }
-    }
-
     override fun setPostSnapshotListener(callback: (List<PostDTO>) -> Unit) {
         FirebaseFirestore.getInstance()
                 .collection(POST_COLLECTION)
@@ -109,13 +85,20 @@ object RemoteAppDataSource : AppDataSource {
                 }
     }
 
-    override fun getPost(post_id: String, callback: (PostDTO) -> Unit) {
-//        cachedPosts[post_id]?.let {
-//            callback(it)
-//            println("get cached post")
-//            return
-//        }
+    override fun setPost(post: PostDTO, callback: (Boolean) -> Unit) {
+        Log.e("$POST_COLLECTION : $post")
+        post.post_id?.let { postid ->
+            FirebaseFirestore.getInstance()
+                    .collection(POST_COLLECTION)
+                    .document(postid)
+                    .set(post)
+                    .addOnCompleteListener {
+                        callback(it.isSuccessful)
+                    }
+        }
+    }
 
+    override fun getPost(post_id: String, callback: (PostDTO) -> Unit) {
         FirebaseFirestore.getInstance().collection(POST_COLLECTION).document(post_id).get()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
@@ -129,16 +112,51 @@ object RemoteAppDataSource : AppDataSource {
                 }
     }
 
-    override fun addComment(parent_post_id: String, user_id: String, content: String, callback: (Boolean) -> Unit) {
-        FirebaseFirestore.getInstance().collection(POST_COLLECTION).document().set(CommentDTO(parent_post_id, content, user_id))
-                .addOnCompleteListener {
-                    callback(it.isSuccessful)
-                }
+//    suspend fun getPosts(): List<PostDTO> = suspendCancellableCoroutine { continuation ->
+//        val task = FirebaseFirestore.getInstance()
+//                .collection(POST_COLLECTION)
+////                .orderBy("created_at", Query.Direction.DESCENDING)
+//                .get()
+//                        // 팔로우한 유저만 구분.
+//                        if (item != null) {
+//                            posts.add(item)
+//                            cachedPosts[snapshot.id] = item
+//
+//                        }
+//                    } catch (e: Exception) {
+//                        firebaseFirestoreException?.printStackTrace()
+//                        e.printStackTrace()
+//                    }
+//
+//        task.addOnSuccessListener { querySnapshot ->
+//            continuation.resume(querySnapshot.toObjects(PostDTO::class.java))
+//        }
+//        suspendCancellableCoroutineTask(continuation, task)
+//    }
+
+//    override fun addComment(parent_post_id: String, user_id: String, content: String, callback: (Boolean) -> Unit) {
+//        FirebaseFirestore.getInstance().collection(POST_COLLECTION).document().set(CommentDTO(parent_post_id, content, user_id))
+//                .addOnCompleteListener {
+//                    callback(it.isSuccessful)
+//                }
+//    }
+
+    //Comment
+    override suspend fun addComment(parent_post_id: String, user_id: String, content: String): Boolean {
+        return suspendCoroutine { continuation ->
+            FirebaseFirestore.getInstance()
+                    .collection(POST_COLLECTION)
+                    .document()
+                    .set(CommentDTO(parent_post_id, content, user_id))
+                    .addOnCompleteListener { task ->
+                        continuation.resume(task.isSuccessful)
+                    }
+        }
     }
 
-    override fun setCommentSnapshotListener(post_id: String, callback: (List<CommentDTO>) -> Unit) {
+    override fun setCommentSnapshotListener(parennta_post_id: String, callback: (List<CommentDTO>) -> Unit) {
         FirebaseFirestore.getInstance().collection(POST_COLLECTION)
-                .whereEqualTo(POST_DOCUMENT.PARENT_POST_NO, post_id)
+                .whereEqualTo(POST_DOCUMENT.PARENT_POST_NO, parennta_post_id)
                 .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                     firebaseFirestoreException?.printStackTrace()
                     querySnapshot ?: return@addSnapshotListener
@@ -150,6 +168,65 @@ object RemoteAppDataSource : AppDataSource {
                 }
     }
 
+    override suspend fun modifyComment(post_id: String, comment: CommentDTO): Boolean {
+        return suspendCoroutine { continuation ->
+            FirebaseFirestore.getInstance()
+                    .collection(POST_COLLECTION)
+                    .document(post_id)
+                    .set(comment)
+                    .addOnCompleteListener { task ->
+                        continuation.resume(task.isSuccessful)
+                    }
+
+        }
+    }
+
+    override suspend fun deleteComment(post_id: String): Boolean {
+        return suspendCoroutine { continuation ->
+            FirebaseFirestore.getInstance()
+                    .collection(POST_COLLECTION)
+                    .document(post_id)
+                    .delete()
+                    .addOnCompleteListener { task ->
+                        continuation.resume(task.isSuccessful)
+                    }
+        }
+    }
+
+//    override suspend fun getComments(post_id: String): ReceiveChannel<List<CommentDTO>> {
+//        listener?.remove() // addSnapshotListener를 onDestory에 remove() 해주거나 삭제가 안되었다면 수동삭제
+//
+//        val channel = Channel<List<CommentDTO>>()
+//
+//        listener = fireStore.collection(POST_COLLECTION).whereEqualTo(POST_DOCUMENT.PARENT_POST_NO, post_id).
+//            addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+//
+//                if (querySnapshot == null) {
+//                    channel.close()
+//                    return@addSnapshotListener
+//                }
+//                firebaseFirestoreException?.let {
+//                    channel.close(it)
+//                    return@addSnapshotListener
+//                }
+//
+//                val commentDTOs = arrayListOf<CommentDTO>()
+//                for(snapshot in querySnapshot.documents) {
+//                    val item = snapshot.toObject(CommentDTO::class.java)
+//                    if(item?.parent_post_no == post_id) {
+//                        item.snapshotId = snapshot.id
+//                        commentDTOs.add(item)
+//                    }
+//                }
+//
+//                //https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.channels/send-blocking.html
+//                channel.sendBlocking(commentDTOs)
+//            }
+//
+//        return channel
+//    }
+
+    //user
     override suspend fun join(name: CharSequence, email: CharSequence, user_image_url: CharSequence?): String {
         return suspendCancellableCoroutine { continuation ->
             val db = FirebaseFirestore.getInstance()
@@ -178,7 +255,7 @@ object RemoteAppDataSource : AppDataSource {
                 .get()
 
         task.addOnSuccessListener { document ->
-//            Log.e("addOnSuccessListener")
+            //            Log.e("addOnSuccessListener")
             if (!document.exists()) {
                 continuation.resume(ProfileModel())
                 return@addOnSuccessListener

@@ -11,17 +11,21 @@ interface AppDataSource {
 
     //글생성
     suspend fun addPost(postDTO: PostDTO): String
-    //글가져오기
-    fun getPost(post_id: String, callback: (PostDTO) -> Unit)
-    //글수정
-    fun setPost(post: PostDTO, callback: (Boolean) -> Unit)
     //글목록Snapshot
     fun setPostSnapshotListener(callback: (List<PostDTO>) -> Unit)
+    //글수정
+    fun setPost(post: PostDTO, callback: (Boolean) -> Unit)
+    //글가져오기
+    fun getPost(post_id: String, callback: (PostDTO) -> Unit)
 
     //댓글추가하기
-    fun addComment(parent_post_id: String, user_id: String, content: String, callback: (Boolean) -> Unit)
+    suspend fun addComment(parent_post_id: String, user_id: String, content: String): Boolean
     //댓글목록가져오기
-    fun setCommentSnapshotListener(post_id: String, callback: (List<CommentDTO>) -> Unit)
+    fun setCommentSnapshotListener(parent_post_id: String, callback: (List<CommentDTO>) -> Unit)
+    // 댓글 수정하기
+    suspend fun modifyComment(post_id: String, comment: CommentDTO): Boolean
+    // 댓글 삭제하기
+    suspend fun deleteComment(post_id: String): Boolean
 
     //가입
     suspend fun join(name: CharSequence, email: CharSequence, user_image_url: CharSequence?): String
@@ -40,17 +44,8 @@ interface AppDataSource {
     //사진URL가져오기
     suspend fun getDownloadUrl(image_id: String): String
 
-
-
-
-
-
-
-
-
 //    fun getDownloadUrl(post_image_id: String, callback: (String) -> Unit)
     //사진업로드하기
 //    fun uploadToFireStorage(id: String, stream: InputStream, callback: (String) -> Unit)
-
 
 }

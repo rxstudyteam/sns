@@ -17,7 +17,6 @@ import smart.base.PP
 
 class EditorViewModel(private var dataSource: AppDataSource) : ViewModel() {
 
-
     val postImageUrl: MutableLiveData<String> = MutableLiveData()
 
     fun getPostImage(context: Context) = CoroutineScope(Dispatchers.Main).launch {

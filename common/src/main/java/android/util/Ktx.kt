@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import android.preference.PreferenceManager
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.StringRes
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -17,6 +18,9 @@ val Int.dp: Int get() = (this * Resources.getSystem().displayMetrics.density).to
 val Context.deviceid: String get() = PreferenceManager.getDefaultSharedPreferences(this).run { getString("deviceid", null) ?: java.util.UUID.randomUUID().toString().also { edit().putString("deviceid", it).apply() } }
 
 fun Context.toast(text: CharSequence) = Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
+fun Context.toast(@StringRes text: Int) = Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
+fun Context.toastLong(text: CharSequence) = Toast.makeText(this, text, Toast.LENGTH_LONG).show()
+fun Context.toastLong(@StringRes text: Int) = Toast.makeText(this, text, Toast.LENGTH_LONG).show()
 
 fun TextView.check(): Boolean {
     if (text.isNullOrBlank()) {
