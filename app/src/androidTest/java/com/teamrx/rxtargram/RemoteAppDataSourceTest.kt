@@ -4,6 +4,7 @@ import android.log.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.teamrx.rxtargram.model.ProfileModel
 import com.teamrx.rxtargram.repository.RemoteAppDataSource
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,7 +17,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class RemoteAppDataSource {
     @Test
-    suspend fun getProfile() {
+    fun getProfile() = runBlocking {
         Log.MODE = Log.eMODE.SYSTEMOUT
         var user_id = "KxUypfZKf2cKmJs4jOeU"
         val pm = RemoteAppDataSource.getProfile(user_id)

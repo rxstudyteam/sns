@@ -1,5 +1,5 @@
 package smart.base;
 
-import android.base.BActivity;
+import android.base.CActivity;
 
-public class BDActivity extends BActivity {}
+public class BDActivity extends CActivity {}
