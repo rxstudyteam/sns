@@ -87,19 +87,21 @@ object RemoteAppDataSource : AppDataSource {
 
     override fun setPost(post: PostDTO, callback: (Boolean) -> Unit) {
         Log.e("$POST_COLLECTION : $post")
-        post.post_id?.let { postid ->
-            FirebaseFirestore.getInstance()
-                    .collection(POST_COLLECTION)
-                    .document(postid)
-                    .set(post)
-                    .addOnCompleteListener {
-                        callback(it.isSuccessful)
-                    }
-        }
+
+        FirebaseFirestore.getInstance()
+                .collection(POST_COLLECTION)
+                .document(post.post_id!!)
+                .set(post)
+                .addOnCompleteListener {
+                    callback(it.isSuccessful)
+                }
+
     }
 
     override fun getPost(post_id: String, callback: (PostDTO) -> Unit) {
-        FirebaseFirestore.getInstance().collection(POST_COLLECTION).document(post_id).get()
+        FirebaseFirestore.getInstance()
+                .collection(POST_COLLECTION)
+                .document(post_id).get()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         task.result?.let { documentSnapshot ->
@@ -244,7 +246,7 @@ object RemoteAppDataSource : AppDataSource {
     }
 
     override suspend fun getProfile(user_id: String): ProfileModel = suspendCancellableCoroutine { continuation ->
-        if (user_id.isNullOrBlank()) {
+        if (user_id.isBlank()) {
             continuation.resume(ProfileModel())
             return@suspendCancellableCoroutine
         }
@@ -265,6 +267,7 @@ object RemoteAppDataSource : AppDataSource {
                 profileModel?.user_id = user_id
                 continuation.resume(profileModel ?: ProfileModel())
             } catch (e: Exception) {
+                continuation.resume(ProfileModel(user_id = user_id))
                 Log.w("parse fail $user_id")
             }
 //            Log.w("addOnSuccessListener")
@@ -364,6 +367,6 @@ object RemoteAppDataSource : AppDataSource {
         } catch (e: Exception) {
             continuation.resumeWithException(e)
         }
-        continuation.invokeOnCancellation { continuation.resumeWithException(EmptyStackException()) }
+//        continuation.invokeOnCancellation { continuation.resumeWithException(EmptyStackException()) }
     }
 }

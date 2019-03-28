@@ -17,10 +17,20 @@ class Profile : AppFragment() {
     private lateinit var bb: ProfileWriteBinding
     private lateinit var vm: ProfileViewModel
 
+    companion object {
+        val EXTRA_USER_ID = "user_id"
+        fun newInstance(user_id: String? = null) = Profile().apply {
+            arguments = Bundle().apply {
+                putString(Profile.EXTRA_USER_ID, user_id)
+            }
+        }
+    }
+
+    private var user_id: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = ProfileWriteBinding.inflate(inflater).also { bb = it }.root
@@ -34,20 +44,27 @@ class Profile : AppFragment() {
             lifecycleOwner = mActivity
         }
 
+        arguments?.run {
+            if (containsKey( EXTRA_USER_ID)) {
+                user_id = getString(EXTRA_USER_ID)
+            }
+        }
+
         supportActionBar?.apply { title = vm.getTitle() }
 
-        loadProfile()
+        loadProfile(user_id)
     }
 
-    private fun loadProfile() = CoroutineScope(Dispatchers.Main).launch {
+    private fun loadProfile(user_id: String?) = CoroutineScope(Dispatchers.Main).launch {
         showProgress()
-        vm.updateProfile()
+        vm.updateProfile(user_id)
         dismissProgress()
     }
 
     private fun saveProfile() = CoroutineScope(Dispatchers.Main).launch {
         if (check()) {
             showProgress()
+
 
             vm.saveProfile(bb.name.text.toString()
                     , bb.email.text.toString()
@@ -73,3 +90,4 @@ class Profile : AppFragment() {
         }
     }
 }
+
