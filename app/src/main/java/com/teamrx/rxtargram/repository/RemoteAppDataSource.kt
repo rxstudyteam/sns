@@ -267,6 +267,7 @@ object RemoteAppDataSource : AppDataSource {
                 profileModel?.user_id = user_id
                 continuation.resume(profileModel ?: ProfileModel())
             } catch (e: Exception) {
+                continuation.resume(ProfileModel(user_id = user_id))
                 Log.w("parse fail $user_id")
             }
 //            Log.w("addOnSuccessListener")

@@ -107,7 +107,7 @@ class DetailViewFragment : AppFragment() {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val binding = DataBindingUtil.getBinding<DetailItemBinding>(holder.itemView)
             val d = posts[position]
-            Log.w(binding)
+//            Log.w(binding)
             binding?.apply {
                 tvUserId.tag = d.user_id
                 tvTitle.text = d.title
@@ -125,6 +125,9 @@ class DetailViewFragment : AppFragment() {
                     if (tvUserId.tag == user.user_id) {
                         tvUserId.text = user.name
                         GlideApp.with(requireContext()).load(user.profile_url).into(ivProfileImage)
+                    } else {
+                        tvUserId.text = d.user_id
+                        GlideApp.with(requireContext()).load(R.drawable.ic_face_black_24dp).into(ivProfileImage)
                     }
                 }
 
