@@ -87,19 +87,21 @@ object RemoteAppDataSource : AppDataSource {
 
     override fun setPost(post: PostDTO, callback: (Boolean) -> Unit) {
         Log.e("$POST_COLLECTION : $post")
-        post.post_id?.let { postid ->
-            FirebaseFirestore.getInstance()
-                    .collection(POST_COLLECTION)
-                    .document(postid)
-                    .set(post)
-                    .addOnCompleteListener {
-                        callback(it.isSuccessful)
-                    }
-        }
+
+        FirebaseFirestore.getInstance()
+                .collection(POST_COLLECTION)
+                .document(post.post_id!!)
+                .set(post)
+                .addOnCompleteListener {
+                    callback(it.isSuccessful)
+                }
+
     }
 
     override fun getPost(post_id: String, callback: (PostDTO) -> Unit) {
-        FirebaseFirestore.getInstance().collection(POST_COLLECTION).document(post_id).get()
+        FirebaseFirestore.getInstance()
+                .collection(POST_COLLECTION)
+                .document(post_id).get()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         task.result?.let { documentSnapshot ->

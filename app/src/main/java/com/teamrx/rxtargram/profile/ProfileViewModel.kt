@@ -22,15 +22,16 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
     val profile_url: MutableLiveData<String> = MutableLiveData()
 
     companion object {
-        private const val DEFAULT_PROFILE_URL = "https://firebasestorage.googleapis.com/v0/b/rxteam-sns.appspot.com/o/profile%2Funnamed.png?alt=media&token=bd08fa0e-84b4-438c-8f25-c7014075bf6e"
+        private const val DEFAULT_PROFILE_URL =
+                "https://firebasestorage.googleapis.com/v0/b/rxteam-sns.appspot.com/o/profile%2Funnamed.png?alt=media&token=bd08fa0e-84b4-438c-8f25-c7014075bf6e"
     }
 
     suspend fun getProfile(user_id: String): ProfileModel {
-        return dataSource.getProfile(PP.user_id)
+        return dataSource.getProfile(user_id)
     }
 
-    suspend fun updateProfile() {
-        val profile = if (PP.user_id == PP.deviceid) ProfileModel() else dataSource.getProfile(PP.user_id)
+    suspend fun updateProfile(user_id: String?) {
+        val profile = if (user_id == null || user_id == PP.deviceid) ProfileModel() else dataSource.getProfile(user_id)
         Log.w(profile)
         name.value = profile.name
         email.value = profile.email
@@ -67,6 +68,7 @@ class ProfileViewModel(private var dataSource: AppDataSource) : ViewModel() {
                 profile_url.value = dataSource.getDownloadUrl(id)
             }
         }
+
 
         dataSource.setProfile(user_id, name, email, profile_url.value)
 
