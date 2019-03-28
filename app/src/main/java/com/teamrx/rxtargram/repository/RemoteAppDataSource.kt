@@ -246,7 +246,7 @@ object RemoteAppDataSource : AppDataSource {
     }
 
     override suspend fun getProfile(user_id: String): ProfileModel = suspendCancellableCoroutine { continuation ->
-        if (user_id.isNullOrBlank()) {
+        if (user_id.isBlank()) {
             continuation.resume(ProfileModel())
             return@suspendCancellableCoroutine
         }
@@ -367,6 +367,6 @@ object RemoteAppDataSource : AppDataSource {
         } catch (e: Exception) {
             continuation.resumeWithException(e)
         }
-        continuation.invokeOnCancellation { continuation.resumeWithException(EmptyStackException()) }
+//        continuation.invokeOnCancellation { continuation.resumeWithException(EmptyStackException()) }
     }
 }
