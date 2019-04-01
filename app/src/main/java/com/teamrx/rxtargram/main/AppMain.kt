@@ -7,8 +7,8 @@ import androidx.fragment.app.transaction
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.AppActivity
-import com.teamrx.rxtargram.editor.EditorActivity
 import com.teamrx.rxtargram.detail.DetailViewFragment
+import com.teamrx.rxtargram.editor.EditorActivity
 import com.teamrx.rxtargram.login.LoginActivity
 import com.teamrx.rxtargram.profile.Profile
 import kotlinx.android.synthetic.main.app_main.*

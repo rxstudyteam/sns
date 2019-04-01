@@ -45,6 +45,7 @@
                 android:windowSoftInputMode="stateHidden">
         </activity>
         <activity android:name=".detail.ModifyActivity"/>
+        <activity android:name=".profile.ProfileActivity"/>
     </application>
 
 </manifest>

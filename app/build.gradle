@@ -20,10 +20,45 @@ android {
             targetCompatibility JavaVersion.VERSION_1_8
         }
     }
+    signingConfigs {
+        sign {
+            keyAlias 'rxtargram'
+            keyPassword 'rxtargram'
+            storeFile file('../release/release.jks')
+            storePassword 'rxtargram'
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.sign
+        }
+        debug {
+            signingConfig signingConfigs.sign
+        }
+    }
+    flavorDimensions 'min21'
+    productFlavors {
+        lab {
+            dimension = 'min21'
+            minSdkVersion 21
+//            applicationIdSuffix = '.test'
+            versionNameSuffix = '.test'
+        }
+        deplay {
+        }
+    }
+    variantFilter { variant ->
+        def buildTypeName = variant.buildType.name
+        def productFlavorsName = variant.flavors*.name
+//        println "-----------------------------------------------------------------------------------------------"
+//        println productFlavorsName
+//        println buildTypeName
+//        println "-----------------------------------------------------------------------------------------------"
+
+        if (productFlavorsName.contains("lab") && buildTypeName.contains("release")) {
+            setIgnore(true)
         }
     }
     repositories {
@@ -52,22 +87,22 @@ dependencies {
     implementation project(':app_dummy')
 
     // firebase
-    implementation 'com.google.firebase:firebase-core:16.0.7'
-    implementation 'com.google.firebase:firebase-firestore:18.0.1'
-    implementation 'com.google.firebase:firebase-storage:16.0.5'
-    implementation 'com.google.firebase:firebase-auth:16.1.0'
+    implementation 'com.google.firebase:firebase-core:16.0.8'
+    implementation 'com.google.firebase:firebase-firestore:18.1.0'
+    implementation 'com.google.firebase:firebase-storage:16.1.0'
+    implementation 'com.google.firebase:firebase-auth:16.2.0'
 
     // rx
     implementation 'io.reactivex.rxjava2:rxkotlin:2.2.0'
-    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
 
     //coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1'
 
     //image
-    implementation 'com.github.bumptech.glide:glide:4.8.0'
-    kapt 'com.github.bumptech.glide:compiler:4.8.0'
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
+    kapt 'com.github.bumptech.glide:compiler:4.9.0'
 
     //kakao
     implementation "com.kakao.sdk:auth:1.16.0"
