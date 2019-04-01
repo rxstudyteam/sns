@@ -1,47 +1,34 @@
+@file:Suppress("LocalVariableName", "PropertyName")
+
 package com.teamrx.rxtargram.editor
 
+import android.content.Context
 import android.graphics.Bitmap
-import android.util.Log
-import android.view.View
+import android.log.Log
+import android.util.jpegstream
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.firebase.Timestamp
-import com.google.firebase.firestore.FirebaseFirestore
 import com.teamrx.rxtargram.model.PostDTO
-import com.teamrx.rxtargram.profile.toStream
 import com.teamrx.rxtargram.repository.AppDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import smart.base.PP
 
 class EditorViewModel(private var dataSource: AppDataSource) : ViewModel() {
 
-    val TAG = EditorViewModel::class.java.simpleName
-
-    private val fireStore: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
-
-    var userId: String? = null
     val postImageUrl: MutableLiveData<String> = MutableLiveData()
 
-    fun createPost(content: String?, parent_post_no: String?, title: String?, bitmap: Bitmap?, callback: () -> Unit) {
-        userId?.let {
-            CoroutineScope(Dispatchers.Main).launch {
-                val post = PostDTO(it, parent_post_no, title, content, Timestamp.now().toDate())
-                val id = dataSource.createPost(post)
-                bitmap?.let {
-                    dataSource.uploadToFireStoragePostImage(id, it.toStream())
-                    Log.i(TAG, "createPost: image upload::  images/${id}")
-                }
-                Log.i(TAG, "createPost: $id")
-                callback()
-            }
-        }
+    fun getPostImage(context: Context) = CoroutineScope(Dispatchers.Main).launch {
+        postImageUrl.value = dataSource.loadGalleryLoad(context)
     }
 
-    fun getPostImage(view: View) {
-        CoroutineScope(Dispatchers.Main).launch {
-            postImageUrl.value = dataSource.loadGalleryLoad(view.context)
-        }
+    suspend fun createPost(title: String, content: String, bitmap: Bitmap?) {
+        Log.e(title, content, bitmap)
+        val image_id: String? = bitmap?.let { dataSource.uploadToFireStoragePostImage(it.jpegstream) }
+        val url = image_id?.let { dataSource.getDownloadUrl(it) }
+        val post = PostDTO(PP.user_id, title, content, url?.let { listOf(it) })
+        val id = dataSource.addPost(post)
+        Log.i("addPost: $id")
     }
-
 }

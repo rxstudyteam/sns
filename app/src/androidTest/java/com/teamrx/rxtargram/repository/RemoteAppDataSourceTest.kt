@@ -2,7 +2,7 @@ package com.teamrx.rxtargram.repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.teamrx.rxtargram.model.Post
+import com.teamrx.rxtargram.model.PostDTO
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.junit.Test
@@ -17,7 +17,7 @@ class RemoteAppDataSourceTest {
 
     @Test
     fun modifyPost() {
-        println("modifyPost()")
+        println("setPost()")
 
         val docRef = firestore.collection(RemoteAppDataSource.POST_COLLECTION).document("FyJRvSzqOLOl6nENqFFV").get()
 
@@ -26,7 +26,7 @@ class RemoteAppDataSourceTest {
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .map { docRef.result }
-                .doOnSuccess { println("modifyPost") }
+                .doOnSuccess { println("setPost") }
                 .test()
                 .await()
 
@@ -34,7 +34,7 @@ class RemoteAppDataSourceTest {
 
 
         docRef.addOnSuccessListener {
-            val post = it.toObject(Post::class.java)
+            val post = it.toObject(PostDTO::class.java)
 
             println("modifyPost : $post")
         }
