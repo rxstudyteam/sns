@@ -89,6 +89,7 @@ class Profile : AppFragment() {
 @BindingAdapter("load")
 fun ImageView.load(imageUrl: String?) {
     Log.e(imageUrl)
+    Log.e()
     Glide.with(this)
             .setDefaultRequestOptions(RequestOptions().apply {
                 placeholder(R.drawable.ic_face_black_24dp)

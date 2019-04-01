@@ -71,6 +71,18 @@ dependencies {
 
     //kakao
     implementation "com.kakao.sdk:auth:1.16.0"
+
+    // retrofit2 ----       https://github.com/square/retrofit      ----
+    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.11.0'
+
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.4.0'
+
+    // rx ------------------------------------------------------------------------------------------
+    implementation('io.reactivex.rxjava2:rxandroid:2.0.1') {
+        exclude group: 'io.reactivex', module: 'rxjava'
+    }
 }
 
 apply plugin: 'com.google.gms.google-services'

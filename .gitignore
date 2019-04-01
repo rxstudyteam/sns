@@ -10,3 +10,4 @@ build/
 *.aab
 *.apk
 .idea/kotlinc.xml
+/kakao_auth_server/node_modules
