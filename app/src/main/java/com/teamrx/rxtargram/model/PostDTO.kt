@@ -9,7 +9,7 @@ data class PostDTO(
         val title: String? = null,
         val content: String? = null,
         val images: List<String>? = emptyList(),
-        val parent_post_no: String? = null,
+        val parent_post_no: String = "",
         val likes: List<String>? = emptyList(),
         val created_at: Date = Timestamp.now().toDate(),
         var post_id: String? = null

@@ -68,15 +68,6 @@ class DetailViewFragment : AppFragment() {
         requireActivity().startActivity(Intent(requireActivity(), ProfileActivity::class.java).putExtra(ProfileActivity.EXTRA_USER_ID, userId))
     }
 
-//    private fun setupRecyclerView() {
-//        adapter = PostRecyclerViewAdapter(requireContext(), this).apply {
-//            goProfile = this@DetailViewFragment.goProfile
-//        }
-//
-//        recyclerView.layoutManager = LinearLayoutManager(activity)
-//        recyclerView.adapter = adapter
-//    }
-
     fun onMenuClick(post_id: String) {
         val context = requireContext()
         AlertDialog.Builder(context).setItems(R.array.post_option) { dlg, which ->
