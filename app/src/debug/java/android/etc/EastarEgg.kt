@@ -14,9 +14,11 @@ import android.net.Uri
 import android.provider.Settings
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import com.bumptech.glide.Glide
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.iid.FirebaseInstanceId
+import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.model.ProfileModel
 import com.teamrx.rxtargram.profile.Profile
 import com.teamrx.rxtargram.repository.RemoteAppDataSource
@@ -24,6 +26,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.*
+import smart.base.PP
 import smart.util.GalleryLoader
 import java.util.*
 import kotlin.coroutines.resume
@@ -189,4 +192,9 @@ class EastarEgg(val activity: Activity) {
                     }
                 }
     }
+
+    public fun USER_CHANGE() {
+        AlertDialog.Builder(activity).setItems(R.array.user_names) { _, which -> PP.user_id = activity.resources.getStringArray(R.array.user_keys)[which] }.show()
+    }
+
 }

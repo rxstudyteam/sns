@@ -20,10 +20,45 @@ android {
             targetCompatibility JavaVersion.VERSION_1_8
         }
     }
+    signingConfigs {
+        sign {
+            keyAlias 'rxtargram'
+            keyPassword 'rxtargram'
+            storeFile file('../release/release.jks')
+            storePassword 'rxtargram'
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.sign
+        }
+        debug {
+            signingConfig signingConfigs.sign
+        }
+    }
+    flavorDimensions 'min21'
+    productFlavors {
+        lab {
+            dimension = 'min21'
+            minSdkVersion 21
+//            applicationIdSuffix = '.test'
+            versionNameSuffix = '.test'
+        }
+        deplay {
+        }
+    }
+    variantFilter { variant ->
+        def buildTypeName = variant.buildType.name
+        def productFlavorsName = variant.flavors*.name
+//        println "-----------------------------------------------------------------------------------------------"
+//        println productFlavorsName
+//        println buildTypeName
+//        println "-----------------------------------------------------------------------------------------------"
+
+        if (productFlavorsName.contains("lab") && buildTypeName.contains("release")) {
+            setIgnore(true)
         }
     }
 }
@@ -63,8 +98,8 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1'
 
     //image
-    implementation 'com.github.bumptech.glide:glide:4.8.0'
-    kapt 'com.github.bumptech.glide:compiler:4.8.0'
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
+    kapt 'com.github.bumptech.glide:compiler:4.9.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -3,8 +3,6 @@ package android.log
 import android.content.res.Resources
 import java.util.*
 
-val Int.dp: Int get() = (this * Resources.getSystem().displayMetrics.density).toInt()
-
 var keep = 0L
 private val Long.r: String get() = String.format(Locale.getDefault(), "%,25d", this)
 fun nano() = (if (keep == 0L) 0L else System.nanoTime() - keep).r.also { keep = System.nanoTime() }

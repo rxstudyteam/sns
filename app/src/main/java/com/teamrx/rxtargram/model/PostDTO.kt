@@ -1,11 +1,16 @@
 package com.teamrx.rxtargram.model
 
+import com.google.firebase.Timestamp
 import java.util.*
 
+
 data class PostDTO(
-    val userId: String,
-    val parent_post_no: String?,
-    val title: String?,
-    val content: String?,
-    val created_at: Date
+        val user_id: String = "",
+        val title: String? = null,
+        val content: String? = null,
+        val images: List<String>? = emptyList(),
+        val parent_post_no: String? = null,
+        val likes: List<String>? = emptyList(),
+        val created_at: Date = Timestamp.now().toDate(),
+        var post_id: String? = null
 )

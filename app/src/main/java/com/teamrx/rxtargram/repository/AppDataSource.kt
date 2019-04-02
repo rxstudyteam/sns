@@ -2,59 +2,57 @@ package com.teamrx.rxtargram.repository
 
 import android.content.Context
 import com.teamrx.rxtargram.model.CommentDTO
-import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.model.PostDTO
 import com.teamrx.rxtargram.model.ProfileModel
-import kotlinx.coroutines.channels.ReceiveChannel
 import java.io.InputStream
 
 interface AppDataSource {
-    // 글 목록 가져오기
-    fun getPosts(callback: (List<Post>) -> Unit)
+    //@formatter:off
 
-    // 글 상세정보 가져오기
-    fun getPostById(post_id: String, callback: (Post) -> Unit)
+    //글생성
+    suspend fun addPost(postDTO: PostDTO): String
+    //글목록Snapshot
+    fun setPostSnapshotListener(callback: (List<PostDTO>) -> Unit)
+    //글수정
+    fun setPost(post: PostDTO, callback: (Boolean) -> Unit)
+    //글가져오기
+    fun getPost(post_id: String, callback: (PostDTO) -> Unit)
 
-    // 댓글 목록 가져오기
-    suspend fun getComments(post_id: String): ReceiveChannel<List<CommentDTO>>
-
-    // 댓글 추가하기
+    //댓글추가하기
     suspend fun addComment(parent_post_id: String, user_id: String, content: String): Boolean
-
+    //댓글목록가져오기
+    fun setCommentSnapshotListener(parent_post_id: String, callback: (List<CommentDTO>) -> Unit)
     // 댓글 수정하기
-    suspend fun modifyComment(comment: CommentDTO): Boolean
-
+    suspend fun modifyComment(post_id: String, comment: CommentDTO): Boolean
     // 댓글 삭제하기
     suspend fun deleteComment(post_id: String): Boolean
 
+    //가입
+    suspend fun join(name: CharSequence, email: CharSequence, user_image_url: CharSequence?): String
     //프로필가져오기
     suspend fun getProfile(user_id: String): ProfileModel
-
     //내프로필변경
     suspend fun setProfile(user_id: String, name: CharSequence?, email: CharSequence?, profile_url: String?): Boolean
 
     //가입
     suspend fun join(name: CharSequence, email: CharSequence): String
 
-    suspend fun join(phoneNumber: CharSequence, email: CharSequence, password: CharSequence): String
-
     // 폰으로 가입하기
     suspend fun joinableFromPhone(phoneNumber: CharSequence): Boolean
 
     suspend fun createPost(postDTO: PostDTO): String
 
+    //user사진업로드하기
+    suspend fun uploadToFireStorageUserImage(stream: InputStream): String
+    //post사진업로드하기
+    suspend fun uploadToFireStoragePostImage(stream: InputStream): String
     //사진가져오기
     suspend fun loadGalleryLoad(context: Context): String?
+    //사진URL가져오기
+    suspend fun getDownloadUrl(image_id: String): String
 
-    // 글 수정
-    fun modifyPost(post: Post, callback: (Boolean) -> Unit)
-
+//    fun getDownloadUrl(post_image_id: String, callback: (String) -> Unit)
     //사진업로드하기
-    suspend fun uploadToFireStorage(user_id: String, stream: InputStream)
-
-    //images
-    suspend fun uploadToFireStoragePostImage(image_id: String, stream: InputStream)
-
-    suspend fun getDownloadUrl(user_id: String): String?
+//    fun uploadToFireStorage(id: String, stream: InputStream, callback: (String) -> Unit)
 
 }

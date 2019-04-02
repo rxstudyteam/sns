@@ -1,101 +1,151 @@
 package com.teamrx.rxtargram.detail
 
-import android.app.AlertDialog
 import android.content.Intent
+import android.log.Log
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.Toast
-import androidx.fragment.app.Fragment
+import android.util.toast
+import android.view.*
+import androidx.appcompat.app.AlertDialog
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.RecyclerView
 import com.teamrx.rxtargram.R
-import com.teamrx.rxtargram.base.BaseViewModel
+import com.teamrx.rxtargram.base.AppFragment
 import com.teamrx.rxtargram.comment.CommentActivity
-import com.teamrx.rxtargram.inject.Injection
-import com.teamrx.rxtargram.model.Post
-import com.teamrx.rxtargram.util.getStringArray
-import kotlinx.android.synthetic.main.fragment_detail_view.*
+import com.teamrx.rxtargram.databinding.DetailItemBinding
+import com.teamrx.rxtargram.editor.EditorActivity
+import com.teamrx.rxtargram.model.PostDTO
+import com.teamrx.rxtargram.profile.ProfileActivity
+import com.teamrx.rxtargram.util.GlideApp
+import kotlinx.android.synthetic.main.detail_fragment.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class DetailViewFragment : Fragment(), OptionClickListener {
-
-    private lateinit var detailViewModel: DetailViewModel
-    private lateinit var adapter: PostRecyclerViewAdapter
-    private val REQUEST_MODYFY = 1001
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_detail_view, container, false)
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-        // 컴포넌트 리스너
-        setupRecyclerView()
-
-        // 활성화 되었을 때 데이터를 다시 로드 하기 위해 뷰모델 observe
-        setupViewModel()
-    }
-
-    private fun setupRecyclerView() {
-        adapter = PostRecyclerViewAdapter(requireContext(), this)
-        recyclerView.layoutManager = LinearLayoutManager(activity)
-        recyclerView.adapter = adapter
-    }
-
-    private fun setupViewModel() {
-        detailViewModel = getViewModel()
-        detailViewModel.getPosts().observe(this, Observer { posts ->
-            updateUI(posts)
-        })
-
-        detailViewModel.loadPosts()
-
-    }
-
-    private fun updateUI(posts: List<Post>) {
-        adapter.setPostDatas(posts)
-    }
-
-    private inline fun <reified T : BaseViewModel> getViewModel(): T {
-        val viewModelFactory = Injection.provideViewModelFactory()
-        return ViewModelProviders.of(this, viewModelFactory).get(T::class.java)
-    }
-
+class DetailViewFragment : AppFragment() {
     companion object {
         fun newInstance() = DetailViewFragment()
     }
 
-    override fun onOptionClick(post: Post?) {
-        val alertBuilder = AlertDialog.Builder(context)
-        val adapter = ArrayAdapter<String>(context, android.R.layout.select_dialog_item)
-        adapter.addAll(getStringArray(R.array.post_option).toMutableList())
+    private val viewModel by lazy { getViewModel<DetailViewModel>() }
 
-        alertBuilder.setAdapter(adapter) { _, id ->
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
-            val strName = adapter.getItem(id)
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        inflater?.inflate(R.menu.detail_view, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
 
-            when (strName) {
-                getString(R.string.modify) -> startModifyActivity(post)
-            }
-
-            Toast.makeText(context, "selected $strName", Toast.LENGTH_SHORT).show()
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        return when (item?.itemId) {
+            R.id.write -> startActivity(Intent(requireContext(), EditorActivity::class.java)).run { true }
+            else -> super.onOptionsItemSelected(item)
         }
-        alertBuilder.show()
     }
 
-    override fun onCommentClick(post_id: String) {
-        // comment 목록보기 화면
-        val activity = activity ?: return
-        CommentActivity.startActivity(activity, post_id)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.detail_fragment, container, false)
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        loadOnce()
     }
 
-    private fun startModifyActivity(post: Post?) {
-        val intent = Intent(activity?.applicationContext, ModifyActivity::class.java)
-        intent.putExtra("post", post)
+    private fun loadOnce() {
+        recyclerView.adapter = DetailViewAdapter()
+        recyclerView.addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
 
-        activity?.startActivity(intent)
+        viewModel.posts.observe(this, Observer { posts ->
+            (recyclerView.adapter as DetailViewAdapter).setDatas(posts)
+        })
+        viewModel.postsListen()
+    }
+
+    private val goProfile: (userId: String) -> Unit = { userId ->
+        requireActivity().startActivity(Intent(requireActivity(), ProfileActivity::class.java).putExtra(ProfileActivity.EXTRA_USER_ID, userId))
+    }
+
+//    private fun setupRecyclerView() {
+//        adapter = PostRecyclerViewAdapter(requireContext(), this).apply {
+//            goProfile = this@DetailViewFragment.goProfile
+//        }
+//
+//        recyclerView.layoutManager = LinearLayoutManager(activity)
+//        recyclerView.adapter = adapter
+//    }
+
+    fun onMenuClick(post_id: String) {
+        val context = requireContext()
+        AlertDialog.Builder(context).setItems(R.array.post_option) { dlg, which ->
+            context.toast("selected ${(dlg as AlertDialog).listView.getItemAtPosition(which)}")
+            when (which) {
+                3 -> startActivity(Intent(requireContext(), ModifyActivity::class.java).putExtra("post_id", post_id))
+            }
+        }.show()
+    }
+
+    fun onCommentClick(post_id: String) {
+        startActivity(Intent(requireContext(), CommentActivity::class.java).putExtra(CommentActivity.EXTRA.post_id, post_id))
+    }
+
+    fun onEditClicked(post_id: String) {
+        startActivity(Intent(requireContext(), ModifyActivity::class.java).putExtra(ModifyActivity.EXTRA.post_id, post_id))
+    }
+
+    inner class DetailViewAdapter : RecyclerView.Adapter<DetailViewAdapter.ViewHolder>() {
+        private val posts = arrayListOf<PostDTO>()
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            return ViewHolder(DataBindingUtil.inflate<com.teamrx.rxtargram.databinding.DetailItemBinding>(LayoutInflater.from(parent.context), R.layout.detail_item, parent, false).also { Log.e(it) }.root)
+        }
+
+        override fun getItemCount(): Int = posts.size
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val binding = DataBindingUtil.getBinding<DetailItemBinding>(holder.itemView)
+            val d = posts[position]
+//            Log.w(binding)
+            binding?.apply {
+                tvUserId.tag = d.user_id
+                tvTitle.text = d.title
+                tvContent.text = d.content
+                tvCreatedAt.text = d.created_at.toString()
+
+                if (d.images.isNullOrEmpty())
+                    ivContentImage.setImageResource(R.drawable.ic_face_black_24dp)
+                else
+                    GlideApp.with(requireContext()).load(d.images.firstOrNull()).into(ivContentImage)
+
+                CoroutineScope(Dispatchers.Main).launch {
+                    val vm = getViewModel<DetailViewModel>()
+                    val user = vm.getProfile(d.user_id)
+                    if (tvUserId.tag == user.user_id) {
+                        tvUserId.text = user.name
+                        GlideApp.with(requireContext()).load(user.profile_url).into(ivProfileImage)
+                    } else {
+                        tvUserId.text = d.user_id
+                        GlideApp.with(requireContext()).load(R.drawable.ic_face_black_24dp).into(ivProfileImage)
+                    }
+                }
+
+                tvUserId.setOnClickListener { goProfile(d.user_id) }
+                ivProfileImage.setOnClickListener { goProfile(d.user_id) }
+                edit.setOnClickListener { onEditClicked(d.post_id!!) }
+                menu.setOnClickListener { onMenuClick(d.post_id!!) }
+                comments.setOnClickListener { onCommentClick(d.post_id!!) }
+            }
+        }
+
+        fun setDatas(posts: List<PostDTO>) {
+            println("${posts.size}")
+            this.posts.clear()
+            this.posts.addAll(posts)
+            notifyDataSetChanged()
+        }
+
+        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view)
     }
 }

@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".main.AppMain">
 
+<<<<<<< HEAD
 
     <Button
         android:id="@+id/main_go_editor_button"
@@ -30,6 +31,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/main_content" />
 
+=======
+>>>>>>> develop
     <FrameLayout
         android:id="@+id/main_content"
         android:layout_width="0dp"
