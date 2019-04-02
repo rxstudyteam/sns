@@ -2,6 +2,8 @@ package com.teamrx.rxtargram.base
 
 import android.annotation.SuppressLint
 import android.content.Context
+import com.kakao.auth.KakaoSDK
+import com.teamrx.rxtargram.login.KakaoSDKAdapter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Base64
@@ -10,8 +12,18 @@ import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
 class AppApplication : BApplication() {
+
+    companion object {
+        lateinit var context: Context
+    }
+
+
+    init {
+        context = applicationContext
+    }
     override fun onCreate() {
         super.onCreate()
+        KakaoSDK.init(KakaoSDKAdapter())
         hashkeyForDaumMap(applicationContext)
     }
 

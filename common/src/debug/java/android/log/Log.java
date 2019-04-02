@@ -7,12 +7,8 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
+import android.graphics.*;
 import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
-import android.graphics.Point;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -25,37 +21,23 @@ import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import androidx.annotation.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.StringTokenizer;
+
 
 @SuppressWarnings("ALL")
-/**
- * @author r
- */
 public class Log {
+
+
 
     public static final int VERBOSE = android.util.Log.VERBOSE;
     public static final int DEBUG = android.util.Log.DEBUG;
@@ -105,7 +87,7 @@ public class Log {
         if (!LOG)
             return -1;
 
-        final ArrayList<String> sa = new ArrayList<>(100);
+        final ArrayList<String> sa = new ArrayList<String>(100);
         final StringTokenizer st = new StringTokenizer(msg, LF, false);
         while (st.hasMoreTokens()) {
             final byte[] byte_text = st.nextToken().getBytes();
@@ -118,10 +100,9 @@ public class Log {
             }
         }
         if (MODE == eMODE.STUDIO) {
-            String DOTS = "....................................................................................";
-            StringBuilder sb = new StringBuilder(DOTS);
-            String last_tag = tag.substring(Math.max(tag.length() + locator.length() - DOTS.length(), 0));
-            sb.replace(0, last_tag.length(), last_tag);
+            StringBuilder sb = new StringBuilder(".....................................................................");
+
+            sb.replace(0, tag.length(), tag);
             sb.replace(sb.length() - locator.length(), sb.length(), locator);
             String adj_tag = sb.toString();
 
@@ -139,10 +120,9 @@ public class Log {
             return sum;
         }
         if (MODE == eMODE.SYSTEMOUT) {
-            String DOTS = "....................................................................................";
-            StringBuilder sb = new StringBuilder(DOTS);
-            String last_tag = tag.substring(Math.max(tag.length() + locator.length() - DOTS.length(), 0));
-            sb.replace(0, last_tag.length(), last_tag);
+            StringBuilder sb = new StringBuilder(".....................................................................");
+
+            sb.replace(0, tag.length(), tag);
             sb.replace(sb.length() - locator.length(), sb.length(), locator);
             String adj_tag = sb.toString();
 
@@ -617,7 +597,7 @@ public class Log {
 
                 //@formatter:on
                 sb.append(",");
-            } catch (Exception ignored) {
+            } catch (Exception e) {
             }
         }
         if (sb.length() > 0)
@@ -635,7 +615,7 @@ public class Log {
                     return new JSONArray(json).toString(4);
                 }
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
         }
         return json;
     }
@@ -773,7 +753,7 @@ public class Log {
                     out.append(typename);
                     out.append("/");
                     out.append(entryname);
-                } catch (Resources.NotFoundException ignored) {
+                } catch (Resources.NotFoundException e) {
                 }
             }
         }
@@ -791,7 +771,7 @@ public class Log {
             String[] columns = c.getColumnNames();
             sb.append(Arrays.toString(columns));
             sb.append("\n");
-        } catch (Exception ignored) {
+        } catch (Exception e) {
         }
 
         int countColumns = c.getColumnCount();
@@ -970,7 +950,7 @@ public class Log {
                 message = cause.getClass().getSimpleName() + "," + cause.getMessage();
                 cause = cause.getCause();
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
         }
         return message;
     }
@@ -1417,7 +1397,7 @@ public class Log {
         try {
             final String target = ((intent.getComponent() != null) ? intent.getComponent().getShortClassName() : intent.toUri(0));
             Log.pc(Log.ERROR, "sendBroadcast", "▶▶", clz, target, intent);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
 
         }
     }
@@ -1428,7 +1408,7 @@ public class Log {
         try {
             final String target = ((intent.getComponent() != null) ? intent.getComponent().getShortClassName() : intent.toUri(0));
             Log.pc(Log.ERROR, "sendBroadcast", "▶▶", clz, target, intent);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
 
         }
     }
@@ -1487,7 +1467,7 @@ public class Log {
         startActivityForResult(clz, intent, -1);
     }
 
-    public static void startActivity(Class<?> clz, Intent intent, Bundle options) {
+    public static void startActivity(Class<?> clz, Intent intent, @Nullable Bundle options) {
         startActivityForResult(clz, intent, -1, options);
     }
 
@@ -1525,7 +1505,7 @@ public class Log {
                 final String target = ((intent.getComponent() != null) ? intent.getComponent().getShortClassName() : intent.toUri(0));
                 Log.pc(Log.ERROR, "startActivities", "▶▶", clz, target, intent);
 //		printStackTrace();
-            } catch (Exception ignored) {
+            } catch (Exception e) {
             }
         }
     }
@@ -1537,7 +1517,7 @@ public class Log {
             final String target = ((intent.getComponent() != null) ? intent.getComponent().getShortClassName() : intent.toUri(0));
             Log.pc(Log.ERROR, (requestCode == -1 ? "startActivity" : "startActivityForResult"), "▶▶", clz, target, intent, String.format("0x%08X", requestCode));
 //		printStackTrace();
-        } catch (Exception ignored) {
+        } catch (Exception e) {
         }
     }
 
@@ -1548,7 +1528,7 @@ public class Log {
             final String target = ((intent.getComponent() != null) ? intent.getComponent().getShortClassName() : intent.toUri(0));
             Log.pc(Log.ERROR, (requestCode == -1 ? "startActivity" : "startActivityForResult"), "▶▶", clz, target, intent, options, String.format("0x%08X", requestCode));
 //		printStackTrace();
-        } catch (Exception ignored) {
+        } catch (Exception e) {
         }
     }
 
@@ -1602,7 +1582,7 @@ public class Log {
                 LAST_ACTION_MOVE = nanoTime;
             }
             Log.e(event);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
         }
     }
 
