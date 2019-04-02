@@ -49,4 +49,8 @@
     <string name="email_and_password_login">Email and Password Login</string>
 
 
+    <string name="invalid_email">올바른 이메일 형식이 아닙니다</string>
+    <string name="invalid_password">특수문자 / 문자 / 숫자 포함 형태의 8~15자리</string>
+
+
 </resources>

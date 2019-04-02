@@ -6,9 +6,11 @@ import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.preference.PreferenceManager
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.StringRes
+import androidx.core.content.ContextCompat
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -63,4 +65,12 @@ fun CharSequence.이가(이: Char, 가: Char): CharSequence {
         (lastName - '가') % JT > 0 -> "$this$이"
         else -> "$this$가"
     }
+}
+
+fun Button.disableButton() {
+    isEnabled = false
+}
+
+fun Button.enableButton() {
+    isEnabled = true
 }

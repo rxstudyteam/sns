@@ -53,7 +53,8 @@
             app:layout_constraintTop_toBottomOf="@+id/password_layout"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:enabled="false"/>
 
     <Button
             android:id="@+id/logout"
@@ -63,6 +64,7 @@
             app:layout_constraintTop_toBottomOf="@+id/login"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp"
+            android:enabled="false"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
