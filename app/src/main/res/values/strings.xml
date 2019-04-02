@@ -41,4 +41,12 @@
     <string name="comment_hint">댓글 달기…</string>
     <string name="comment_add_success">댓글 등록 완료</string>
     <string name="comment_add_failed">댓글 등록 실패</string>
+    <string name="title_activity_login">LoginActivity</string>
+
+
+    <string name="kakao_app_key">0a46785deb41448399d48450f66072dc</string>
+    <string name="kakao_login">Kakao Login</string>
+    <string name="email_and_password_login">Email and Password Login</string>
+
+
 </resources>

@@ -7,6 +7,32 @@
                                                    android:layout_height="match_parent"
                                                    tools:context=".main.AppMain">
 
+
+    <Button
+            android:text="글 쓰기"
+            android:id="@+id/main_go_editor_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toTopOf="@+id/main_content"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp"
+            app:layout_constraintEnd_toStartOf="@id/login_button"
+            android:layout_marginEnd="8dp"/>
+
+
+    <Button
+            android:text="로그인"
+            android:id="@+id/login_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toTopOf="@+id/main_content"
+            app:layout_constraintStart_toEndOf="@id/main_go_editor_button"
+            android:layout_marginStart="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8dp"/>
+
     <FrameLayout
             android:id="@+id/main_content"
             android:layout_width="0dp"

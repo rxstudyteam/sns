@@ -5,13 +5,22 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Base64
+import com.kakao.auth.KakaoSDK
+import com.teamrx.rxtargram.login.KakaoSDKAdapter
 import smart.base.BApplication
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
 class AppApplication : BApplication() {
+
+    companion object {
+        lateinit var context: Context
+    }
+
     override fun onCreate() {
         super.onCreate()
+        context = applicationContext
+        KakaoSDK.init(KakaoSDKAdapter())
         hashkeyForDaumMap(applicationContext)
     }
 
