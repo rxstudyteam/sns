@@ -19,11 +19,8 @@ class ViewModelFactory(private val dataSource: AppDataSource): ViewModelProvider
             CommentViewModel::class.java -> CommentViewModel(dataSource) as T
             ProfileViewModel::class.java -> ProfileViewModel(dataSource) as T
             EditorViewModel::class.java -> EditorViewModel(dataSource) as T
-<<<<<<< HEAD
             JoinViewModel::class.java -> JoinViewModel(dataSource) as T
-=======
             ModifyViewModel::class.java -> ModifyViewModel(dataSource) as T
->>>>>>> develop
             else -> throw IllegalArgumentException("unknown viewmodel class")
         }
     }

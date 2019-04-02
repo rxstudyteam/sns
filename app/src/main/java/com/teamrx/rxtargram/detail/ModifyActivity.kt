@@ -4,10 +4,12 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.lifecycle.Observer
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.AppActivity
 import com.teamrx.rxtargram.model.PostDTO
 import com.teamrx.rxtargram.util.GlideApp
+import kotlinx.android.synthetic.main.activity_modify.*
 
 
 /**
@@ -67,15 +69,13 @@ class ModifyActivity : AppActivity() {
         }
     }
 
-    private fun updateContent() {
-        post.content = tvContent.text.toString()
-    }
 
     private fun updateUI() {
 
         GlideApp.with(mContext)
-                .load("http://cdnweb01.wikitree.co.kr/webdata/editor/201411/28/img_20141128161209_521102e2.jpg")
-                .into(ivContentImage)
+            .load("http://cdnweb01.wikitree.co.kr/webdata/editor/201411/28/img_20141128161209_521102e2.jpg")
+            .into(ivContentImage)
+    }
 
     private fun check(): Boolean {
         return true

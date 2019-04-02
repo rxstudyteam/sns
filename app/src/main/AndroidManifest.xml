@@ -34,11 +34,8 @@
                   android:windowSoftInputMode="stateHidden">
         </activity>
         <activity android:name=".detail.ModifyActivity"/>
-<<<<<<< HEAD
         <activity android:name=".join.JoinActivity"/>
-=======
         <activity android:name=".profile.ProfileActivity"/>
->>>>>>> develop
     </application>
 
 </manifest>

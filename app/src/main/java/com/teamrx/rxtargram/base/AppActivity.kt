@@ -2,6 +2,7 @@ package com.teamrx.rxtargram.base
 
 import android.widget.Toast
 import android.annotation.SuppressLint
+import androidx.lifecycle.ViewModelProviders
 import com.teamrx.rxtargram.inject.Injection
 import smart.base.BActivity
 

@@ -3,15 +3,18 @@ package smart.base
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.graphics.drawable.AnimationDrawable
+import android.os.Build
 import android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND
 import android.view.animation.LinearInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDialog
 import com.teamrx.base.R
 
 open class BActivity : BDActivity() {
+    @RequiresApi(Build.VERSION_CODES.HONEYCOMB)
     override fun createProgress(): AppCompatDialog {
         val context = this
 
