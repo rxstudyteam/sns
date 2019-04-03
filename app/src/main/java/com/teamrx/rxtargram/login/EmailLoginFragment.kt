@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.jakewharton.rxbinding2.widget.RxTextView
 import com.teamrx.rxtargram.R
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -24,7 +25,8 @@ import kotlinx.android.synthetic.main.fragment_email_login.*
 
 class EmailLoginFragment : Fragment() {
 
-    val disposable = CompositeDisposable()
+    private val disposable = CompositeDisposable()
+    private val auth by lazy { FirebaseAuth.getInstance() }
 
     companion object {
         val PASSWORD_REGEX = """^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#${'$'}%!\-_?&])(?=\S+${'$'}).{8,}""".toRegex()
@@ -48,13 +50,13 @@ class EmailLoginFragment : Fragment() {
         observeComponents()
 
         login.setOnClickListener {
-            if(FirebaseAuth.getInstance().currentUser == null) {
+            if(auth.currentUser == null) {
                 performLoginOrAccountCreation(edt_email.text.toString().trim(), edt_password.text.toString().trim())
             }
         }
 
         logout.setOnClickListener {
-            FirebaseAuth.getInstance().signOut()
+            auth.signOut()
         }
     }
 
@@ -64,7 +66,7 @@ class EmailLoginFragment : Fragment() {
     }
 
     private fun observeAuthState() {
-        FirebaseAuth.getInstance().addAuthStateListener { auth ->
+        auth.addAuthStateListener { auth ->
             if(auth.currentUser != null) {
                 logout.enableButton()
                 login.disableButton()
@@ -106,7 +108,7 @@ class EmailLoginFragment : Fragment() {
 
     private fun performLoginOrAccountCreation(email: String, password: String) {
         // 이메일/비밀번호와 이메일링크를 모두 사용하는 경우
-        FirebaseAuth.getInstance().fetchSignInMethodsForEmail(email)
+        auth.fetchSignInMethodsForEmail(email)
             .addOnSuccessListener { task ->
                 val signInMethods  = task.signInMethods
                 when {
@@ -125,12 +127,12 @@ class EmailLoginFragment : Fragment() {
     private fun performLogin(email: String, password: String) {
         // 신규 계정 생성 및 자동 로그인
         // 짧은 시간 동안 같은 IP 주소에서 이메일/비밀번호 및 익명 방식으로 애플리케이션에 새로 가입할 수 있는 횟수가 제한
-        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
+        auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener  { task ->
                 if(task.isSuccessful) {
-                    Toast.makeText(requireContext(), "회원가입 및 로그인 성공", Toast.LENGTH_SHORT).show()
-                    println("회원가입 및 로그인 성공 current User : ${FirebaseAuth.getInstance().currentUser}")
+                    showUserInfo(auth.currentUser)
                 } else {
+                    // 신규계정의 비밀번호를 정확하게 입력했는지, 비밀번호가 복잡성 조건을 충족하는지에따라 계정 생성에 실패할 수 있음
                     // 이미 이메일 계정이 있는 경우 로그인 시도
                     performSignIn(email, password)
                 }
@@ -139,16 +141,27 @@ class EmailLoginFragment : Fragment() {
 
     private fun performSignIn(email: String, password: String) {
         // 로그인 처리
-        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+        auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener  { task ->
                 if(task.isSuccessful) {
-                    Toast.makeText(requireContext(), "로그인 성공", Toast.LENGTH_SHORT).show()
-                    println("로그인 성공 current User : ${FirebaseAuth.getInstance().currentUser}")
+                    showUserInfo(auth.currentUser)
                 } else {
                     Toast.makeText(requireContext(), "로그인 실패 (ID 또는 PW 미일치)", Toast.LENGTH_SHORT).show()
                     println("로그인 실패 (ID 또는 PW 미일치)")
                 }
             }
+    }
+
+    private fun showUserInfo(user: FirebaseUser?) {
+        user?.let {
+            val name = user.displayName
+            val email = user.email
+            val emailVerified = user.isEmailVerified
+            val uid = user.uid
+
+            Toast.makeText(requireContext(), "로그인 성공 $uid  $name  $email  emailVerified : $emailVerified", Toast.LENGTH_SHORT).show()
+            println("로그인 성공 $uid  $name  $email  emailVerified : $emailVerified")
+        }
     }
 
     private fun enableError(textInputLayout: TextInputLayout) {
