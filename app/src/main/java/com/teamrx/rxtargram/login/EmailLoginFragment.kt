@@ -44,7 +44,8 @@ class EmailLoginFragment : Fragment() {
         hideEmailError()
         hidePasswordError()
 
-        observe()
+        observeAuthState()
+        observeComponents()
 
         login.setOnClickListener {
             if(FirebaseAuth.getInstance().currentUser == null) {
@@ -54,11 +55,6 @@ class EmailLoginFragment : Fragment() {
 
         logout.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
-            logout.disableButton()
-        }
-
-        if(FirebaseAuth.getInstance().currentUser != null) {
-            logout.enableButton()
         }
     }
 
@@ -67,7 +63,18 @@ class EmailLoginFragment : Fragment() {
         disposable.dispose()
     }
 
-    private fun observe() {
+    private fun observeAuthState() {
+        FirebaseAuth.getInstance().addAuthStateListener { auth ->
+            if(auth.currentUser != null) {
+                logout.enableButton()
+                login.disableButton()
+            } else {
+                logout.disableButton()
+            }
+        }
+    }
+
+    private fun observeComponents() {
         val emailObservable = RxTextView.textChanges(edt_email)
             .subscribeOn(Schedulers.computation())
             .observeOn(AndroidSchedulers.mainThread())
@@ -121,8 +128,6 @@ class EmailLoginFragment : Fragment() {
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener  { task ->
                 if(task.isSuccessful) {
-                    login.disableButton()
-                    logout.enableButton()
                     Toast.makeText(requireContext(), "회원가입 및 로그인 성공", Toast.LENGTH_SHORT).show()
                     println("회원가입 및 로그인 성공 current User : ${FirebaseAuth.getInstance().currentUser}")
                 } else {
@@ -137,8 +142,6 @@ class EmailLoginFragment : Fragment() {
         FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
             .addOnCompleteListener  { task ->
                 if(task.isSuccessful) {
-                    login.disableButton()
-                    logout.enableButton()
                     Toast.makeText(requireContext(), "로그인 성공", Toast.LENGTH_SHORT).show()
                     println("로그인 성공 current User : ${FirebaseAuth.getInstance().currentUser}")
                 } else {
