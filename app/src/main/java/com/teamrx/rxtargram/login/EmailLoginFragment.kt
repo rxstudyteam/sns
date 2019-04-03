@@ -8,6 +8,7 @@ import android.util.enableButton
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.EmailAuthProvider
@@ -18,8 +19,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_email_login.*
-import java.util.concurrent.TimeUnit
 
 class EmailLoginFragment : Fragment() {
 
@@ -40,39 +41,10 @@ class EmailLoginFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        val emailObservable = RxTextView.textChanges(edt_email)
-            .observeOn(AndroidSchedulers.mainThread())
-            .debounce(400, TimeUnit.MILLISECONDS)
-            .filter { !TextUtils.isEmpty(it) }
+        hideEmailError()
+        hidePasswordError()
 
-        disposable += emailObservable.subscribe ({ email ->
-            val isEmailValid = validateEmail(email.toString())
-            println("$email is $isEmailValid")
-            if(isEmailValid) showEmailError() else hideEmailError()
-        }, {e -> e.printStackTrace()} )
-
-        val passwordObservable = RxTextView.textChanges(edt_password)
-            .observeOn(AndroidSchedulers.mainThread())
-            .debounce(400, TimeUnit.MILLISECONDS)
-            .filter { !TextUtils.isEmpty(it) }
-
-        disposable += passwordObservable.subscribe ({ password ->
-            val isPasswordValid = validatePassword(password.toString())
-            println("$password is $isPasswordValid")
-            if(isPasswordValid) showPasswordError() else hidePasswordError()
-        }, {e -> e.printStackTrace()} )
-
-        disposable += Observables.combineLatest(emailObservable, passwordObservable) {
-                email, password ->
-
-            val isEmailValid = validateEmail(email.toString())
-            val isPasswordValid = validatePassword(password.toString())
-            println("$email is $isEmailValid   $password is $isPasswordValid")
-            isEmailValid && isPasswordValid
-        }.observeOn(AndroidSchedulers.mainThread()).subscribe ({ valid ->
-            if(valid) login.enableButton() else login.disableButton()
-        }, {e -> e.printStackTrace()} )
-
+        observe()
 
         login.setOnClickListener {
             if(FirebaseAuth.getInstance().currentUser == null) {
@@ -82,14 +54,47 @@ class EmailLoginFragment : Fragment() {
 
         logout.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
+            logout.disableButton()
         }
 
-        if(FirebaseAuth.getInstance().currentUser == null) { logout.enableButton() }
+        if(FirebaseAuth.getInstance().currentUser != null) {
+            logout.enableButton()
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         disposable.dispose()
+    }
+
+    private fun observe() {
+        val emailObservable = RxTextView.textChanges(edt_email)
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .filter { !TextUtils.isEmpty(it) }
+            .map { inputText -> validateEmail(inputText.toString()) }
+
+        disposable += emailObservable.subscribe ({ isEmailValid ->
+            if(isEmailValid) hideEmailError() else showEmailError()
+        }, { e -> e.printStackTrace() } )
+
+        val passwordObservable = RxTextView.textChanges(edt_password)
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .filter { !TextUtils.isEmpty(it) }
+            .map { inputText -> validatePassword(inputText.toString()) }
+
+        disposable += passwordObservable.subscribe ({ isPasswordValid ->
+            if(isPasswordValid) hidePasswordError() else showPasswordError()
+        }, { e -> e.printStackTrace() } )
+
+        disposable += Observables.combineLatest(emailObservable, passwordObservable) {
+                isEmailValid, isPasswordValid -> isEmailValid && isPasswordValid }
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe ({ valid ->
+                if(valid) login.enableButton() else login.disableButton()
+            }, { e -> e.printStackTrace() } )
     }
 
     private fun performLoginOrAccountCreation(email: String, password: String) {
@@ -116,7 +121,10 @@ class EmailLoginFragment : Fragment() {
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener  { task ->
                 if(task.isSuccessful) {
-                    println("로그인 성공 current User : ${FirebaseAuth.getInstance().currentUser}")
+                    login.disableButton()
+                    logout.enableButton()
+                    Toast.makeText(requireContext(), "회원가입 및 로그인 성공", Toast.LENGTH_SHORT).show()
+                    println("회원가입 및 로그인 성공 current User : ${FirebaseAuth.getInstance().currentUser}")
                 } else {
                     // 이미 이메일 계정이 있는 경우 로그인 시도
                     performSignIn(email, password)
@@ -129,7 +137,13 @@ class EmailLoginFragment : Fragment() {
         FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
             .addOnCompleteListener  { task ->
                 if(task.isSuccessful) {
+                    login.disableButton()
+                    logout.enableButton()
+                    Toast.makeText(requireContext(), "로그인 성공", Toast.LENGTH_SHORT).show()
                     println("로그인 성공 current User : ${FirebaseAuth.getInstance().currentUser}")
+                } else {
+                    Toast.makeText(requireContext(), "로그인 실패 (ID 또는 PW 미일치)", Toast.LENGTH_SHORT).show()
+                    println("로그인 실패 (ID 또는 PW 미일치)")
                 }
             }
     }
@@ -172,6 +186,9 @@ class EmailLoginFragment : Fragment() {
     }
 
     private fun validatePassword(password: String): Boolean {
+        if(TextUtils.isEmpty(password))
+            return false
+
         return password.matches(PASSWORD_REGEX)
     }
 }
