@@ -1,10 +1,11 @@
+@file:Suppress("unused", "SpellCheckingInspection", "MemberVisibilityCanBePrivate", "FunctionName")
+
 package smart.base
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import androidx.core.content.edit
-import java.util.UUID.randomUUID
 
 /**
  * <pre>
@@ -25,26 +26,24 @@ import java.util.UUID.randomUUID
  *
 </pre> *
  */
+@Suppress("EnumEntryName")
 enum class PP {
     IS_FIRST_RUN, // 앱 최초 실행 여부
     PUSH_TOKEN,
     IS_READ_PUSH,
     ACCESS_TOKEN,
     REFRESH_TOKEN,
-    UUID,
-    user_id,
+//    user_id,
     ;
 
     companion object {
         private lateinit var PREFERENCES: SharedPreferences
 
-        private val DEFVALUE_STRING = ""
-        private val DEFVALUE_FLOAT = -1f
-        private val DEFVALUE_INT = -1
-        private val DEFVALUE_LONG = -1L
-        private val DEFVALUE_BOOLEAN = false
-
-        val uuid get() = UUID.get(randomUUID().toString())
+        private const val DEFAULT_STRING = ""
+        private const val DEFAULT_FLOAT = -1f
+        private const val DEFAULT_INT = -1
+        private const val DEFAULT_LONG = -1L
+        private const val DEFAULT_BOOLEAN = false
 
         fun CREATE(context: Context) {
             PREFERENCES = PreferenceManager.getDefaultSharedPreferences(context)
@@ -60,15 +59,22 @@ enum class PP {
         }
 
         fun clear() = PREFERENCES.edit().clear().commit()
+
+        val deviceid: String get() = PREFERENCES.run { getString("deviceid", null) ?: java.util.UUID.randomUUID().toString().also { edit().putString("deviceid", it).apply() } }
+        var user_id: String
+            get() = PREFERENCES.run { getString("user_id", null) ?: deviceid }
+            set(user_id) = PREFERENCES.edit().putString("user_id", user_id).apply()
     }
 
     //@formatter:off
-    fun getBoolean   (defValues: Boolean      = DEFVALUE_BOOLEAN ) =  PREFERENCES.getBoolean  (name, defValues)
-    fun getInt       (defValues: Int          = DEFVALUE_INT     ) =  PREFERENCES.getInt      (name, defValues)
-    fun getLong      (defValues: Long         = DEFVALUE_LONG    ) =  PREFERENCES.getLong     (name, defValues)
-    fun getFloat     (defValues: Float        = DEFVALUE_FLOAT   ) =  PREFERENCES.getFloat    (name, defValues)
-    fun getString    (defValues: String       = DEFVALUE_STRING  ) =  PREFERENCES.getString   (name, defValues)
-    fun getStringSet (defValues: Set<String>? = null             ) =  PREFERENCES.getStringSet(name, defValues)
+    fun getBoolean   (DEFAULT : Boolean      = DEFAULT_BOOLEAN )                =  PREFERENCES.getBoolean  (name, DEFAULT)
+    fun isit         (DEFAULT : Boolean      = DEFAULT_BOOLEAN )                =              getBoolean  (      DEFAULT)
+    fun getInt       (DEFAULT : Int          = DEFAULT_INT     )                =  PREFERENCES.getInt      (name, DEFAULT)
+    fun getLong      (DEFAULT : Long         = DEFAULT_LONG    )                =  PREFERENCES.getLong     (name, DEFAULT)
+    fun getFloat     (DEFAULT : Float        = DEFAULT_FLOAT   )                =  PREFERENCES.getFloat    (name, DEFAULT)
+    fun getString    (DEFAULT : String?      = DEFAULT_STRING  ) : String?      =  PREFERENCES.getString   (name, DEFAULT)
+    fun get          (DEFAULT : String?      = DEFAULT_STRING  ) : String?      =              getString   (      DEFAULT)
+    fun getStringSet (DEFAULT : Set<String>? = null            ) : Set<String>? = PREFERENCES.getStringSet(name, DEFAULT)
 
     fun set(v: Boolean     ) = PREFERENCES.edit { putBoolean  (name, v) }
     fun set(v: Int         ) = PREFERENCES.edit { putInt      (name, v) }
@@ -78,15 +84,8 @@ enum class PP {
     fun set(v: Set<String>?) = PREFERENCES.edit { putStringSet(name, v) }
 
     fun toggle() = set(!getBoolean())
-    fun get(defValue: String = DEFVALUE_STRING) = getString(defValue)
-    fun isit(defValue: Boolean = DEFVALUE_BOOLEAN) = getBoolean(defValue)
-
     fun contain() = PREFERENCES.contains(name)
     fun remove() = PREFERENCES.edit().remove(name).commit()
 
-    fun first(): Boolean {
-        val result = getBoolean(false)
-        set(true)
-        return result
-    }
+    fun first(): Boolean  = getBoolean().apply { set(true) }
 }

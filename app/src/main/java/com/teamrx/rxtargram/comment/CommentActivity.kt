@@ -1,37 +1,47 @@
+@file:Suppress("PrivatePropertyName")
+
 package com.teamrx.rxtargram.comment
 
-import android.app.Activity
 import android.app.AlertDialog
-import android.base.CActivity
 import android.content.Context
-import android.content.Intent
+import android.log.Log
 import android.os.Bundle
+import android.util.toast
+import android.util.toastLong
+import android.view.LayoutInflater
 import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.teamrx.rxtargram.R
-import com.teamrx.rxtargram.base.BaseViewModel
-import com.teamrx.rxtargram.detail.DetailViewModel
-import com.teamrx.rxtargram.inject.Injection
+import com.teamrx.rxtargram.base.AppActivity
+import com.teamrx.rxtargram.detail.ModifyViewModel
 import com.teamrx.rxtargram.model.CommentDTO
-import com.teamrx.rxtargram.model.Post
-import com.teamrx.rxtargram.util.getStringArray
+import com.teamrx.rxtargram.model.PostDTO
 import kotlinx.android.synthetic.main.activity_comment.*
+import kotlinx.android.synthetic.main.comment_item.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import smart.base.PP
 
-class CommentActivity : CActivity() {
+@Suppress("LocalVariableName")
+class CommentActivity : AppActivity() {
 
-    private lateinit var commentViewModel: CommentViewModel
-    private lateinit var detailViewModel: DetailViewModel
-    private lateinit var adapter: CommentAdapter
+    interface EXTRA {
+        companion object {
+            const val post_id = "post_id"
+        }
+    }
+
+    private val commentViewModel by lazy { getViewModel<CommentViewModel>() }
+    private val detailViewModel by lazy { getViewModel<ModifyViewModel>() }
     private val input: InputMethodManager by lazy { getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager }
 
+    private lateinit var post_id: String
     private var postId: String? = null
     private var modifyMode: Boolean? = false
     private var selectedComment: CommentDTO? = null
@@ -44,16 +54,20 @@ class CommentActivity : CActivity() {
         supportActionBar?.title = getString(R.string.comment)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        val arguments = intent.extras
-        postId = arguments?.getString("post_id")
+        val post_id = intent.extras?.getString(EXTRA.post_id)
+        if (post_id.isNullOrBlank()) {
+            runOnUiThread { finish() }
+            return
+        }
 
+        this.post_id = post_id
         setupRecyclerView()
         setupEvent()
         setupViewModel()
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return when(item?.itemId) {
+        return when (item?.itemId) {
             android.R.id.home -> {
                 finish()
                 true
@@ -64,56 +78,49 @@ class CommentActivity : CActivity() {
     }
 
     private fun setupRecyclerView() {
-        adapter = CommentAdapter { comment -> onOptionClick(comment) }
-
-        recyclerView.adapter = adapter
+        recyclerView.adapter = CommentAdapter()
         recyclerView.layoutManager = LinearLayoutManager(this@CommentActivity)
     }
 
     private fun setupEvent() {
         tvSummit.setOnClickListener {
             // 로그인상태가 아니므로 임의의 사용자
-            val user_id = "MrTiDrASkFH9hby1x9VD"
-
-            modifyMode?.let { modifyMode ->
-                if(modifyMode) {
-                    selectedComment?.title = edtContent.text.toString()
-                    selectedComment?.let {
-                        updateComment(it)
-                    }
-
+//            val user_id = "MrTiDrASkFH9hby1x9VD"
+            CoroutineScope(Dispatchers.Main).launch {
+                val user_id = PP.user_id
+                val result = commentViewModel.addComment(parent_post_id = post_id, user_id = user_id, content = edtContent.text.toString())
+                if (result) {
+                    edtContent.setText("")
+                    this@CommentActivity.toast(R.string.comment_add_success)
                 } else {
-                    addComment(postId.toString(), user_id, edtContent.text.toString())
+                    this@CommentActivity.toast(R.string.comment_add_failed)
                 }
             }
         }
     }
 
     private fun setupViewModel() {
-        detailViewModel = getViewModel()
-        commentViewModel = getViewModel()
+//        detailViewModel = getViewModel()
+//        commentViewModel = getViewModel()
 
-        detailViewModel.getPostById().observe(this, Observer { post ->
+        detailViewModel.getPost(post_id).observe(this, Observer { post ->
             updatePost(post)
         })
 
         commentViewModel.getComments().observe(this, Observer { comments ->
             println("ui update..")
-            updateComments(comments)
+            (recyclerView.adapter as? CommentAdapter)?.setComments(comments)
         })
 
-        detailViewModel.loadPostById(postId.toString())
-        loadComments(postId.toString())
+//        detailViewModel.loadPostById(post_id.toString())
+        commentViewModel.loadComments(parent_post_id = post_id)
+        detailViewModel.getPost(post_id)
     }
 
-    private fun updatePost(post: Post) {
+    private fun updatePost(post: PostDTO) {
         tvUserId.text = post.user_id
         tvContent.text = post.content
-        tvCreatedAt.text = post.created_at?.toDate().toString()
-    }
-
-    private fun updateComments(comments: List<CommentDTO>) {
-        adapter.setComments(comments)
+        tvCreatedAt.text = post.created_at.toString()
     }
 
     private fun updateMode(comment: CommentDTO) {
@@ -130,92 +137,120 @@ class CommentActivity : CActivity() {
         input.hideSoftInputFromWindow(edtContent.windowToken, 0)
     }
 
-    private fun loadComments(postId: String) = CoroutineScope(Dispatchers.Main).launch {
-        commentViewModel.loadComments(postId)
-    }
-
-    private fun addComment(parent_post_id: String, user_id: String, content: String) = CoroutineScope(Dispatchers.Main).launch {
+    private fun updateComment(post_id: String, comment: CommentDTO) = CoroutineScope(Dispatchers.Main).launch {
         showProgress()
 
-        commentViewModel.addComment(parent_post_id, user_id, content)
-            .observe(this@CommentActivity, Observer { isSuccess ->
-                if(isSuccess) {
-                    commentClear()
-                } else {
-                    Toast.makeText(this@CommentActivity, getString(R.string.comment_add_failed), Toast.LENGTH_LONG).show()
-                }
-            })
-
-        dismissProgress()
-    }
-
-    private fun updateComment(comment: CommentDTO) = CoroutineScope(Dispatchers.Main).launch {
-        showProgress()
-
-        commentViewModel.modifyComment(comment).observe(this@CommentActivity, Observer { isSuccess ->
-            if(isSuccess) {
-                commentClear()
-            } else {
-                Toast.makeText(this@CommentActivity, "수정실패", Toast.LENGTH_LONG).show()
-            }
-        })
-
+        val result = commentViewModel.modifyComment(post_id, comment)
+        if (result) {
+            commentClear()
+        } else {
+            toastLong("수정실패")
+        }
         dismissProgress()
     }
 
     private fun deleteComment(comment_id: String) = CoroutineScope(Dispatchers.Main).launch {
         showProgress()
 
-        commentViewModel.deleteComment(comment_id).observe(this@CommentActivity, Observer { isSuccess ->
-            if(isSuccess) {
-                Toast.makeText(this@CommentActivity, "삭제성공", Toast.LENGTH_LONG).show()
-            } else {
-                Toast.makeText(this@CommentActivity, "삭제실패", Toast.LENGTH_LONG).show()
-            }
-        })
+        val result = commentViewModel.deleteComment(comment_id)
+        if (result)
+            toastLong("삭제성공")
+        else
+            toastLong("삭제실패")
 
         dismissProgress()
     }
 
-    private fun onOptionClick(comment: CommentDTO) {
-        val alertBuilder = AlertDialog.Builder(this@CommentActivity)
-        val adapter = ArrayAdapter<String>(this@CommentActivity, android.R.layout.select_dialog_item)
-        adapter.addAll(getStringArray(R.array.comment_option).toMutableList())
-
-        alertBuilder.setAdapter(adapter) { _, id ->
-
-            val strName = adapter.getItem(id)
-
-            when (strName) {
-                getString(R.string.modify) -> {
-                    updateMode(comment)
+    fun onItemLongClick(comment: CommentDTO) {
+        val context = this
+        AlertDialog.Builder(context).setItems(R.array.comment_option) { dlg, which ->
+            (dlg as AlertDialog).let { dlg ->
+                val text = dlg.listView.getItemAtPosition(which)
+                val id = dlg.listView.getItemIdAtPosition(which)
+                toast("selected ${dlg.listView.getItemAtPosition(which)}")
+                Log.e(text, id, R.string.modify, R.string.delete)
+                resources.getStringArray(R.array.comment_option)
+                when (text) {
+                    getString(R.string.delete) -> deleteComment(comment.post_id!!)
+                    getString(R.string.modify) -> updateComment(comment.post_id!!, comment)
+                    else -> Unit
                 }
-                getString(R.string.delete) -> {
-                    comment.snapshotId?.let { comment_id ->
-                        deleteComment(comment_id)
-                    }
+            }
+        }.show()
+    }
+
+//    val alertBuilder = AlertDialog.Builder(this@CommentActivity)
+//    val adapter = ArrayAdapter<String>(this@CommentActivity, android.R.layout.select_dialog_item)
+//    adapter.addAll(  getStringArray(R.array.comment_option).toMutableList())
+//
+//    alertBuilder.setAdapter(adapter)
+//    {
+//        _, id ->
+//
+//        val strName = adapter.getItem(id)
+//
+//        when (strName) {
+//            getString(R.string.modify) -> {
+//                updateMode(comment)
+//            }
+//            getString(R.string.delete) -> {
+//                comment.snapshotId?.let { comment_id ->
+//                    deleteComment(comment_id)
+//                }
+//            }
+//        }
+//    }
+//
+//    alertBuilder.show()
+
+//    private inline fun <reified T : BaseViewModel> getViewModel(): T {
+//        val viewModelFactory = Injection.provideViewModelFactory()
+//        return ViewModelProviders.of(this, viewModelFactory).get(T::class.java)
+//    }
+
+//    companion object {
+//        fun startActivity(activity: Activity, post_id: String) {
+//            val intent = Intent(activity, CommentActivity::class.java)
+//            val bundle = Bundle()
+//            bundle.putString("post_id", post_id)
+//            intent.putExtras(bundle)
+//            activity.startActivity(intent)
+//        }
+//    }
+
+    inner class CommentAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+        val comments = arrayListOf<CommentDTO>()
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder = ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.comment_item, parent, false))
+
+        override fun getItemCount(): Int = comments.size
+
+        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+            val item = (holder as ViewHolder).itemView
+            item.tvUserId.text = comments[position].user_id
+            item.tvContent.text = comments[position].title
+
+            item.tvReComment.setOnClickListener {
+                // 답글 달기
+            }
+
+            item.setOnLongClickListener {
+                comments[position].post_id?.let { post_id ->
+                    onItemLongClick(comments[position])
                 }
+                true
             }
         }
 
-        alertBuilder.show()
-    }
+        fun setComments(comments: List<CommentDTO>) {
+            this.comments.clear()
+            this.comments.addAll(comments)
 
-    private inline fun <reified T : BaseViewModel> getViewModel(): T {
-        val viewModelFactory = Injection.provideViewModelFactory()
-        return ViewModelProviders.of(this, viewModelFactory).get(T::class.java)
-    }
-
-    companion object {
-        fun startActivity(activity: Activity, post_id: String) {
-            val intent = Intent(activity, CommentActivity::class.java)
-            val bundle = Bundle()
-            bundle.putString("post_id", post_id)
-
-            intent.putExtras(bundle)
-
-            activity.startActivity(intent)
+            notifyDataSetChanged()
         }
 
+        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view)
     }
+
 }

@@ -1,10 +1,12 @@
 package com.teamrx.rxtargram.base
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProviders
 import com.teamrx.rxtargram.inject.Injection
 import smart.base.BActivity
 
+@SuppressLint("Registered")
 open class AppActivity : BActivity() {
 
     protected inline fun <reified T : BaseViewModel> getViewModel(): T {

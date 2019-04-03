@@ -4,10 +4,9 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.lifecycle.Observer
 import com.teamrx.rxtargram.R
 import com.teamrx.rxtargram.base.AppActivity
-import com.teamrx.rxtargram.base.AppApplication.Companion.context
-import com.teamrx.rxtargram.model.Post
 import com.teamrx.rxtargram.util.GlideApp
 import kotlinx.android.synthetic.main.activity_modify.*
 
@@ -15,57 +14,59 @@ import kotlinx.android.synthetic.main.activity_modify.*
  *
  * Created by Rell on 2019. 1. 23..
  */
+@Suppress("LocalVariableName")
 class ModifyActivity : AppActivity() {
-    private lateinit var detailViewModel: DetailViewModel
 
-    private lateinit var post: Post
+    object EXTRA {
+        const val post_id = "post_id"
+    }
+
+    private val viewModel by lazy { getViewModel<ModifyViewModel>() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContentView(R.layout.activity_modify)
 
-        post = intent.getParcelableExtra("post")
-        updateUI()
+        viewModel.post.observe(this, Observer { updateUI() })
 
-        println("ModifyActivity > $post")
+        val post_id = intent.extras?.getString(EXTRA.post_id)
+        if (post_id.isNullOrBlank()) {
+            runOnUiThread { finish() }
+            return
+        }
 
-        detailViewModel = getViewModel()
+        viewModel.getPost(post_id)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-
         menuInflater.inflate(R.menu.menu_modify, menu)
-
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-
         val id = item?.itemId
-
-        when (id) {
-            R.id.done -> done()
+        return when (id) {
+            R.id.done -> done().let { true }
+            else -> super.onOptionsItemSelected(item)
         }
 
-        return super.onOptionsItemSelected(item)
     }
 
     fun done() {
-        updateContent()
+//        if (!check())
+//            return
 
-        detailViewModel.modifyPost(post) { success ->
+        viewModel.post.value ?: return
+
+        viewModel.setPost(viewModel.post.value!!.copy(content = tvContent.text.toString())) { success ->
             if (success) {
                 finish()
             } else {
-                Toast.makeText(context, "수정에 실패하였습니다.", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "수정에 실패하였습니다.", Toast.LENGTH_LONG).show()
             }
         }
     }
 
-    private fun updateContent() {
-        post.content = tvContent.text.toString()
-    }
 
     private fun updateUI() {
 
@@ -73,7 +74,7 @@ class ModifyActivity : AppActivity() {
                 .load("http://cdnweb01.wikitree.co.kr/webdata/editor/201411/28/img_20141128161209_521102e2.jpg")
                 .into(ivContentImage)
 
-        tvUserId.text = post.user_id
-        tvContent.setText(post.content)
+//        tvUserId.text = post.user_id
+//        tvContent.setText(post.content)
     }
 }
