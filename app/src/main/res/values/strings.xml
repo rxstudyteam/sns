@@ -2,4 +2,49 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string-array name="user_names">
+        <item>정동진</item>
+        <item>김정우</item>
+        <item>이주영</item>
+        <item>갓보</item>
+        <item>김지훈</item>
+    </string-array>
+    <string-array name="user_keys">
+        <item>KxUypfZKf2cKmJs4jOeU</item>
+        <item>2nE</item>
+        <item>KxUypfZKf2cKmJs4jOeU</item>
+        <item>GlhMMR2zYVVNLKyuVObL</item>
+        <item>KxUypfZKf2cKmJs4jOeU</item>
+    </string-array>
+    <string-array name="post_option">
+        <item>완료</item>
+        <item>공유</item>
+        <item>링크 복사</item>
+        <item>보관</item>
+        <item>수정</item>
+        <item>삭제</item>
+    </string-array>
+    <string-array name="comment_option">
+        <item>@string/modify</item>
+        <item>@string/delete</item>
+    </string-array>
+    <string name="done">완료</string>
+    <string name="share">공유</string>
+    <string name="copy_link">링크 복사</string>
+    <string name="save">저장</string>
+    <string name="modify">수정</string>
+    <string name="delete">삭제</string>
+    <string name="disable_reply_function">댓글 기능 해제</string>
+    <string name="comment">댓글</string>
+    <string name="comment_submit">게시</string>
+    <string name="comment_hint">댓글 달기…</string>
+    <string name="comment_add_success">댓글 등록 완료</string>
+    <string name="comment_add_failed">댓글 등록 실패</string>
+    <string name="title_activity_login">LoginActivity</string>
+
+
+    <string name="kakao_app_key">0a46785deb41448399d48450f66072dc</string>
+
+
 </resources>
